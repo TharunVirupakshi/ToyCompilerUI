@@ -133,6 +133,9 @@ export default function EditorWindow() {
   const [code, setCode] = useState<string>("");
   const editorRef = useRef<any>(null);
   const [currentStep, setCurrentStep] = useState(0);
+  // track last cursor location
+  const [lastLocation, setLastLocation] = useState<{ line: number; char: number }>({line: 0, char: 0});
+  const [lexStep, setLexStep] = useState<LexReadTokenData | null>(null);
 
   const handleEditorMount = (editor: any, monaco: any) => {
     editorRef.current = editor;
@@ -146,20 +149,28 @@ export default function EditorWindow() {
     const { location } = step.data as LexReadTokenData;
     const [line, char] = location.split(":").map(Number);
 
+    // if we already had a last location, highlight from there until this step
+    const startLine = lastLocation?.line ?? line;
+    const startCol = lastLocation?.char ?? char;
+
     editorRef.current.setSelection({
-      startLineNumber: line,
-      startColumn: char,
+      startLineNumber: startLine,
+      startColumn: startCol,
       endLineNumber: line,
-      endColumn: char + 1,
+      endColumn: char, // always advance 1 col per step
     });
+
     editorRef.current.revealLineInCenter(line);
+
+    // update last location
+    setLastLocation({ line, char });
+    setLexStep(step.data as LexReadTokenData);
   }, [currentStep]);
 
   return (
   <div className="h-screen">
     {/* Controls */}
-    <div className="p-2 flex gap-2 bg-gray-200">
-
+    <div className="p-2 flex gap-2">
         <button
           onClick={() =>
             setCurrentStep((s) =>
@@ -170,12 +181,29 @@ export default function EditorWindow() {
         >
           Step →
         </button>
-      </div>
+        <div className="">
+          <p>
+          Token: {lastLocation?.line}:{lastLocation?.char} <br/>
+          Step: {stepsData.phases[0].steps[currentStep].type}
+          </p>
+        </div>
+        <div className="">
+          <p>
+            Token: {lexStep?.token} <br/>
+            Value: {lexStep?.value}
+          </p>
+        </div>
+    </div>
       <Editor
         height="100%"
         width="100%"
         defaultLanguage="c"
-        defaultValue="// Start typing here..."
+        defaultValue={
+`int i = 2;
+
+void main(){
+  i = 3;
+}`}
         theme="vs-dark"
         value={code}
         onMount={handleEditorMount}
@@ -186,6 +214,7 @@ export default function EditorWindow() {
           scrollBeyondLastLine: false,
           fontSize: 14,
           occurrencesHighlight: "off",
+          selectionHighlight: false,
         }}
       />
   </div>
