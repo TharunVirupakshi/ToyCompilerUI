@@ -29,7 +29,8 @@ export default function EditorWindow({
     editorRef.current = editor;
   };
 
-  const currentStep = steps[currentStepIndex];
+  const currentStep =
+  currentStepIndex >= 0 ? steps[currentStepIndex] : null;
 
   // Highlight on step change
   useEffect(() => {
@@ -65,8 +66,6 @@ export default function EditorWindow({
         ruleId: Number(ruleId),
         subRuleId: Number(subRuleId),
       });
-    } else {
-      onActiveRuleChange(null);
     }
   }, [currentStep, onActiveRuleChange]);
 
@@ -83,23 +82,7 @@ export default function EditorWindow({
 
   return (
     <div className="h-full">
-      <div className="">
-        <div className="flex items-center gap-1.5">
-          <button
-            onClick={() => handleStep(-1)}
-            className="btn btn-ghost"
-            disabled={currentStepIndex === 0}
-          >
-            ←
-          </button>
-          <button
-            onClick={() => handleStep(1)}
-            className="btn btn-primary"
-            disabled={currentStepIndex >= steps.length - 1}
-          >
-            →
-          </button>
-        </div>
+      <div className="flex justify-between p-1 bg-neutral-800">
         <div className="flex items-center gap-4 text-xs text-muted">
           <span>
             STEP {currentStepIndex + 1}/{steps.length || 1}
@@ -113,6 +96,23 @@ export default function EditorWindow({
           </span>
           <span>•</span>
           <span>{locationLabel ?? "—"}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+        <button
+          className="bg-neutral-600 rounded-sm p-1 px-3 font-mono font-light text-sm cursor-pointer"
+          onClick={() => handleStep(-1)}
+          disabled={currentStepIndex <= 0}
+        >
+          Prev
+        </button>
+
+        <button
+          className="bg-neutral-600 rounded-sm p-1 px-3 font-mono font-light text-sm cursor-pointer"
+          onClick={() => handleStep(1)}
+          disabled={currentStepIndex < 0 || currentStepIndex >= steps.length - 1}
+        >
+          Next
+        </button>
         </div>
       </div>
       <div className="h-full">

@@ -12,7 +12,7 @@ import { deriveSymbolTableState } from "./utils/symbolTables";
 
 function App() {
   const [stepsData, setStepsData] = useState<StepsData>(sampleStepsData);
-  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [currentStepIndex, setCurrentStepIndex] = useState<number>(-1);
   const [activeRule, setActiveRule] = useState<ActiveRule | null>(null);
   const [logLabel, setLogLabel] = useState("Sample data");
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -20,19 +20,22 @@ function App() {
   const steps = useMemo(() => stepsData.phases[0]?.steps ?? [], [stepsData]);
 
   useEffect(() => {
-    if (steps.length === 0) {
-      setCurrentStepIndex(0);
-      return;
-    }
+    if (currentStepIndex < 0) return;
+    if (steps.length === 0) return;
+  
     if (currentStepIndex >= steps.length) {
       setCurrentStepIndex(steps.length - 1);
     }
   }, [steps, currentStepIndex]);
+  
 
-  const symbolTables = useMemo(
-    () => deriveSymbolTableState(steps, currentStepIndex),
-    [steps, currentStepIndex]
-  );
+  const symbolTables = useMemo(() => {
+    if (currentStepIndex < 0) {
+      return { tables: [], focusId: null };
+    }
+    return deriveSymbolTableState(steps, currentStepIndex);
+  }, [steps, currentStepIndex]);
+  
 
   const handleFileUpload = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -80,11 +83,16 @@ function App() {
           {loadError && <span className="text-muted">({loadError})</span>}
         </div>
         <div className="toolbar-actions">
+        {currentStepIndex < 0 && (
+          <button className="bg-neutral-600 rounded-sm p-1 px-3 font-mono font-light text-sm cursor-pointer" onClick={() => setCurrentStepIndex(0)}>
+            START
+          </button>
+        )}
           <label className="file-input">
             Load log
             <input type="file" accept="application/json" onChange={handleFileUpload} />
           </label>
-          <button className="btn btn-ghost" onClick={handleUseSample}>
+          <button className="bg-neutral-600 rounded-sm p-1 px-3 font-mono font-light text-sm cursor-pointer" onClick={handleUseSample}>
             Reset sample
           </button>
         </div>
@@ -116,17 +124,12 @@ function App() {
           }
           bottomLeft={
             <div className="panel h-full">
-              <StepTimeline steps={steps} currentStepIndex={currentStepIndex} />
+              
             </div>
           }
           bottomRight={
             <div className="panel h-full">
-              <InsightsPanel
-                logLabel={logLabel}
-                stepsCount={steps.length}
-                totalScopes={symbolTables.tables.length}
-                totalSymbols={totalSymbols}
-              />
+             
             </div>
           }
         />

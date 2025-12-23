@@ -1,6 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
-import { DataSet, Network } from "vis-network/standalone";
-import "vis-network/styles/vis-network.css";
+import { useEffect, useRef } from "react";
 import type { SymbolTableRecord } from "../utils/symbolTables";
 
 interface SymbolTablesPaneProps {
@@ -8,156 +6,121 @@ interface SymbolTablesPaneProps {
   focusId: number | null;
 }
 
-const graphOptions = {
-  autoResize: true,
-  height: "100%",
-  width: "100%",
-  interaction: {
-    dragNodes: false,
-    zoomView: true,
-  },
-  layout: {
-    hierarchical: {
-      direction: "UD",
-      sortMethod: "directed",
-      nodeSpacing: 160,
-      levelSeparation: 140,
-    },
-  },
-  physics: {
-    enabled: false,
-  },
-  nodes: {
-    shape: "box" as const,
-    color: {
-      background: "#0f172a",
-      border: "#38bdf8",
-      highlight: {
-        background: "#38bdf8",
-        border: "#ffffff",
-      },
-    },
-    font: {
-      color: "#e2e8f0",
-    },
-    borderWidth: 1.5,
-  },
-  edges: {
-    color: "#475569",
-    arrows: "to" as const,
-  },
-};
-
 const SymbolTablesPane = ({ tables, focusId }: SymbolTablesPaneProps) => {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const networkRef = useRef<Network | null>(null);
-
-  const data = useMemo(() => {
-    const nodes = tables.map((table) => ({
-      id: table.id,
-      label: `${table.name}\n(#${table.id})`,
-    }));
-    const edges = tables
-      .filter((table) => table.parentId !== null)
-      .map((table) => ({
-        from: table.parentId as number,
-        to: table.id,
-      }));
-    return { nodes, edges };
-  }, [tables]);
+  const activeRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    if (!networkRef.current) {
-      networkRef.current = new Network(
-        containerRef.current,
-        {
-          nodes: new DataSet(data.nodes),
-          edges: new DataSet(data.edges),
-        },
-        graphOptions
-      );
+    if (activeRef.current) {
+      activeRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
+  }, [focusId]);
 
-    return () => {
-      networkRef.current?.destroy();
-      networkRef.current = null;
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (!networkRef.current) return;
-    networkRef.current.setData({
-      nodes: new DataSet(data.nodes),
-      edges: new DataSet(data.edges),
-    });
-    if (focusId !== null) {
-      networkRef.current.selectNodes([focusId], false);
-      networkRef.current.focus(focusId, {
-        scale: 1.05,
-        animation: { duration: 400, easingFunction: "easeInOutQuad" },
-      });
-    }
-  }, [data, focusId]);
-
-  const focusedTable = tables.find((table) => table.id === focusId);
+  const hasData = tables.length > 0;
 
   return (
-    <div className="">
-      <div className="">
-        <h2 className="panel-title">Symbol tables</h2>
-        
+    <div className="h-full flex flex-col font-mono text-sm text-gray-200">
+      {/* Header */}
+      <div className="bg-neutral-800 p-1">
+        <h2 className="font-semibold text-gray-100">Symbol Tables</h2>
+        <p className="text-xs text-gray-400">
+          Scopes created during parsing
+        </p>
       </div>
-      <div className=" rounded-lg border border-panel">
-        <div ref={containerRef} className="h-full w-full" />
-      </div>
-      <div className="rounded-lg border border-panel p-3 text-sm">
-        <div className="">
-          <div>
-            <p className="text-xs uppercase tracking-wide text-muted">
-              Focused table
-            </p>
-            <p className="text-base font-semibold">
-              {focusedTable ? focusedTable.name : "—"}
-            </p>
-            {focusedTable && (
-              <p className="text-xs text-muted">table #{focusedTable.id}</p>
-            )}
+
+      {/* Content */}
+      <div className="mt-2 space-y-2 overflow-y-auto px-2 flex-1">
+        {!hasData && (
+          <div className="text-xs text-gray-400 px-2 py-1">
+            Click <span className="font-semibold">START</span> to begin execution
+            and create scopes.
           </div>
-          <div className="text-right">
-            <p className="text-xs uppercase tracking-wide text-muted">symbols</p>
-            <p className="text-xl font-semibold">{focusedTable ? focusedTable.symbols.length : 0}</p>
-          </div>
-        </div>
-        <div className="">
-          {(focusedTable?.symbols.slice(-5).reverse() ?? []).map((sym, idx) => (
+        )}
+
+        {tables.map((table) => {
+          const isActive = table.id === focusId;
+
+          return (
             <div
-              key={`${sym.name}-${idx}`}
-              className="symbol-card"
+              key={table.id}
+              ref={isActive ? activeRef : null}
+              className={`
+                rounded-sm
+                px-2
+                py-1
+                transition-colors
+                ${
+                  isActive
+                    ? "border-neutral-400 bg-neutral-800 border"
+                    : "bg-neutral-800"
+                }
+              `}
             >
-              <div className="flex justify-between text-sm font-medium">
-                <span>{sym.name}</span>
-                <span className="text-xs text-muted">
-                  {sym.line_no}:{sym.char_no}
-                </span>
+              {/* Scope header */}
+              <div className="flex justify-between items-center mb-1">
+                <div className="text-xs text-gray-400">
+                  Scope #{table.id}
+                  {table.parentId !== null && (
+                    <span className="text-gray-500">
+                      {" "}
+                      (parent #{table.parentId})
+                    </span>
+                  )}
+                </div>
+
+                <div className="text-xs text-gray-400">
+                  {table.symbols.length} symbol
+                  {table.symbols.length !== 1 && "s"}
+                </div>
               </div>
-              <div className="text-xs text-muted">
-                {sym.type || "untyped"} ·{" "}
-                {sym.is_function === "1" ? "function" : "symbol"}
-                {sym.is_duplicate === "1" && " · duplicate"}
-              </div>
+
+              {/* Symbols */}
+              {table.symbols.length === 0 && (
+                <div className="text-xs text-gray-500 italic px-1">
+                  no symbols
+                </div>
+              )}
+
+            {table.symbols.map((sym, idx) => {
+              const isNewSymbol =
+                table.id === focusId && idx === table.symbols.length - 1;
+
+              return (
+                <div
+                  key={`${sym.name}-${idx}`}
+                  className={`
+                    flex justify-between px-1 py-[2px]
+                    ${
+                      isNewSymbol
+                        ? "bg-neutral-700 border-l-4 border-neutral-400"
+                        : ""
+                    }
+                  `}
+                >
+                  <span
+                    className={`
+                      ${
+                        isNewSymbol
+                          ? "text-gray-100 font-medium"
+                          : "text-gray-400"
+                      }
+                    `}
+                  >
+                    {sym.name}
+                  </span>
+
+                  <span className="text-xs text-gray-500">
+                    {sym.type || "untyped"}
+                  </span>
+                </div>
+              );
+            })}
+
             </div>
-          ))}
-          {!focusedTable && (
-            <p className="text-xs text-muted">
-              Step through the log to create scopes and populate symbols.
-            </p>
-          )}
-        </div>
+          );
+        })}
       </div>
     </div>
   );
 };
 
 export default SymbolTablesPane;
-

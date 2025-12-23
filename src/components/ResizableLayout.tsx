@@ -70,15 +70,15 @@ const ResizableLayout: FC<ResizableLayoutProps> = ({
           </Split>
 
           {/* BOTTOM ROW */}
-          <Split
+          {showBottomLeft && <div className="pane h-full">{bottomLeft}</div>}
+          {/* <Split
             sizes={Array(visibleBottomPanels).fill(100 / visibleBottomPanels)}
             minSize={80}
             gutterSize={8}
             className="flex h-full"
           >
-            {showBottomLeft && <div className="pane h-full">{bottomLeft}</div>}
             {showBottomRight && <div className="pane h-full">{bottomRight}</div>}
-          </Split>
+          </Split> */}
         </Split>
       </Split>
     </div>

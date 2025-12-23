@@ -130,39 +130,72 @@ const GrammarPanel: React.FC<GrammarPanelProps> = ({
   }, [activeRuleId, activeSubRuleId]);
 
   return (
-    <div className=" font-mono text-sm">
-      <div>
-        <h2 className="panel-title">Grammar</h2>
-        <p className="panel-subtitle">Reduce rules grouped by production.</p>
+    <div className="h-full flex flex-col font-mono text-sm text-gray-200">
+      {/* Header */}
+      <div className="bg-neutral-800 p-1">
+        <h2 className="font-semibold text-gray-100">Grammar</h2>
+        <p className="text-xs text-gray-400">
+          Reduce rules grouped by production
+        </p>
       </div>
-      <div className="mt-3 space-y-3 overflow-y-auto pr-1">
+
+      {/* Rules */}
+      <div className="mt-2 space-y-2 overflow-y-auto px-2 flex-1">
         {Object.entries(groupedRules).map(([groupId, rules]) => {
-          const isGroupActive = parseInt(groupId) === activeRuleId;
+          const isGroupActive = Number(groupId) === activeRuleId;
+
           return (
             <div
               key={groupId}
               ref={isGroupActive ? activeRef : null}
-              className={`border px-3 py-2 transition ${
-                isGroupActive
-                  ? "border-accent bg-accent/10"
-                  : "border-panel"
-              }`}
+              className={`
+                rounded-sm
+                px-2
+                py-1
+                transition-colors
+                ${
+                  isGroupActive
+                    ? "border-neutral-400 bg-neutral-800 border-1"
+                    : "bg-neutral-800"
+                }
+              `}
             >
-              <span className="text-muted text-xs mb-1 block">[{groupId}]</span>
+              {/* Group label */}
+              <div className="text-xs text-gray-400 mb-1">
+                [{groupId}]
+              </div>
+
               {rules.map((rule, idx) => {
                 const isActive =
-                  rule.id === activeRuleId && rule.subId === activeSubRuleId;
+                  rule.id === activeRuleId &&
+                  rule.subId === activeSubRuleId;
+
                 const prefix = idx === 0 ? "" : "  | ";
 
                 return (
-                  <div key={`${rule.id}.${rule.subId}`}>
-                    <span className="text-muted select-none">{prefix}</span>
-                    <span
-                      className={`${
+                  <div
+                    key={`${rule.id}.${rule.subId}`}
+                    className={`
+                      flex items-start gap-1 px-1 py-[2px]
+                      ${
                         isActive
-                          ? "text-white font-medium"
-                          : "text-muted"
-                      }`}
+                          ? "bg-neutral-700 border-l-4 border-neutral-400"
+                          : ""
+                      }
+                    `}
+                  >
+                    <span className="text-gray-500 select-none">
+                      {prefix}
+                    </span>
+
+                    <span
+                      className={`
+                        ${
+                          isActive
+                            ? "text-gray-100 font-semibold"
+                            : "text-gray-400"
+                        }
+                      `}
                     >
                       {rule.text}
                     </span>

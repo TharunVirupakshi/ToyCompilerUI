@@ -2,16 +2,22 @@
 
 :root {
   color-scheme: dark;
-  --bg: #282828;
-  --panel: #1d212b;
-  --panel-border: #1f232f;
-  --text: #f5f8ff;
-  --text-muted: #7d859c;
-  --accent: #4cc2ff;
-  --accent-soft: #2f98ff;
-  --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+
+  /* VS Code Dark+ inspired */
+  --bg: #1e1e1e;
+  --panel: #1f1f1f;
+  --panel-border: #3c3c3c;
+
+  --text: #d4d4d4;
+  --text-muted: #858585;
+
+  --accent: #007acc;
+  --accent-soft: #094771;
+
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+
   font-family: "JetBrains Mono", "Fira Code", "SFMono-Regular", Consolas, monospace;
-  font-size: 15px;
+  font-size: 14px;
 }
 
 *,
@@ -20,14 +26,11 @@
   box-sizing: border-box;
 }
 
-body {
+html, body, #root {
   margin: 0;
+  padding: 0;
+  height: 100%;
   background: var(--bg);
   color: var(--text);
-  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
-}
-
-#root {
-  min-height: 100vh;
 }
