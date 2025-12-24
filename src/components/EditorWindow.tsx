@@ -6,6 +6,7 @@ import type {
   ParseReduceRuleData,
   Step,
 } from "../types/steps";
+import { sampleInputCode } from "../data";
 
 interface EditorWindowProps {
   steps: Step[];
@@ -120,11 +121,7 @@ export default function EditorWindow({
           height="100%"
           width="100%"
           defaultLanguage="c"
-          defaultValue={`int i = 2;
-
-void main(){
-  i = 3;
-}`}
+          defaultValue={sampleInputCode}
           theme="vs-dark"
           value={code}
           onMount={handleEditorMount}

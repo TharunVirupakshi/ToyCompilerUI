@@ -5,6 +5,7 @@ export type StepType =
   | "PARSE_ADD_SYM"
   | "PARSE_ASSGN_SYM_TYPE"
   | "PARSE_ENTER_SCOPE"
+  | "PARSE_CREATE_AST_NODE"
   | "PARSE_EXIT_SCOPE";
 
 export interface ParseCreateScopeData {
@@ -48,12 +49,17 @@ export interface ParseEnterExitScopeData {
   name: string;
 }
 
+export interface ParseCreateASTNodeData {
+  node_id: NumericValue;
+}
+
 export type ParseStepData =
   | ParseCreateScopeData
   | ParseReduceRuleData
   | LexReadTokenData
   | ParseAddSymData
   | ParseAssgnSymType
+  | ParseCreateASTNodeData
   | ParseEnterExitScopeData;
 
 export interface Step {

@@ -37,27 +37,28 @@ const SymbolTablesPane = ({ tables, focusId }: SymbolTablesPaneProps) => {
         )}
 
         {tables.map((table) => {
-          const isActive = table.id === focusId;
+          const isActiveTable = table.id === focusId;
+          const lastSymbolIndex = table.symbols.length - 1;
 
           return (
             <div
               key={table.id}
-              ref={isActive ? activeRef : null}
+              ref={isActiveTable ? activeRef : null}
               className={`
                 rounded-sm
                 px-2
                 py-1
                 transition-colors
                 ${
-                  isActive
-                    ? "border-neutral-400 bg-neutral-800 border"
+                  isActiveTable
+                    ? "border border-neutral-400 bg-neutral-800"
                     : "bg-neutral-800"
                 }
               `}
             >
               {/* Scope header */}
-              <div className="flex justify-between items-center mb-1">
-                <div className="text-xs text-gray-400">
+              <div className="flex justify-between items-center mb-1 text-xs text-gray-400">
+                <div>
                   Scope #{table.id}
                   {table.parentId !== null && (
                     <span className="text-gray-500">
@@ -66,55 +67,70 @@ const SymbolTablesPane = ({ tables, focusId }: SymbolTablesPaneProps) => {
                     </span>
                   )}
                 </div>
-
-                <div className="text-xs text-gray-400">
+                <div>
                   {table.symbols.length} symbol
                   {table.symbols.length !== 1 && "s"}
                 </div>
               </div>
 
-              {/* Symbols */}
-              {table.symbols.length === 0 && (
+              {/* Table */}
+              {table.symbols.length === 0 ? (
                 <div className="text-xs text-gray-500 italic px-1">
                   no symbols
                 </div>
+              ) : (
+                <table className="w-full text-xs border-collapse">
+                  <thead>
+                    <tr className="text-gray-400 border-b border-neutral-700">
+                      <th className="text-left font-normal px-1 py-0.5">sym</th>
+                      <th className="text-left font-normal px-1 py-0.5">type</th>
+                      <th className="text-center font-normal px-1 py-0.5">func</th>
+                      <th className="text-right font-normal px-1 py-0.5">loc</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {table.symbols.map((sym, idx) => {
+                      const isNewSymbol =
+                        isActiveTable && idx === lastSymbolIndex;
+
+                      return (
+                        <tr
+                          key={`${sym.name}-${idx}`}
+                          className={`
+                            ${
+                              isNewSymbol
+                                ? "bg-neutral-700 border-l-4 border-neutral-400"
+                                : ""
+                            }
+                          `}
+                        >
+                          <td
+                            className={`px-1 py-[2px] ${
+                              isNewSymbol
+                                ? "text-gray-100 font-medium"
+                                : "text-gray-400"
+                            }`}
+                          >
+                            {sym.name}
+                          </td>
+
+                          <td className="px-1 py-[2px] text-gray-400">
+                            {sym.type || "—"}
+                          </td>
+
+                          <td className="px-1 py-[2px] text-center text-gray-400">
+                            {sym.is_function === "1" ? "yes" : "no"}
+                          </td>
+
+                          <td className="px-1 py-[2px] text-right text-gray-500">
+                            {sym.line_no}:{sym.char_no}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               )}
-
-            {table.symbols.map((sym, idx) => {
-              const isNewSymbol =
-                table.id === focusId && idx === table.symbols.length - 1;
-
-              return (
-                <div
-                  key={`${sym.name}-${idx}`}
-                  className={`
-                    flex justify-between px-1 py-[2px]
-                    ${
-                      isNewSymbol
-                        ? "bg-neutral-700 border-l-4 border-neutral-400"
-                        : ""
-                    }
-                  `}
-                >
-                  <span
-                    className={`
-                      ${
-                        isNewSymbol
-                          ? "text-gray-100 font-medium"
-                          : "text-gray-400"
-                      }
-                    `}
-                  >
-                    {sym.name}
-                  </span>
-
-                  <span className="text-xs text-gray-500">
-                    {sym.type || "untyped"}
-                  </span>
-                </div>
-              );
-            })}
-
             </div>
           );
         })}

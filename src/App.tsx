@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import EditorWindow from "./components/EditorWindow";
 import GrammarPanel from "./components/GrammarPanel";
@@ -6,9 +6,12 @@ import ResizableLayout from "./components/ResizableLayout";
 import SymbolTablesPane from "./components/SymbolTablesPane";
 import StepTimeline from "./components/StepTimeline";
 import InsightsPanel from "./components/InsightsPanel";
-import { sampleStepsData } from "./data/sampleSteps";
-import type { ActiveRule, StepsData } from "./types/steps";
+import { sampleStepsData } from "./data";
+import type { ActiveRule, ParseCreateASTNodeData, StepsData } from "./types/steps";
 import { deriveSymbolTableState } from "./utils/symbolTables";
+import ASTPane from "./components/ASTPane";
+import type { ASTPaneHandle } from "./components/ASTPane";
+import { sampleAstJson } from "./data/";
 
 function App() {
   const [stepsData, setStepsData] = useState<StepsData>(sampleStepsData);
@@ -18,6 +21,7 @@ function App() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const steps = useMemo(() => stepsData.phases[0]?.steps ?? [], [stepsData]);
+  const astRef = useRef<ASTPaneHandle>(null);
 
   useEffect(() => {
     if (currentStepIndex < 0) return;
@@ -25,6 +29,14 @@ function App() {
   
     if (currentStepIndex >= steps.length) {
       setCurrentStepIndex(steps.length - 1);
+    }
+    const step = steps[currentStepIndex];
+    if (!step) return;
+    if (step.type === "PARSE_CREATE_AST_NODE") { 
+      const nodeId = Number((step.data as ParseCreateASTNodeData)?.node_id);
+      if (!Number.isNaN(nodeId)) {
+        astRef.current?.enableNode(nodeId);
+      }
     }
   }, [steps, currentStepIndex]);
   
@@ -124,7 +136,7 @@ function App() {
           }
           bottomLeft={
             <div className="panel h-full">
-              
+              <ASTPane ref={astRef} astData={sampleAstJson}/> 
             </div>
           }
           bottomRight={
