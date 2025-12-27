@@ -43,7 +43,7 @@ import {
       font: {
         color: "#d4d4d4",
         size: 12,
-        face: "JetBrains Mono",
+        face: "JetBrains Mono, Fira Code, monospace",
       },
     },
     edges: {
@@ -108,23 +108,18 @@ import {
       useImperativeHandle(ref, () => ({
         enableNode(nodeId: number) {
           if (nodes.current.get(nodeId)) return;
-  
+        
           const def = nodeMap.get(nodeId);
           if (!def) return;
-  
-          /* Add node */
+        
           nodes.current.add({
             id: def.id,
             label: def.label,
           });
-  
-          /* Add edges only when both endpoints exist */
+        
           const relatedEdges = edgeMap.get(nodeId) ?? [];
           relatedEdges.forEach((e) => {
-            if (
-              nodes.current.get(e.from) &&
-              nodes.current.get(e.to)
-            ) {
+            if (nodes.current.get(e.from) && nodes.current.get(e.to)) {
               const edgeId = `${e.from}->${e.to}`;
               if (!edges.current.get(edgeId)) {
                 edges.current.add({
@@ -135,12 +130,28 @@ import {
               }
             }
           });
-  
-          /* Optional: focus newly added node */
-          networkRef.current?.focus(nodeId, {
-            scale: 1.1
+        
+          const network = networkRef.current;
+          if (!network) return;
+        
+          // 🔑 PAN ONLY — never touch scale
+          const pos = network.getPositions([nodeId])[nodeId];
+          if (!pos) return;
+        
+          network.moveTo({
+            position: pos,
+            animation: {
+              duration: 300,
+              easingFunction: "easeInOutQuad",
+            },
           });
-        },
+        
+          network.selectNodes([nodeId]);
+        }
+        
+        
+        
+        ,
       }));
   
       return (
