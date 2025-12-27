@@ -1,6 +1,7 @@
 export type StepType =
   | "PARSE_CREATE_SCOPE"
   | "PARSE_REDUCE_RULE"
+  | "PARSE_SEMANTIC_STEP"
   | "LEX_READ_TOKEN"
   | "PARSE_ADD_SYM"
   | "PARSE_ASSGN_SYM_TYPE"
@@ -20,6 +21,13 @@ export interface ParseReduceRuleData {
   ruleId: NumericValue;
   subRuleId: NumericValue;
   rule: string;
+}
+
+export interface ParseSemanticStepData {
+  ruleId: NumericValue;
+  subRuleId: NumericValue;
+  stepNo: NumericValue;
+  instr: string;
 }
 
 export interface LexReadTokenData {
@@ -56,6 +64,7 @@ export interface ParseCreateASTNodeData {
 export type ParseStepData =
   | ParseCreateScopeData
   | ParseReduceRuleData
+  | ParseSemanticStepData
   | LexReadTokenData
   | ParseAddSymData
   | ParseAssgnSymType

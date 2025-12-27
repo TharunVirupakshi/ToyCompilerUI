@@ -7,7 +7,7 @@ import SymbolTablesPane from "./components/SymbolTablesPane";
 import StepTimeline from "./components/StepTimeline";
 import InsightsPanel from "./components/InsightsPanel";
 import { sampleStepsData } from "./data";
-import type { ActiveRule, ParseCreateASTNodeData, StepsData } from "./types/steps";
+import type { ActiveRule, ParseCreateASTNodeData, Step, StepsData, ParseSemanticStepData } from "./types/steps";
 import { deriveSymbolTableState } from "./utils/symbolTables";
 import ASTPane from "./components/ASTPane";
 import type { ASTPaneHandle } from "./components/ASTPane";
@@ -19,26 +19,60 @@ function App() {
   const [activeRule, setActiveRule] = useState<ActiveRule | null>(null);
   const [logLabel, setLogLabel] = useState("Sample data");
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [showSemanticRules, setShowSemanticRules] = useState<boolean>(false);
+  const [activeSemanticStep, setActiveSemanticStep] = useState<ParseSemanticStepData | null>(null);
+
 
   const steps = useMemo(() => stepsData.phases[0]?.steps ?? [], [stepsData]);
   const astRef = useRef<ASTPaneHandle>(null);
 
-  useEffect(() => {
-    if (currentStepIndex < 0) return;
-    if (steps.length === 0) return;
-  
-    if (currentStepIndex >= steps.length) {
-      setCurrentStepIndex(steps.length - 1);
-    }
-    const step = steps[currentStepIndex];
-    if (!step) return;
-    if (step.type === "PARSE_CREATE_AST_NODE") { 
-      const nodeId = Number((step.data as ParseCreateASTNodeData)?.node_id);
-      if (!Number.isNaN(nodeId)) {
-        astRef.current?.enableNode(nodeId);
+  const isSemanticStep = (step: Step | undefined) =>
+    step?.type === "PARSE_SEMANTIC_STEP";
+
+    useEffect(() => {
+      if (currentStepIndex < 0 || steps.length === 0) return;
+    
+      let idx = currentStepIndex;
+    
+      // 🔁 Skip semantic steps if disabled
+      if (!showSemanticRules) {
+        while (idx < steps.length && isSemanticStep(steps[idx])) {
+          idx++;
+        }
       }
-    }
-  }, [steps, currentStepIndex]);
+    
+      // 🚨 Clamp
+      if (idx >= steps.length) {
+        idx = steps.length - 1;
+      }
+    
+      // 🔄 Update index ONCE and EXIT
+      if (idx !== currentStepIndex) {
+        setCurrentStepIndex(idx);
+        return; // 🔑 critical
+      }
+    
+      const step = steps[idx];
+      if (!step) return;
+    
+      // 🔥 Semantic highlighting
+      if (showSemanticRules && isSemanticStep(step)) {
+        const data = step.data as ParseSemanticStepData
+        console.log("Set semantic step ", data.instr)
+        setActiveSemanticStep(data);
+      } 
+    
+      // 🌳 AST node handling
+      if (step.type === "PARSE_CREATE_AST_NODE") {
+        const nodeId = Number(
+          (step.data as ParseCreateASTNodeData)?.node_id
+        );
+        if (!Number.isNaN(nodeId)) {
+          astRef.current?.enableNode(nodeId);
+        }
+      }
+    }, [steps, currentStepIndex, showSemanticRules]);
+    
   
 
   const symbolTables = useMemo(() => {
@@ -100,6 +134,17 @@ function App() {
             START
           </button>
         )}
+        <button
+          className={`
+            rounded-sm p-1 px-3 font-mono text-sm cursor-pointer
+            ${showSemanticRules
+              ? "bg-blue-600 text-white"
+              : "bg-neutral-700 text-gray-300"}
+          `}
+          onClick={() => setShowSemanticRules(v => !v)}
+        >
+          {showSemanticRules ? "Semantic: ON" : "Semantic: OFF"}
+        </button>
           <label className="file-input">
             Load log
             <input type="file" accept="application/json" onChange={handleFileUpload} />
@@ -126,6 +171,8 @@ function App() {
               <GrammarPanel
                 activeRuleId={activeRule?.ruleId}
                 activeSubRuleId={activeRule?.subRuleId}
+                showSemanticSteps={showSemanticRules}
+                activeSemanticStep={activeSemanticStep}
               />
             </div>
           }
