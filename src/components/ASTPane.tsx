@@ -80,15 +80,30 @@ import {
   
       /* Lookup maps */
       const nodeMap = useMemo(
-        () => new Map(astData.nodes.map((n) => [n.node_id, n])),
+        () => new Map(astData.nodes.map((n) => [n.id, n])),
         [astData.nodes]
       );
-      
-  
-      const edgeMap = useMemo(
+
+      const nodeIdToVisId = useMemo(
+        () =>
+          new Map<number, number>(
+            astData.nodes.map((n) => [n.node_id, n.id])
+          ),
+        [astData.nodes]
+      );
+
+      const outgoingEdgeMap = useMemo(
         () =>
           astData.edges.reduce<Map<number, ASTEdgeDef[]>>((acc, e) => {
             acc.set(e.from, [...(acc.get(e.from) ?? []), e]);
+            return acc;
+          }, new Map()),
+        [astData.edges]
+      );
+      
+      const incomingEdgeMap = useMemo(
+        () =>
+          astData.edges.reduce<Map<number, ASTEdgeDef[]>>((acc, e) => {
             acc.set(e.to, [...(acc.get(e.to) ?? []), e]);
             return acc;
           }, new Map()),
@@ -109,51 +124,52 @@ import {
       /* Expose imperative API */
       useImperativeHandle(ref, () => ({
         enableNode(nodeId: number) {
-          if (nodes.current.get(nodeId)) return;
+          const visId = nodeIdToVisId.get(nodeId);
+          if (visId === undefined) return;
         
-          const def = nodeMap.get(nodeId);
+          if (nodes.current.get(visId)) return;
+        
+          const def = nodeMap.get(visId);
           if (!def) return;
         
+          // ✅ Add node
           nodes.current.add({
-            id: def.node_id,
+            id: visId,
             label: def.label,
-            bfsIndex: def.id,   // metadata only
           });
         
-          const relatedEdges = edgeMap.get(nodeId) ?? [];
-          relatedEdges.forEach((e) => {
-            if (nodes.current.get(e.from) && nodes.current.get(e.to)) {
-              const edgeId = `${e.from}->${e.to}`;
-              if (!edges.current.get(edgeId)) {
-                edges.current.add({
-                  id: edgeId,
-                  from: e.from,
-                  to: e.to,
-                });
-              }
+          const tryAddEdge = (fromVis: number, toVis: number) => {
+            if (!nodes.current.get(fromVis) || !nodes.current.get(toVis)) return;
+        
+            const edgeId = `${fromVis}->${toVis}`;
+            if (!edges.current.get(edgeId)) {
+              edges.current.add({ id: edgeId, from: fromVis, to: toVis });
             }
-          });
+          };
         
+          // ✅ Only VIS-ID edges
+          (outgoingEdgeMap.get(visId) ?? []).forEach(e =>
+            tryAddEdge(e.from, e.to)
+          );
+        
+          (incomingEdgeMap.get(visId) ?? []).forEach(e =>
+            tryAddEdge(e.from, e.to)
+          );
+        
+          // Pan + select
           const network = networkRef.current;
           if (!network) return;
         
-          // 🔑 PAN ONLY — never touch scale
-          const pos = network.getPositions([nodeId])[nodeId];
+          const pos = network.getPositions([visId])[visId];
           if (!pos) return;
         
           network.moveTo({
             position: pos,
-            animation: {
-              duration: 300,
-              easingFunction: "easeInOutQuad",
-            },
+            animation: { duration: 300, easingFunction: "easeInOutQuad" },
           });
         
-          network.selectNodes([nodeId]);
+          network.selectNodes([visId]);
         }
-        
-        
-        
         ,
       }));
   

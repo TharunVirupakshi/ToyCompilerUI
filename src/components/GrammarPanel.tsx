@@ -966,7 +966,7 @@ const GrammarPanel: React.FC<GrammarPanelProps> = ({
                           Number(activeSemanticStep?.subRuleId) === rule.subId &&
                           Number(activeSemanticStep?.stepNo) === step.stepNo;
 
-                        if (isSemanticActive) console.log("Active semantic step: ", step.instr)                        
+                        // if (isSemanticActive) console.log("Active semantic step: ", step.instr)                        
 
                         return (
                           <div

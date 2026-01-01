@@ -58,7 +58,7 @@ function App() {
       // 🔥 Semantic highlighting
       if (showSemanticRules && isSemanticStep(step)) {
         const data = step.data as ParseSemanticStepData
-        console.log("Set semantic step ", data.instr)
+        // console.log("Set semantic step ", data.instr)
         setActiveSemanticStep(data);
       } 
     
@@ -67,6 +67,7 @@ function App() {
         const nodeId = Number(
           (step.data as ParseCreateASTNodeData)?.node_id
         );
+        console.log("Enabling node: ", nodeId)
         if (!Number.isNaN(nodeId)) {
           astRef.current?.enableNode(nodeId);
         }
