@@ -10,6 +10,7 @@ import {
   /* AST blueprint types */
   interface ASTNodeDef {
     id: number;
+    node_id: number;
     label: string;
   }
   
@@ -79,9 +80,10 @@ import {
   
       /* Lookup maps */
       const nodeMap = useMemo(
-        () => new Map(astData.nodes.map((n) => [n.id, n])),
+        () => new Map(astData.nodes.map((n) => [n.node_id, n])),
         [astData.nodes]
       );
+      
   
       const edgeMap = useMemo(
         () =>
@@ -113,8 +115,9 @@ import {
           if (!def) return;
         
           nodes.current.add({
-            id: def.id,
+            id: def.node_id,
             label: def.label,
+            bfsIndex: def.id,   // metadata only
           });
         
           const relatedEdges = edgeMap.get(nodeId) ?? [];
