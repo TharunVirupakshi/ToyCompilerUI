@@ -59,7 +59,7 @@ const SymbolTablesPane = ({ tables, focusId }: SymbolTablesPaneProps) => {
               {/* Scope header */}
               <div className="flex justify-between items-center mb-1 text-xs text-gray-400">
                 <div>
-                  Scope #{table.id}
+                  Scope #{table.id} : {table.name}
                   {table.parentId !== null && (
                     <span className="text-gray-500">
                       {" "}

@@ -3,7 +3,13 @@ import Editor from "@monaco-editor/react";
 import type {
   ActiveRule,
   LexReadTokenData,
+  ParseAddSymData,
+  ParseAssgnSymType,
+  ParseCreateASTNodeData,
+  ParseCreateScopeData,
+  ParseEnterExitScopeData,
   ParseReduceRuleData,
+  ParseSemanticStepData,
   Step,
 } from "../types/steps";
 import { sampleInputCode } from "../data";
@@ -81,6 +87,58 @@ export default function EditorWindow({
     return lexStep.location;
   }, [lexStep]);
 
+  function getStepSummary(step: Step): string {
+    switch (step.type) {
+      case "LEX_READ_TOKEN": {
+        const { token, value, location } = step.data as LexReadTokenData;
+        return `LEX: ${token}${value ? `(${value})` : ""} @ ${location}`;
+      }
+  
+      case "PARSE_REDUCE_RULE": {
+        const { ruleId, subRuleId, rule } = step.data as ParseReduceRuleData;
+        return `REDUCE: ${rule} [${ruleId}.${subRuleId}]`;
+      }
+  
+      case "PARSE_SEMANTIC_STEP": {
+        const { instr, stepNo } = step.data as ParseSemanticStepData;
+        return `SEMANTIC(${stepNo}): ${instr}`;
+      }
+  
+      case "PARSE_CREATE_AST_NODE": {
+        return `AST NODE CREATED: #${(step.data as ParseCreateASTNodeData).node_id}`;
+      }
+  
+      case "PARSE_CREATE_SCOPE": {
+        const { name, table_id, parent_id } = step.data as ParseCreateScopeData;
+        return `SCOPE CREATE: ${name} (id=${table_id}, parent=${parent_id})`;
+      }
+  
+      case "PARSE_ENTER_SCOPE": {
+        const { name, table_id } = step.data as ParseEnterExitScopeData
+        return `ENTER SCOPE: ${name} (id=${table_id})`;
+      }
+
+      case "PARSE_EXIT_SCOPE": {
+        const { name, table_id } = step.data as ParseEnterExitScopeData
+        return `EXIT SCOPE: ${name} (id=${table_id})`;
+      }
+  
+      case "PARSE_ADD_SYM": {
+        const d = step.data as ParseAddSymData;
+        return `ADD SYMBOL: ${d.name} : ${d.sym_type} (scope ${d.scope_id})`;
+      }
+  
+      case "PARSE_ASSGN_SYM_TYPE": {
+        const d = step.data as ParseAssgnSymType;
+        return `TYPE ASSIGN: ${d.name} ← ${d.sym_type}`;
+      }
+  
+      default:
+        return step.type;
+    }
+  }
+  
+
   return (
     <div className="h-full">
       <div className="flex justify-between p-1 bg-neutral-800">
@@ -89,14 +147,9 @@ export default function EditorWindow({
             STEP {currentStepIndex + 1}/{steps.length || 1}
           </span>
           <span>•</span>
-          <span>{currentStep ? currentStep.type : "—"}</span>
-          <span>•</span>
-          <span>
-            {lexStep?.token ?? "—"}
-            {lexStep?.value ? ` (${lexStep.value})` : ""}
+          <span className="truncate max-w-[600px] text-gray-300">
+          {currentStep ? getStepSummary(currentStep) : "—"}
           </span>
-          <span>•</span>
-          <span>{locationLabel ?? "—"}</span>
         </div>
         <div className="flex items-center gap-1.5">
         <button
