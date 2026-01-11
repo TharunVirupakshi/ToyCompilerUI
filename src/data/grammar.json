@@ -1,0 +1,1062 @@
+[
+  {
+    "ruleNo": 1,
+    "text": "program \u2192 stmt_list",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "root = createProgramNode($1)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 2,
+    "text": "stmt_list \u2192 stmt_list stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createStmtListNode($1, $2)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 3,
+    "text": "stmt_list \u2192 \u03b5",
+    "semanticSteps": [
+      {
+        "stepNo": 2,
+        "instr": "$$ = NULL"
+      }
+    ]
+  },
+  {
+    "ruleNo": 4,
+    "text": "stmt \u2192 decl_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 5,
+    "text": "stmt \u2192 assgn_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 6,
+    "text": "stmt \u2192 expr_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 7,
+    "text": "stmt \u2192 cond_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 8,
+    "text": "stmt \u2192 block_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 9,
+    "text": "stmt \u2192 loop_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 10,
+    "text": "stmt \u2192 ret_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 11,
+    "text": "stmt \u2192 func_decl",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 12,
+    "text": "stmt \u2192 func_call_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 13,
+    "text": "stmt \u2192 break_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 14,
+    "text": "stmt \u2192 continue_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 15,
+    "text": "stmt \u2192 ';'",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = NULL"
+      }
+    ]
+  },
+  {
+    "ruleNo": 16,
+    "text": "ret_stmt \u2192 RETURN expr ;",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createReturnNode($2)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 17,
+    "text": "ret_stmt \u2192 RETURN ;",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createReturnNode(NULL)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 18,
+    "text": "func_call_stmt \u2192 func_call ;",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 19,
+    "text": "assgn_stmt \u2192 assgn_expr ;",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 20,
+    "text": "assgn_expr \u2192 ID ASSIGN expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createAssgnNode($1, $3)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 21,
+    "text": "block_smt_enter \u2192 \u03b5",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "enterBlockScope()"
+      }
+    ]
+  },
+  {
+    "ruleNo": 22,
+    "text": "block_stmt \u2192 { stmt_list }",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createBlockStmtNode($3)"
+      },
+      {
+        "stepNo": 2,
+        "instr": "exitScope()"
+      }
+    ]
+  },
+  {
+    "ruleNo": 23,
+    "text": "block_stmt_without_scope \u2192 { stmt_list }",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createBlockStmtNode($2)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 24,
+    "text": "body \u2192 block_stmt_without_scope",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 25,
+    "text": "body \u2192 decl_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 26,
+    "text": "body \u2192 assgn_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 27,
+    "text": "body \u2192 expr_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 28,
+    "text": "body \u2192 cond_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 29,
+    "text": "body \u2192 loop_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 30,
+    "text": "body \u2192 ret_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 31,
+    "text": "body \u2192 func_decl",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 32,
+    "text": "body \u2192 func_call_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 33,
+    "text": "body \u2192 break_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 34,
+    "text": "body \u2192 continue_stmt",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 35,
+    "text": "body \u2192 ;",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = NULL"
+      }
+    ]
+  },
+  {
+    "ruleNo": 36,
+    "text": "break_stmt \u2192 BREAK ;",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createBreakNode()"
+      }
+    ]
+  },
+  {
+    "ruleNo": 37,
+    "text": "continue_stmt \u2192 CONTINUE ;",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createContinueNode()"
+      }
+    ]
+  },
+  {
+    "ruleNo": 38,
+    "text": "if_enter \u2192 \u03b5",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "enterIfBlockScope()"
+      }
+    ]
+  },
+  {
+    "ruleNo": 39,
+    "text": "if_exit \u2192 \u03b5",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "exitScope()"
+      }
+    ]
+  },
+  {
+    "ruleNo": 40,
+    "text": "cond_stmt \u2192 IF '(' expr ')' if_enter body if_exit else_part",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createIfElseNode($3, $6, $8.else_body)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 41,
+    "text": "else_enter \u2192 \u03b5",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "enterElseBlockScoep()"
+      }
+    ]
+  },
+  {
+    "ruleNo": 42,
+    "text": "else_part \u2192 ELSE else_enter body",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$.else_body = $3"
+      },
+      {
+        "stepNo": 2,
+        "instr": "exitScope()"
+      }
+    ]
+  },
+  {
+    "ruleNo": 43,
+    "text": "else_part \u2192 \u03b5",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$.else_body = NULL"
+      }
+    ]
+  },
+  {
+    "ruleNo": 44,
+    "text": "while_enter \u2192 \u03b5",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "enterWhileBlockScope()"
+      }
+    ]
+  },
+  {
+    "ruleNo": 45,
+    "text": "for_enter \u2192 \u03b5",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "enterForBlockScope()"
+      }
+    ]
+  },
+  {
+    "ruleNo": 46,
+    "text": "loop_stmt \u2192 WHILE '(' expr ')' body",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createWhileNode($3, $6)"
+      },
+      {
+        "stepNo": 2,
+        "instr": "exitScope()"
+      }
+    ]
+  },
+  {
+    "ruleNo": 47,
+    "text": "loop_stmt \u2192 FOR '(' for_enter for_init ';' for_expr ';' for_expr ')' body",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createForNode($4, $6, $8, $10)"
+      },
+      {
+        "stepNo": 2,
+        "instr": "exitScope()"
+      }
+    ]
+  },
+  {
+    "ruleNo": 48,
+    "text": "for_init \u2192 decl",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 49,
+    "text": "for_init \u2192 expr_list",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 50,
+    "text": "for_init \u2192 \u03b5",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = NULL"
+      }
+    ]
+  },
+  {
+    "ruleNo": 51,
+    "text": "expr_list \u2192 expr_list ',' expr_list_item",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createCommaExprList($1, $3)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 52,
+    "text": "expr_list \u2192 expr_list_item",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createCommaExprList(NULL, $1)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 53,
+    "text": "expr_list_item \u2192 assgn_expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 54,
+    "text": "expr_list_item \u2192 expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 55,
+    "text": "for_expr \u2192 expr_list",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 56,
+    "text": "for_expr \u2192 \u03b5",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = NULL"
+      }
+    ]
+  },
+  {
+    "ruleNo": 57,
+    "text": "decl_stmt \u2192 decl ';'",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 58,
+    "text": "decl \u2192 type_spec var_list",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "setVarListType($1, $2)"
+      },
+      {
+        "stepNo": 2,
+        "instr": "$$ = createDeclNode($1, $2)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 59,
+    "text": "type_spec \u2192 INT",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createTypeNode(INT)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 60,
+    "text": "type_spec \u2192 CHAR",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createTypeNode(CHAR)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 61,
+    "text": "type_spec \u2192 FLOAT",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createTypeNode(FLOAT)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 62,
+    "text": "type_spec \u2192 STRING",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createTypeNode(STRING)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 63,
+    "text": "var_list \u2192 var_list ',' var",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createVarListNode($1, $3)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 64,
+    "text": "var_list \u2192 var",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createVarListNode(NULL, $1)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 65,
+    "text": "var \u2192 ID",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createVarNode($1)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 66,
+    "text": "var \u2192 ID ASSIGN expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createVarAssgnNode($1, $3)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 67,
+    "text": "func_decl \u2192 func_header params ')' body",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createFuncDeclNode($1.type, $1.id, $2, $4)"
+      },
+      {
+        "stepNo": 2,
+        "instr": "exitScope()"
+      }
+    ]
+  },
+  {
+    "ruleNo": 68,
+    "text": "func_header \u2192 type_spec ID '('",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$.type = $1"
+      },
+      {
+        "stepNo": 2,
+        "instr": "$$.id = createFucnIdNode($2, $1)"
+      },
+      {
+        "stepNo": 3,
+        "instr": "enterFunctionScope()"
+      }
+    ]
+  },
+  {
+    "ruleNo": 69,
+    "text": "func_header \u2192 VOID ID '('",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$.type = createTypeNode(VOID)"
+      },
+      {
+        "stepNo": 2,
+        "instr": "$$.id = createFucnIdNode($2, $$.type)"
+      },
+      {
+        "stepNo": 3,
+        "instr": "enterFunctionScope()"
+      }
+    ]
+  },
+  {
+    "ruleNo": 70,
+    "text": "func_call \u2192 ID '(' arg_list ')'",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createFuncCallNode($1, $3)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 71,
+    "text": "arg_list \u2192 arg_list ',' expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createArgListNode($1, $3)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 72,
+    "text": "arg_list \u2192 expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createArgListNode(NULL, $1)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 73,
+    "text": "arg_list \u2192 \u03b5",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = NULL"
+      }
+    ]
+  },
+  {
+    "ruleNo": 74,
+    "text": "params \u2192 params ',' param",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createParamsListNode($1, $3)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 75,
+    "text": "params \u2192 param",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createParamsListNode(NULL, $1)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 76,
+    "text": "params \u2192 \u03b5",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = NULL"
+      }
+    ]
+  },
+  {
+    "ruleNo": 77,
+    "text": "param \u2192 type_spec ID",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createParamNode($1, $2)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 78,
+    "text": "expr_stmt \u2192 expr ;",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 79,
+    "text": "expr \u2192 expr PLUS expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createBinaryExpNode($1, $3, +)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 80,
+    "text": "expr \u2192 expr MINUS expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createBinaryExpNode($1, $3, -)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 81,
+    "text": "expr \u2192 expr MULT expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createBinaryExpNode($1, $3, *)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 82,
+    "text": "expr \u2192 expr DIV expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createBinaryExpNode($1, $3, /)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 83,
+    "text": "expr \u2192 expr EQ expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createBinaryExpNode($1, $3, ==)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 84,
+    "text": "expr \u2192 expr NEQ expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createBinaryExpNode($1, $3, !=)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 85,
+    "text": "expr \u2192 expr LT expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createBinaryExpNode($1, $3, <)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 86,
+    "text": "expr \u2192 expr GT expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createBinaryExpNode($1, $3, >)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 87,
+    "text": "expr \u2192 expr LEQ expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createBinaryExpNode($1, $3, <=)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 88,
+    "text": "expr \u2192 expr GEQ expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createBinaryExpNode($1, $3, >=)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 89,
+    "text": "expr \u2192 expr AND expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createBinaryExpNode($1, $3, &&)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 90,
+    "text": "expr \u2192 expr OR expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createBinaryExpNode($1, $3, ||)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 91,
+    "text": "expr \u2192 NOT expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createUnaryExpNode($2, !)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 92,
+    "text": "expr \u2192 MINUS expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createUnaryExpNode($2, -)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 93,
+    "text": "expr \u2192 INC expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createUnaryExpNode($2, PRE_INC)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 94,
+    "text": "expr \u2192 DEC expr",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createUnaryExpNode($2, PRE_DEC)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 95,
+    "text": "expr \u2192 expr INC",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createUnaryExpNode($1, POST_INC)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 96,
+    "text": "expr \u2192 expr DEC",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createUnaryExpNode($1, POST_DEC)"
+      }
+    ]
+  },
+  {
+    "ruleNo": 97,
+    "text": "expr \u2192 ID",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createTermExpNode(createIdRefNode($1))"
+      }
+    ]
+  },
+  {
+    "ruleNo": 98,
+    "text": "expr \u2192 INT_LITERAL",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createTermExpNode(createIntLiteralNode($1))"
+      }
+    ]
+  },
+  {
+    "ruleNo": 99,
+    "text": "expr \u2192 CHAR_LITERAL",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createTermExpNode(createCharLiteralNode($1))"
+      }
+    ]
+  },
+  {
+    "ruleNo": 100,
+    "text": "expr \u2192 STR_LITERAL",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = createTermExpNode(createStrLiteralNode($1))"
+      }
+    ]
+  },
+  {
+    "ruleNo": 101,
+    "text": "expr \u2192 func_call",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $1"
+      }
+    ]
+  },
+  {
+    "ruleNo": 102,
+    "text": "expr \u2192 ( expr )",
+    "semanticSteps": [
+      {
+        "stepNo": 1,
+        "instr": "$$ = $2"
+      }
+    ]
+  }
+]

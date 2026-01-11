@@ -2,83 +2,69 @@ import { FC, ReactNode, useState } from "react";
 import Split from "react-split";
 
 interface ResizableLayoutProps {
-  left: ReactNode;
+  leftTop: ReactNode;     // Editor
+  leftBottom: ReactNode;  // Parser States (placeholder)
   topLeft: ReactNode;
   topRight: ReactNode;
   bottomLeft: ReactNode;
-  bottomRight: ReactNode;
+  bottomRight?: ReactNode;
 }
 
 const ResizableLayout: FC<ResizableLayoutProps> = ({
-  left,
+  leftTop,
+  leftBottom,
   topLeft,
   topRight,
   bottomLeft,
-  bottomRight,
 }) => {
-  const [showTopLeft, setShowTopLeft] = useState(true);
-  const [showTopRight, setShowTopRight] = useState(true);
-  const [showBottomLeft, setShowBottomLeft] = useState(true);
-  const [showBottomRight, setShowBottomRight] = useState(true);
-
-  const visibleTopPanels = [showTopLeft, showTopRight].filter(Boolean).length || 1;
-  const visibleBottomPanels = [showBottomLeft, showBottomRight].filter(Boolean).length || 1;
-
   return (
-    <div className="h-full w-full relative">
+    <div className="h-full w-full">
 
-      {/* Panel Toggle Buttons */}
-      {/* <div className="absolute top-2 right-2 z-50 flex gap-2 text-xs">
-        <button className="border px-2 py-1 bg-white" onClick={() => setShowTopLeft(!showTopLeft)}>
-          TL
-        </button>
-        <button className="border px-2 py-1 bg-white" onClick={() => setShowTopRight(!showTopRight)}>
-          TR
-        </button>
-        <button className="border px-2 py-1 bg-white" onClick={() => setShowBottomLeft(!showBottomLeft)}>
-          BL
-        </button>
-        <button className="border px-2 py-1 bg-white" onClick={() => setShowBottomRight(!showBottomRight)}>
-          BR
-        </button>
-      </div> */}
-
+      {/* OUTER: Left / Right */}
       <Split
         sizes={[40, 60]}
         minSize={200}
         gutterSize={8}
-        className="split-horizontal flex h-full"
+        className="flex h-full"
       >
-        <div className="pane h-full">{left}</div>
+        {/* LEFT COLUMN (Editor + Parser States) */}
+        <Split
+          direction="vertical"
+          sizes={[70, 30]}
+          minSize={100}
+          gutterSize={8}
+          className="flex flex-col h-full"
+        >
+          <div className="pane h-full">
+            {leftTop}
+          </div>
 
+          <div className="pane h-full bg-neutral-900 border-t border-neutral-700">
+            {leftBottom}
+          </div>
+        </Split>
+
+        {/* RIGHT COLUMN */}
         <Split
           direction="vertical"
           sizes={[50, 50]}
-          minSize={80}
+          minSize={120}
           gutterSize={8}
-          className="split-vertical h-full"
+          className="flex flex-col h-full"
         >
-          {/* TOP ROW */}
+          {/* TOP RIGHT ROW */}
           <Split
-            sizes={Array(visibleTopPanels).fill(100 / visibleTopPanels)}
-            minSize={80}
+            sizes={[50, 50]}
+            minSize={120}
             gutterSize={8}
             className="flex h-full"
           >
-            {showTopLeft && <div className="pane h-full">{topLeft}</div>}
-            {showTopRight && <div className="pane h-full">{topRight}</div>}
+            <div className="pane h-full">{topLeft}</div>
+            <div className="pane h-full">{topRight}</div>
           </Split>
 
-          {/* BOTTOM ROW */}
-          {showBottomLeft && <div className="pane h-full">{bottomLeft}</div>}
-          {/* <Split
-            sizes={Array(visibleBottomPanels).fill(100 / visibleBottomPanels)}
-            minSize={80}
-            gutterSize={8}
-            className="flex h-full"
-          >
-            {showBottomRight && <div className="pane h-full">{bottomRight}</div>}
-          </Split> */}
+          {/* BOTTOM RIGHT */}
+          <div className="pane h-full">{bottomLeft}</div>
         </Split>
       </Split>
     </div>

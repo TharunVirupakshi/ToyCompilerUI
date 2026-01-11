@@ -6,12 +6,12 @@ import ResizableLayout from "./components/ResizableLayout";
 import SymbolTablesPane from "./components/SymbolTablesPane";
 import StepTimeline from "./components/StepTimeline";
 import InsightsPanel from "./components/InsightsPanel";
-import { sampleStepsData } from "./data";
-import type { ActiveRule, ParseCreateASTNodeData, Step, StepsData, ParseSemanticStepData } from "./types/steps";
+import { sampleStepsData, sampleAstJson, sampleStatesJson } from "./data";
+import type { ActiveRule, ParseCreateASTNodeData, Step, StepsData, ParseSemanticStepData, ParseStackSnapshot } from "./types/steps";
 import { deriveSymbolTableState } from "./utils/symbolTables";
 import ASTPane from "./components/ASTPane";
 import type { ASTPaneHandle } from "./components/ASTPane";
-import { sampleAstJson } from "./data/";
+import ParserStatesPanel from "./components/ParserStatesPanel";
 
 function App() {
   const [stepsData, setStepsData] = useState<StepsData>(sampleStepsData);
@@ -21,6 +21,7 @@ function App() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showSemanticRules, setShowSemanticRules] = useState<boolean>(false);
   const [activeSemanticStep, setActiveSemanticStep] = useState<ParseSemanticStepData | null>(null);
+  const [parseStatesStack, setParseStatesStack] = useState<number[]>([]); 
 
 
   const steps = useMemo(() => stepsData.phases[0]?.steps ?? [], [stepsData]);
@@ -71,6 +72,11 @@ function App() {
         if (!Number.isNaN(nodeId)) {
           astRef.current?.enableNode(nodeId);
         }
+      }
+
+      if (step.type == "PARSE_STACK_SNAPSHOT") {
+        const statesStack = (step.data as ParseStackSnapshot)?.states
+        setParseStatesStack(statesStack)
       }
     }, [steps, currentStepIndex, showSemanticRules]);
     
@@ -157,7 +163,7 @@ function App() {
       </header>
       <main className="workspace">
         <ResizableLayout
-          left={
+          leftTop={
             <div className="panel panel--editor h-full">
               <EditorWindow
                 steps={steps}
@@ -167,11 +173,16 @@ function App() {
               />
             </div>
           }
+          leftBottom={
+            <ParserStatesPanel
+              states={sampleStatesJson}
+              stateStack={parseStatesStack}
+            />
+          }
           topLeft={
             <div className="panel h-full">
               <GrammarPanel
-                activeRuleId={activeRule?.ruleId}
-                activeSubRuleId={activeRule?.subRuleId}
+                activeRuleNo={activeRule?.ruleNo}
                 showSemanticSteps={showSemanticRules}
                 activeSemanticStep={activeSemanticStep}
               />

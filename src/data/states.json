@@ -1,0 +1,8224 @@
+[
+  {
+    "state": 0,
+    "items": [
+      {
+        "rule": 0,
+        "item": "$accept: \u2022 program $end"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "program",
+        "to": 1
+      },
+      {
+        "symbol": "stmt_list",
+        "to": 2
+      }
+    ],
+    "default": {
+      "action": "reduce",
+      "rule": 3,
+      "lhs": "stmt_list"
+    }
+  },
+  {
+    "state": 1,
+    "items": [
+      {
+        "rule": 0,
+        "item": "$accept: program \u2022 $end"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "$end",
+        "to": 3
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 2,
+    "items": [
+      {
+        "rule": 1,
+        "item": "program: stmt_list \u2022"
+      },
+      {
+        "rule": 2,
+        "item": "stmt_list: stmt_list \u2022 stmt"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 4
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "IF",
+        "to": 8
+      },
+      {
+        "symbol": "WHILE",
+        "to": 9
+      },
+      {
+        "symbol": "FOR",
+        "to": 10
+      },
+      {
+        "symbol": "RETURN",
+        "to": 11
+      },
+      {
+        "symbol": "BREAK",
+        "to": 12
+      },
+      {
+        "symbol": "CONTINUE",
+        "to": 13
+      },
+      {
+        "symbol": "INT",
+        "to": 14
+      },
+      {
+        "symbol": "FLOAT",
+        "to": 15
+      },
+      {
+        "symbol": "CHAR",
+        "to": 16
+      },
+      {
+        "symbol": "VOID",
+        "to": 17
+      },
+      {
+        "symbol": "STRING",
+        "to": 18
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "';'",
+        "to": 23
+      },
+      {
+        "symbol": "'{'",
+        "to": 24
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "stmt",
+        "to": 26
+      },
+      {
+        "symbol": "ret_stmt",
+        "to": 27
+      },
+      {
+        "symbol": "func_call_stmt",
+        "to": 28
+      },
+      {
+        "symbol": "assgn_stmt",
+        "to": 29
+      },
+      {
+        "symbol": "assgn_expr",
+        "to": 30
+      },
+      {
+        "symbol": "block_stmt",
+        "to": 31
+      },
+      {
+        "symbol": "break_stmt",
+        "to": 32
+      },
+      {
+        "symbol": "continue_stmt",
+        "to": 33
+      },
+      {
+        "symbol": "cond_stmt",
+        "to": 34
+      },
+      {
+        "symbol": "loop_stmt",
+        "to": 35
+      },
+      {
+        "symbol": "decl_stmt",
+        "to": 36
+      },
+      {
+        "symbol": "decl",
+        "to": 37
+      },
+      {
+        "symbol": "type_spec",
+        "to": 38
+      },
+      {
+        "symbol": "func_decl",
+        "to": 39
+      },
+      {
+        "symbol": "func_header",
+        "to": 40
+      },
+      {
+        "symbol": "func_call",
+        "to": 41
+      },
+      {
+        "symbol": "expr_stmt",
+        "to": 42
+      },
+      {
+        "symbol": "expr",
+        "to": 43
+      }
+    ],
+    "default": {
+      "action": "reduce",
+      "rule": 1,
+      "lhs": "program"
+    }
+  },
+  {
+    "state": 3,
+    "items": [
+      {
+        "rule": 0,
+        "item": "$accept: program $end \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "accept"
+    }
+  },
+  {
+    "state": 4,
+    "items": [
+      {
+        "rule": 20,
+        "item": "assgn_expr: ID \u2022 ASSIGN expr"
+      },
+      {
+        "rule": 70,
+        "item": "func_call: ID \u2022 '(' arg_list ')'"
+      },
+      {
+        "rule": 97,
+        "item": "expr: ID \u2022"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ASSIGN",
+        "to": 44
+      },
+      {
+        "symbol": "'('",
+        "to": 45
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 97,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 5,
+    "items": [
+      {
+        "rule": 100,
+        "item": "expr: STR_LITERAL \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 100,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 6,
+    "items": [
+      {
+        "rule": 98,
+        "item": "expr: INT_LITERAL \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 98,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 7,
+    "items": [
+      {
+        "rule": 99,
+        "item": "expr: CHAR_LITERAL \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 99,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 8,
+    "items": [
+      {
+        "rule": 40,
+        "item": "cond_stmt: IF \u2022 '(' expr ')' if_enter body if_exit else_part"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "'('",
+        "to": 46
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 9,
+    "items": [
+      {
+        "rule": 46,
+        "item": "loop_stmt: WHILE \u2022 '(' expr ')' while_enter body"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "'('",
+        "to": 47
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 10,
+    "items": [
+      {
+        "rule": 47,
+        "item": "loop_stmt: FOR \u2022 '(' for_enter for_init ';' for_expr ';' for_expr ')' body"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "'('",
+        "to": 48
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 11,
+    "items": [
+      {
+        "rule": 16,
+        "item": "ret_stmt: RETURN \u2022 expr ';'"
+      },
+      {
+        "rule": 17,
+        "item": "| RETURN \u2022 ';'"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "';'",
+        "to": 50
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 52
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 12,
+    "items": [
+      {
+        "rule": 36,
+        "item": "break_stmt: BREAK \u2022 ';'"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "';'",
+        "to": 53
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 13,
+    "items": [
+      {
+        "rule": 37,
+        "item": "continue_stmt: CONTINUE \u2022 ';'"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "';'",
+        "to": 54
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 14,
+    "items": [
+      {
+        "rule": 59,
+        "item": "type_spec: INT \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 59,
+      "lhs": "type_spec"
+    }
+  },
+  {
+    "state": 15,
+    "items": [
+      {
+        "rule": 61,
+        "item": "type_spec: FLOAT \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 61,
+      "lhs": "type_spec"
+    }
+  },
+  {
+    "state": 16,
+    "items": [
+      {
+        "rule": 60,
+        "item": "type_spec: CHAR \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 60,
+      "lhs": "type_spec"
+    }
+  },
+  {
+    "state": 17,
+    "items": [
+      {
+        "rule": 69,
+        "item": "func_header: VOID \u2022 ID '('"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 55
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 18,
+    "items": [
+      {
+        "rule": 62,
+        "item": "type_spec: STRING \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 62,
+      "lhs": "type_spec"
+    }
+  },
+  {
+    "state": 19,
+    "items": [
+      {
+        "rule": 92,
+        "item": "expr: MINUS \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 56
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 20,
+    "items": [
+      {
+        "rule": 93,
+        "item": "expr: INC \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 57
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 21,
+    "items": [
+      {
+        "rule": 94,
+        "item": "expr: DEC \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 58
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 22,
+    "items": [
+      {
+        "rule": 91,
+        "item": "expr: NOT \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 59
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 23,
+    "items": [
+      {
+        "rule": 15,
+        "item": "stmt: ';' \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 15,
+      "lhs": "stmt"
+    }
+  },
+  {
+    "state": 24,
+    "items": [
+      {
+        "rule": 22,
+        "item": "block_stmt: '{' \u2022 block_stmt_enter stmt_list '}'"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "block_stmt_enter",
+        "to": 60
+      }
+    ],
+    "default": {
+      "action": "reduce",
+      "rule": 21,
+      "lhs": "block_stmt_enter"
+    }
+  },
+  {
+    "state": 25,
+    "items": [
+      {
+        "rule": 102,
+        "item": "expr: '(' \u2022 expr ')'"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 61
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 26,
+    "items": [
+      {
+        "rule": 2,
+        "item": "stmt_list: stmt_list stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 2,
+      "lhs": "stmt_list"
+    }
+  },
+  {
+    "state": 27,
+    "items": [
+      {
+        "rule": 10,
+        "item": "stmt: ret_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 10,
+      "lhs": "stmt"
+    }
+  },
+  {
+    "state": 28,
+    "items": [
+      {
+        "rule": 12,
+        "item": "stmt: func_call_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 12,
+      "lhs": "stmt"
+    }
+  },
+  {
+    "state": 29,
+    "items": [
+      {
+        "rule": 5,
+        "item": "stmt: assgn_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 5,
+      "lhs": "stmt"
+    }
+  },
+  {
+    "state": 30,
+    "items": [
+      {
+        "rule": 19,
+        "item": "assgn_stmt: assgn_expr \u2022 ';'"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "';'",
+        "to": 62
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 31,
+    "items": [
+      {
+        "rule": 8,
+        "item": "stmt: block_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 8,
+      "lhs": "stmt"
+    }
+  },
+  {
+    "state": 32,
+    "items": [
+      {
+        "rule": 13,
+        "item": "stmt: break_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 13,
+      "lhs": "stmt"
+    }
+  },
+  {
+    "state": 33,
+    "items": [
+      {
+        "rule": 14,
+        "item": "stmt: continue_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 14,
+      "lhs": "stmt"
+    }
+  },
+  {
+    "state": 34,
+    "items": [
+      {
+        "rule": 7,
+        "item": "stmt: cond_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 7,
+      "lhs": "stmt"
+    }
+  },
+  {
+    "state": 35,
+    "items": [
+      {
+        "rule": 9,
+        "item": "stmt: loop_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 9,
+      "lhs": "stmt"
+    }
+  },
+  {
+    "state": 36,
+    "items": [
+      {
+        "rule": 4,
+        "item": "stmt: decl_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 4,
+      "lhs": "stmt"
+    }
+  },
+  {
+    "state": 37,
+    "items": [
+      {
+        "rule": 57,
+        "item": "decl_stmt: decl \u2022 ';'"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "';'",
+        "to": 63
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 38,
+    "items": [
+      {
+        "rule": 58,
+        "item": "decl: type_spec \u2022 var_list"
+      },
+      {
+        "rule": 68,
+        "item": "func_header: type_spec \u2022 ID '('"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 64
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "var_list",
+        "to": 65
+      },
+      {
+        "symbol": "var",
+        "to": 66
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 39,
+    "items": [
+      {
+        "rule": 11,
+        "item": "stmt: func_decl \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 11,
+      "lhs": "stmt"
+    }
+  },
+  {
+    "state": 40,
+    "items": [
+      {
+        "rule": 67,
+        "item": "func_decl: func_header \u2022 params ')' body"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "INT",
+        "to": 14
+      },
+      {
+        "symbol": "FLOAT",
+        "to": 15
+      },
+      {
+        "symbol": "CHAR",
+        "to": 16
+      },
+      {
+        "symbol": "STRING",
+        "to": 18
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "type_spec",
+        "to": 67
+      },
+      {
+        "symbol": "params",
+        "to": 68
+      },
+      {
+        "symbol": "param",
+        "to": 69
+      }
+    ],
+    "default": {
+      "action": "reduce",
+      "rule": 76,
+      "lhs": "params"
+    }
+  },
+  {
+    "state": 41,
+    "items": [
+      {
+        "rule": 18,
+        "item": "func_call_stmt: func_call \u2022 ';'"
+      },
+      {
+        "rule": 101,
+        "item": "expr: func_call \u2022"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "';'",
+        "to": 70
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "';'",
+        "rule": 101,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 101,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 42,
+    "items": [
+      {
+        "rule": 6,
+        "item": "stmt: expr_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 6,
+      "lhs": "stmt"
+    }
+  },
+  {
+    "state": 43,
+    "items": [
+      {
+        "rule": 78,
+        "item": "expr_stmt: expr \u2022 ';'"
+      },
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      },
+      {
+        "symbol": "EQ",
+        "to": 77
+      },
+      {
+        "symbol": "NEQ",
+        "to": 78
+      },
+      {
+        "symbol": "LEQ",
+        "to": 79
+      },
+      {
+        "symbol": "GEQ",
+        "to": 80
+      },
+      {
+        "symbol": "LT",
+        "to": 81
+      },
+      {
+        "symbol": "GT",
+        "to": 82
+      },
+      {
+        "symbol": "AND",
+        "to": 83
+      },
+      {
+        "symbol": "OR",
+        "to": 84
+      },
+      {
+        "symbol": "';'",
+        "to": 85
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 44,
+    "items": [
+      {
+        "rule": 20,
+        "item": "assgn_expr: ID ASSIGN \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 86
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 45,
+    "items": [
+      {
+        "rule": 70,
+        "item": "func_call: ID '(' \u2022 arg_list ')'"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "arg_list",
+        "to": 87
+      },
+      {
+        "symbol": "expr",
+        "to": 88
+      }
+    ],
+    "default": {
+      "action": "reduce",
+      "rule": 73,
+      "lhs": "arg_list"
+    }
+  },
+  {
+    "state": 46,
+    "items": [
+      {
+        "rule": 40,
+        "item": "cond_stmt: IF '(' \u2022 expr ')' if_enter body if_exit else_part"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 89
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 47,
+    "items": [
+      {
+        "rule": 46,
+        "item": "loop_stmt: WHILE '(' \u2022 expr ')' while_enter body"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 90
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 48,
+    "items": [
+      {
+        "rule": 47,
+        "item": "loop_stmt: FOR '(' \u2022 for_enter for_init ';' for_expr ';' for_expr ')' body"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "for_enter",
+        "to": 91
+      }
+    ],
+    "default": {
+      "action": "reduce",
+      "rule": 45,
+      "lhs": "for_enter"
+    }
+  },
+  {
+    "state": 49,
+    "items": [
+      {
+        "rule": 70,
+        "item": "func_call: ID \u2022 '(' arg_list ')'"
+      },
+      {
+        "rule": 97,
+        "item": "expr: ID \u2022"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "'('",
+        "to": 45
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 97,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 50,
+    "items": [
+      {
+        "rule": 17,
+        "item": "ret_stmt: RETURN ';' \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 17,
+      "lhs": "ret_stmt"
+    }
+  },
+  {
+    "state": 51,
+    "items": [
+      {
+        "rule": 101,
+        "item": "expr: func_call \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 101,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 52,
+    "items": [
+      {
+        "rule": 16,
+        "item": "ret_stmt: RETURN expr \u2022 ';'"
+      },
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      },
+      {
+        "symbol": "EQ",
+        "to": 77
+      },
+      {
+        "symbol": "NEQ",
+        "to": 78
+      },
+      {
+        "symbol": "LEQ",
+        "to": 79
+      },
+      {
+        "symbol": "GEQ",
+        "to": 80
+      },
+      {
+        "symbol": "LT",
+        "to": 81
+      },
+      {
+        "symbol": "GT",
+        "to": 82
+      },
+      {
+        "symbol": "AND",
+        "to": 83
+      },
+      {
+        "symbol": "OR",
+        "to": 84
+      },
+      {
+        "symbol": "';'",
+        "to": 92
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 53,
+    "items": [
+      {
+        "rule": 36,
+        "item": "break_stmt: BREAK ';' \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 36,
+      "lhs": "break_stmt"
+    }
+  },
+  {
+    "state": 54,
+    "items": [
+      {
+        "rule": 37,
+        "item": "continue_stmt: CONTINUE ';' \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 37,
+      "lhs": "continue_stmt"
+    }
+  },
+  {
+    "state": 55,
+    "items": [
+      {
+        "rule": 69,
+        "item": "func_header: VOID ID \u2022 '('"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "'('",
+        "to": 93
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 56,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 92,
+        "item": "| MINUS expr \u2022"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "INC",
+        "rule": 92,
+        "lhs": "expr"
+      },
+      {
+        "symbol": "DEC",
+        "rule": 92,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 92,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 57,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 93,
+        "item": "| INC expr \u2022"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "INC",
+        "rule": 93,
+        "lhs": "expr"
+      },
+      {
+        "symbol": "DEC",
+        "rule": 93,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 93,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 58,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 94,
+        "item": "| DEC expr \u2022"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "INC",
+        "rule": 94,
+        "lhs": "expr"
+      },
+      {
+        "symbol": "DEC",
+        "rule": 94,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 94,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 59,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 91,
+        "item": "| NOT expr \u2022"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "INC",
+        "rule": 91,
+        "lhs": "expr"
+      },
+      {
+        "symbol": "DEC",
+        "rule": 91,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 91,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 60,
+    "items": [
+      {
+        "rule": 22,
+        "item": "block_stmt: '{' block_stmt_enter \u2022 stmt_list '}'"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "stmt_list",
+        "to": 94
+      }
+    ],
+    "default": {
+      "action": "reduce",
+      "rule": 3,
+      "lhs": "stmt_list"
+    }
+  },
+  {
+    "state": 61,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      },
+      {
+        "rule": 102,
+        "item": "| '(' expr \u2022 ')'"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      },
+      {
+        "symbol": "EQ",
+        "to": 77
+      },
+      {
+        "symbol": "NEQ",
+        "to": 78
+      },
+      {
+        "symbol": "LEQ",
+        "to": 79
+      },
+      {
+        "symbol": "GEQ",
+        "to": 80
+      },
+      {
+        "symbol": "LT",
+        "to": 81
+      },
+      {
+        "symbol": "GT",
+        "to": 82
+      },
+      {
+        "symbol": "AND",
+        "to": 83
+      },
+      {
+        "symbol": "OR",
+        "to": 84
+      },
+      {
+        "symbol": "')'",
+        "to": 95
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 62,
+    "items": [
+      {
+        "rule": 19,
+        "item": "assgn_stmt: assgn_expr ';' \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 19,
+      "lhs": "assgn_stmt"
+    }
+  },
+  {
+    "state": 63,
+    "items": [
+      {
+        "rule": 57,
+        "item": "decl_stmt: decl ';' \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 57,
+      "lhs": "decl_stmt"
+    }
+  },
+  {
+    "state": 64,
+    "items": [
+      {
+        "rule": 65,
+        "item": "var: ID \u2022"
+      },
+      {
+        "rule": 66,
+        "item": "| ID \u2022 ASSIGN expr"
+      },
+      {
+        "rule": 68,
+        "item": "func_header: type_spec ID \u2022 '('"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ASSIGN",
+        "to": 96
+      },
+      {
+        "symbol": "'('",
+        "to": 97
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 65,
+      "lhs": "var"
+    }
+  },
+  {
+    "state": 65,
+    "items": [
+      {
+        "rule": 58,
+        "item": "decl: type_spec var_list \u2022"
+      },
+      {
+        "rule": 63,
+        "item": "var_list: var_list \u2022 ',' var"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "','",
+        "to": 98
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 58,
+      "lhs": "decl"
+    }
+  },
+  {
+    "state": 66,
+    "items": [
+      {
+        "rule": 64,
+        "item": "var_list: var \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 64,
+      "lhs": "var_list"
+    }
+  },
+  {
+    "state": 67,
+    "items": [
+      {
+        "rule": 77,
+        "item": "param: type_spec \u2022 ID"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 99
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 68,
+    "items": [
+      {
+        "rule": 67,
+        "item": "func_decl: func_header params \u2022 ')' body"
+      },
+      {
+        "rule": 74,
+        "item": "params: params \u2022 ',' param"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "')'",
+        "to": 100
+      },
+      {
+        "symbol": "','",
+        "to": 101
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 69,
+    "items": [
+      {
+        "rule": 75,
+        "item": "params: param \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 75,
+      "lhs": "params"
+    }
+  },
+  {
+    "state": 70,
+    "items": [
+      {
+        "rule": 18,
+        "item": "func_call_stmt: func_call ';' \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 18,
+      "lhs": "func_call_stmt"
+    }
+  },
+  {
+    "state": 71,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr PLUS \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 102
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 72,
+    "items": [
+      {
+        "rule": 80,
+        "item": "expr: expr MINUS \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 103
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 73,
+    "items": [
+      {
+        "rule": 81,
+        "item": "expr: expr MULT \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 104
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 74,
+    "items": [
+      {
+        "rule": 82,
+        "item": "expr: expr DIV \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 105
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 75,
+    "items": [
+      {
+        "rule": 95,
+        "item": "expr: expr INC \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 95,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 76,
+    "items": [
+      {
+        "rule": 96,
+        "item": "expr: expr DEC \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 96,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 77,
+    "items": [
+      {
+        "rule": 83,
+        "item": "expr: expr EQ \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 106
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 78,
+    "items": [
+      {
+        "rule": 84,
+        "item": "expr: expr NEQ \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 107
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 79,
+    "items": [
+      {
+        "rule": 87,
+        "item": "expr: expr LEQ \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 108
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 80,
+    "items": [
+      {
+        "rule": 88,
+        "item": "expr: expr GEQ \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 109
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 81,
+    "items": [
+      {
+        "rule": 85,
+        "item": "expr: expr LT \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 110
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 82,
+    "items": [
+      {
+        "rule": 86,
+        "item": "expr: expr GT \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 111
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 83,
+    "items": [
+      {
+        "rule": 89,
+        "item": "expr: expr AND \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 112
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 84,
+    "items": [
+      {
+        "rule": 90,
+        "item": "expr: expr OR \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 113
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 85,
+    "items": [
+      {
+        "rule": 78,
+        "item": "expr_stmt: expr ';' \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 78,
+      "lhs": "expr_stmt"
+    }
+  },
+  {
+    "state": 86,
+    "items": [
+      {
+        "rule": 20,
+        "item": "assgn_expr: ID ASSIGN expr \u2022"
+      },
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      },
+      {
+        "symbol": "EQ",
+        "to": 77
+      },
+      {
+        "symbol": "NEQ",
+        "to": 78
+      },
+      {
+        "symbol": "LEQ",
+        "to": 79
+      },
+      {
+        "symbol": "GEQ",
+        "to": 80
+      },
+      {
+        "symbol": "LT",
+        "to": 81
+      },
+      {
+        "symbol": "GT",
+        "to": 82
+      },
+      {
+        "symbol": "AND",
+        "to": 83
+      },
+      {
+        "symbol": "OR",
+        "to": 84
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 20,
+      "lhs": "assgn_expr"
+    }
+  },
+  {
+    "state": 87,
+    "items": [
+      {
+        "rule": 70,
+        "item": "func_call: ID '(' arg_list \u2022 ')'"
+      },
+      {
+        "rule": 71,
+        "item": "arg_list: arg_list \u2022 ',' expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "')'",
+        "to": 114
+      },
+      {
+        "symbol": "','",
+        "to": 115
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 88,
+    "items": [
+      {
+        "rule": 72,
+        "item": "arg_list: expr \u2022"
+      },
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      },
+      {
+        "symbol": "EQ",
+        "to": 77
+      },
+      {
+        "symbol": "NEQ",
+        "to": 78
+      },
+      {
+        "symbol": "LEQ",
+        "to": 79
+      },
+      {
+        "symbol": "GEQ",
+        "to": 80
+      },
+      {
+        "symbol": "LT",
+        "to": 81
+      },
+      {
+        "symbol": "GT",
+        "to": 82
+      },
+      {
+        "symbol": "AND",
+        "to": 83
+      },
+      {
+        "symbol": "OR",
+        "to": 84
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 72,
+      "lhs": "arg_list"
+    }
+  },
+  {
+    "state": 89,
+    "items": [
+      {
+        "rule": 40,
+        "item": "cond_stmt: IF '(' expr \u2022 ')' if_enter body if_exit else_part"
+      },
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      },
+      {
+        "symbol": "EQ",
+        "to": 77
+      },
+      {
+        "symbol": "NEQ",
+        "to": 78
+      },
+      {
+        "symbol": "LEQ",
+        "to": 79
+      },
+      {
+        "symbol": "GEQ",
+        "to": 80
+      },
+      {
+        "symbol": "LT",
+        "to": 81
+      },
+      {
+        "symbol": "GT",
+        "to": 82
+      },
+      {
+        "symbol": "AND",
+        "to": 83
+      },
+      {
+        "symbol": "OR",
+        "to": 84
+      },
+      {
+        "symbol": "')'",
+        "to": 116
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 90,
+    "items": [
+      {
+        "rule": 46,
+        "item": "loop_stmt: WHILE '(' expr \u2022 ')' while_enter body"
+      },
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      },
+      {
+        "symbol": "EQ",
+        "to": 77
+      },
+      {
+        "symbol": "NEQ",
+        "to": 78
+      },
+      {
+        "symbol": "LEQ",
+        "to": 79
+      },
+      {
+        "symbol": "GEQ",
+        "to": 80
+      },
+      {
+        "symbol": "LT",
+        "to": 81
+      },
+      {
+        "symbol": "GT",
+        "to": 82
+      },
+      {
+        "symbol": "AND",
+        "to": 83
+      },
+      {
+        "symbol": "OR",
+        "to": 84
+      },
+      {
+        "symbol": "')'",
+        "to": 117
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 91,
+    "items": [
+      {
+        "rule": 47,
+        "item": "loop_stmt: FOR '(' for_enter \u2022 for_init ';' for_expr ';' for_expr ')' body"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 4
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "INT",
+        "to": 14
+      },
+      {
+        "symbol": "FLOAT",
+        "to": 15
+      },
+      {
+        "symbol": "CHAR",
+        "to": 16
+      },
+      {
+        "symbol": "STRING",
+        "to": 18
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "assgn_expr",
+        "to": 118
+      },
+      {
+        "symbol": "for_init",
+        "to": 119
+      },
+      {
+        "symbol": "expr_list",
+        "to": 120
+      },
+      {
+        "symbol": "expr_list_item",
+        "to": 121
+      },
+      {
+        "symbol": "decl",
+        "to": 122
+      },
+      {
+        "symbol": "type_spec",
+        "to": 123
+      },
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 124
+      }
+    ],
+    "default": {
+      "action": "reduce",
+      "rule": 50,
+      "lhs": "for_init"
+    }
+  },
+  {
+    "state": 92,
+    "items": [
+      {
+        "rule": 16,
+        "item": "ret_stmt: RETURN expr ';' \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 16,
+      "lhs": "ret_stmt"
+    }
+  },
+  {
+    "state": 93,
+    "items": [
+      {
+        "rule": 69,
+        "item": "func_header: VOID ID '(' \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 69,
+      "lhs": "func_header"
+    }
+  },
+  {
+    "state": 94,
+    "items": [
+      {
+        "rule": 2,
+        "item": "stmt_list: stmt_list \u2022 stmt"
+      },
+      {
+        "rule": 22,
+        "item": "block_stmt: '{' block_stmt_enter stmt_list \u2022 '}'"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 4
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "IF",
+        "to": 8
+      },
+      {
+        "symbol": "WHILE",
+        "to": 9
+      },
+      {
+        "symbol": "FOR",
+        "to": 10
+      },
+      {
+        "symbol": "RETURN",
+        "to": 11
+      },
+      {
+        "symbol": "BREAK",
+        "to": 12
+      },
+      {
+        "symbol": "CONTINUE",
+        "to": 13
+      },
+      {
+        "symbol": "INT",
+        "to": 14
+      },
+      {
+        "symbol": "FLOAT",
+        "to": 15
+      },
+      {
+        "symbol": "CHAR",
+        "to": 16
+      },
+      {
+        "symbol": "VOID",
+        "to": 17
+      },
+      {
+        "symbol": "STRING",
+        "to": 18
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "';'",
+        "to": 23
+      },
+      {
+        "symbol": "'{'",
+        "to": 24
+      },
+      {
+        "symbol": "'}'",
+        "to": 125
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "stmt",
+        "to": 26
+      },
+      {
+        "symbol": "ret_stmt",
+        "to": 27
+      },
+      {
+        "symbol": "func_call_stmt",
+        "to": 28
+      },
+      {
+        "symbol": "assgn_stmt",
+        "to": 29
+      },
+      {
+        "symbol": "assgn_expr",
+        "to": 30
+      },
+      {
+        "symbol": "block_stmt",
+        "to": 31
+      },
+      {
+        "symbol": "break_stmt",
+        "to": 32
+      },
+      {
+        "symbol": "continue_stmt",
+        "to": 33
+      },
+      {
+        "symbol": "cond_stmt",
+        "to": 34
+      },
+      {
+        "symbol": "loop_stmt",
+        "to": 35
+      },
+      {
+        "symbol": "decl_stmt",
+        "to": 36
+      },
+      {
+        "symbol": "decl",
+        "to": 37
+      },
+      {
+        "symbol": "type_spec",
+        "to": 38
+      },
+      {
+        "symbol": "func_decl",
+        "to": 39
+      },
+      {
+        "symbol": "func_header",
+        "to": 40
+      },
+      {
+        "symbol": "func_call",
+        "to": 41
+      },
+      {
+        "symbol": "expr_stmt",
+        "to": 42
+      },
+      {
+        "symbol": "expr",
+        "to": 43
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 95,
+    "items": [
+      {
+        "rule": 102,
+        "item": "expr: '(' expr ')' \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 102,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 96,
+    "items": [
+      {
+        "rule": 66,
+        "item": "var: ID ASSIGN \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 126
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 97,
+    "items": [
+      {
+        "rule": 68,
+        "item": "func_header: type_spec ID '(' \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 68,
+      "lhs": "func_header"
+    }
+  },
+  {
+    "state": 98,
+    "items": [
+      {
+        "rule": 63,
+        "item": "var_list: var_list ',' \u2022 var"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 127
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "var",
+        "to": 128
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 99,
+    "items": [
+      {
+        "rule": 77,
+        "item": "param: type_spec ID \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 77,
+      "lhs": "param"
+    }
+  },
+  {
+    "state": 100,
+    "items": [
+      {
+        "rule": 67,
+        "item": "func_decl: func_header params ')' \u2022 body"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 4
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "IF",
+        "to": 8
+      },
+      {
+        "symbol": "WHILE",
+        "to": 9
+      },
+      {
+        "symbol": "FOR",
+        "to": 10
+      },
+      {
+        "symbol": "RETURN",
+        "to": 11
+      },
+      {
+        "symbol": "BREAK",
+        "to": 12
+      },
+      {
+        "symbol": "CONTINUE",
+        "to": 13
+      },
+      {
+        "symbol": "INT",
+        "to": 14
+      },
+      {
+        "symbol": "FLOAT",
+        "to": 15
+      },
+      {
+        "symbol": "CHAR",
+        "to": 16
+      },
+      {
+        "symbol": "VOID",
+        "to": 17
+      },
+      {
+        "symbol": "STRING",
+        "to": 18
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "';'",
+        "to": 129
+      },
+      {
+        "symbol": "'{'",
+        "to": 130
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "ret_stmt",
+        "to": 131
+      },
+      {
+        "symbol": "func_call_stmt",
+        "to": 132
+      },
+      {
+        "symbol": "assgn_stmt",
+        "to": 133
+      },
+      {
+        "symbol": "assgn_expr",
+        "to": 30
+      },
+      {
+        "symbol": "block_stmt_without_scope",
+        "to": 134
+      },
+      {
+        "symbol": "body",
+        "to": 135
+      },
+      {
+        "symbol": "break_stmt",
+        "to": 136
+      },
+      {
+        "symbol": "continue_stmt",
+        "to": 137
+      },
+      {
+        "symbol": "cond_stmt",
+        "to": 138
+      },
+      {
+        "symbol": "loop_stmt",
+        "to": 139
+      },
+      {
+        "symbol": "decl_stmt",
+        "to": 140
+      },
+      {
+        "symbol": "decl",
+        "to": 37
+      },
+      {
+        "symbol": "type_spec",
+        "to": 38
+      },
+      {
+        "symbol": "func_decl",
+        "to": 141
+      },
+      {
+        "symbol": "func_header",
+        "to": 40
+      },
+      {
+        "symbol": "func_call",
+        "to": 41
+      },
+      {
+        "symbol": "expr_stmt",
+        "to": 142
+      },
+      {
+        "symbol": "expr",
+        "to": 43
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 101,
+    "items": [
+      {
+        "rule": 74,
+        "item": "params: params ',' \u2022 param"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "INT",
+        "to": 14
+      },
+      {
+        "symbol": "FLOAT",
+        "to": 15
+      },
+      {
+        "symbol": "CHAR",
+        "to": 16
+      },
+      {
+        "symbol": "STRING",
+        "to": 18
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "type_spec",
+        "to": 67
+      },
+      {
+        "symbol": "param",
+        "to": 143
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 102,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 79,
+        "item": "| expr PLUS expr \u2022"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "INC",
+        "rule": 79,
+        "lhs": "expr"
+      },
+      {
+        "symbol": "DEC",
+        "rule": 79,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 79,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 103,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr MINUS expr \u2022"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "INC",
+        "rule": 80,
+        "lhs": "expr"
+      },
+      {
+        "symbol": "DEC",
+        "rule": 80,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 80,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 104,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr MULT expr \u2022"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "INC",
+        "rule": 81,
+        "lhs": "expr"
+      },
+      {
+        "symbol": "DEC",
+        "rule": 81,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 81,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 105,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr DIV expr \u2022"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "INC",
+        "rule": 82,
+        "lhs": "expr"
+      },
+      {
+        "symbol": "DEC",
+        "rule": 82,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 82,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 106,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr EQ expr \u2022"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      },
+      {
+        "symbol": "LEQ",
+        "to": 79
+      },
+      {
+        "symbol": "GEQ",
+        "to": 80
+      },
+      {
+        "symbol": "LT",
+        "to": 81
+      },
+      {
+        "symbol": "GT",
+        "to": 82
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "INC",
+        "rule": 83,
+        "lhs": "expr"
+      },
+      {
+        "symbol": "DEC",
+        "rule": 83,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 83,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 107,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr NEQ expr \u2022"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      },
+      {
+        "symbol": "LEQ",
+        "to": 79
+      },
+      {
+        "symbol": "GEQ",
+        "to": 80
+      },
+      {
+        "symbol": "LT",
+        "to": 81
+      },
+      {
+        "symbol": "GT",
+        "to": 82
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "INC",
+        "rule": 84,
+        "lhs": "expr"
+      },
+      {
+        "symbol": "DEC",
+        "rule": 84,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 84,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 108,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr LEQ expr \u2022"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "INC",
+        "rule": 87,
+        "lhs": "expr"
+      },
+      {
+        "symbol": "DEC",
+        "rule": 87,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 87,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 109,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr GEQ expr \u2022"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "INC",
+        "rule": 88,
+        "lhs": "expr"
+      },
+      {
+        "symbol": "DEC",
+        "rule": 88,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 88,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 110,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr LT expr \u2022"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "INC",
+        "rule": 85,
+        "lhs": "expr"
+      },
+      {
+        "symbol": "DEC",
+        "rule": 85,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 85,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 111,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr GT expr \u2022"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "INC",
+        "rule": 86,
+        "lhs": "expr"
+      },
+      {
+        "symbol": "DEC",
+        "rule": 86,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 86,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 112,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr AND expr \u2022"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      },
+      {
+        "symbol": "EQ",
+        "to": 77
+      },
+      {
+        "symbol": "NEQ",
+        "to": 78
+      },
+      {
+        "symbol": "LEQ",
+        "to": 79
+      },
+      {
+        "symbol": "GEQ",
+        "to": 80
+      },
+      {
+        "symbol": "LT",
+        "to": 81
+      },
+      {
+        "symbol": "GT",
+        "to": 82
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "INC",
+        "rule": 89,
+        "lhs": "expr"
+      },
+      {
+        "symbol": "DEC",
+        "rule": 89,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 89,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 113,
+    "items": [
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr OR expr \u2022"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      },
+      {
+        "symbol": "EQ",
+        "to": 77
+      },
+      {
+        "symbol": "NEQ",
+        "to": 78
+      },
+      {
+        "symbol": "LEQ",
+        "to": 79
+      },
+      {
+        "symbol": "GEQ",
+        "to": 80
+      },
+      {
+        "symbol": "LT",
+        "to": 81
+      },
+      {
+        "symbol": "GT",
+        "to": 82
+      },
+      {
+        "symbol": "AND",
+        "to": 83
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "INC",
+        "rule": 90,
+        "lhs": "expr"
+      },
+      {
+        "symbol": "DEC",
+        "rule": 90,
+        "lhs": "expr"
+      }
+    ],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 90,
+      "lhs": "expr"
+    }
+  },
+  {
+    "state": 114,
+    "items": [
+      {
+        "rule": 70,
+        "item": "func_call: ID '(' arg_list ')' \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 70,
+      "lhs": "func_call"
+    }
+  },
+  {
+    "state": 115,
+    "items": [
+      {
+        "rule": 71,
+        "item": "arg_list: arg_list ',' \u2022 expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 49
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 144
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 116,
+    "items": [
+      {
+        "rule": 40,
+        "item": "cond_stmt: IF '(' expr ')' \u2022 if_enter body if_exit else_part"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "if_enter",
+        "to": 145
+      }
+    ],
+    "default": {
+      "action": "reduce",
+      "rule": 38,
+      "lhs": "if_enter"
+    }
+  },
+  {
+    "state": 117,
+    "items": [
+      {
+        "rule": 46,
+        "item": "loop_stmt: WHILE '(' expr ')' \u2022 while_enter body"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "while_enter",
+        "to": 146
+      }
+    ],
+    "default": {
+      "action": "reduce",
+      "rule": 44,
+      "lhs": "while_enter"
+    }
+  },
+  {
+    "state": 118,
+    "items": [
+      {
+        "rule": 53,
+        "item": "expr_list_item: assgn_expr \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 53,
+      "lhs": "expr_list_item"
+    }
+  },
+  {
+    "state": 119,
+    "items": [
+      {
+        "rule": 47,
+        "item": "loop_stmt: FOR '(' for_enter for_init \u2022 ';' for_expr ';' for_expr ')' body"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "';'",
+        "to": 147
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 120,
+    "items": [
+      {
+        "rule": 49,
+        "item": "for_init: expr_list \u2022"
+      },
+      {
+        "rule": 51,
+        "item": "expr_list: expr_list \u2022 ',' expr_list_item"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "','",
+        "to": 148
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 49,
+      "lhs": "for_init"
+    }
+  },
+  {
+    "state": 121,
+    "items": [
+      {
+        "rule": 52,
+        "item": "expr_list: expr_list_item \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 52,
+      "lhs": "expr_list"
+    }
+  },
+  {
+    "state": 122,
+    "items": [
+      {
+        "rule": 48,
+        "item": "for_init: decl \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 48,
+      "lhs": "for_init"
+    }
+  },
+  {
+    "state": 123,
+    "items": [
+      {
+        "rule": 58,
+        "item": "decl: type_spec \u2022 var_list"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 127
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "var_list",
+        "to": 65
+      },
+      {
+        "symbol": "var",
+        "to": 66
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 124,
+    "items": [
+      {
+        "rule": 54,
+        "item": "expr_list_item: expr \u2022"
+      },
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      },
+      {
+        "symbol": "EQ",
+        "to": 77
+      },
+      {
+        "symbol": "NEQ",
+        "to": 78
+      },
+      {
+        "symbol": "LEQ",
+        "to": 79
+      },
+      {
+        "symbol": "GEQ",
+        "to": 80
+      },
+      {
+        "symbol": "LT",
+        "to": 81
+      },
+      {
+        "symbol": "GT",
+        "to": 82
+      },
+      {
+        "symbol": "AND",
+        "to": 83
+      },
+      {
+        "symbol": "OR",
+        "to": 84
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 54,
+      "lhs": "expr_list_item"
+    }
+  },
+  {
+    "state": 125,
+    "items": [
+      {
+        "rule": 22,
+        "item": "block_stmt: '{' block_stmt_enter stmt_list '}' \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 22,
+      "lhs": "block_stmt"
+    }
+  },
+  {
+    "state": 126,
+    "items": [
+      {
+        "rule": 66,
+        "item": "var: ID ASSIGN expr \u2022"
+      },
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      },
+      {
+        "symbol": "EQ",
+        "to": 77
+      },
+      {
+        "symbol": "NEQ",
+        "to": 78
+      },
+      {
+        "symbol": "LEQ",
+        "to": 79
+      },
+      {
+        "symbol": "GEQ",
+        "to": 80
+      },
+      {
+        "symbol": "LT",
+        "to": 81
+      },
+      {
+        "symbol": "GT",
+        "to": 82
+      },
+      {
+        "symbol": "AND",
+        "to": 83
+      },
+      {
+        "symbol": "OR",
+        "to": 84
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 66,
+      "lhs": "var"
+    }
+  },
+  {
+    "state": 127,
+    "items": [
+      {
+        "rule": 65,
+        "item": "var: ID \u2022"
+      },
+      {
+        "rule": 66,
+        "item": "| ID \u2022 ASSIGN expr"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ASSIGN",
+        "to": 96
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 65,
+      "lhs": "var"
+    }
+  },
+  {
+    "state": 128,
+    "items": [
+      {
+        "rule": 63,
+        "item": "var_list: var_list ',' var \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 63,
+      "lhs": "var_list"
+    }
+  },
+  {
+    "state": 129,
+    "items": [
+      {
+        "rule": 35,
+        "item": "body: ';' \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 35,
+      "lhs": "body"
+    }
+  },
+  {
+    "state": 130,
+    "items": [
+      {
+        "rule": 23,
+        "item": "block_stmt_without_scope: '{' \u2022 stmt_list '}'"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "stmt_list",
+        "to": 149
+      }
+    ],
+    "default": {
+      "action": "reduce",
+      "rule": 3,
+      "lhs": "stmt_list"
+    }
+  },
+  {
+    "state": 131,
+    "items": [
+      {
+        "rule": 30,
+        "item": "body: ret_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 30,
+      "lhs": "body"
+    }
+  },
+  {
+    "state": 132,
+    "items": [
+      {
+        "rule": 32,
+        "item": "body: func_call_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 32,
+      "lhs": "body"
+    }
+  },
+  {
+    "state": 133,
+    "items": [
+      {
+        "rule": 26,
+        "item": "body: assgn_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 26,
+      "lhs": "body"
+    }
+  },
+  {
+    "state": 134,
+    "items": [
+      {
+        "rule": 24,
+        "item": "body: block_stmt_without_scope \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 24,
+      "lhs": "body"
+    }
+  },
+  {
+    "state": 135,
+    "items": [
+      {
+        "rule": 67,
+        "item": "func_decl: func_header params ')' body \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 67,
+      "lhs": "func_decl"
+    }
+  },
+  {
+    "state": 136,
+    "items": [
+      {
+        "rule": 33,
+        "item": "body: break_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 33,
+      "lhs": "body"
+    }
+  },
+  {
+    "state": 137,
+    "items": [
+      {
+        "rule": 34,
+        "item": "body: continue_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 34,
+      "lhs": "body"
+    }
+  },
+  {
+    "state": 138,
+    "items": [
+      {
+        "rule": 28,
+        "item": "body: cond_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 28,
+      "lhs": "body"
+    }
+  },
+  {
+    "state": 139,
+    "items": [
+      {
+        "rule": 29,
+        "item": "body: loop_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 29,
+      "lhs": "body"
+    }
+  },
+  {
+    "state": 140,
+    "items": [
+      {
+        "rule": 25,
+        "item": "body: decl_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 25,
+      "lhs": "body"
+    }
+  },
+  {
+    "state": 141,
+    "items": [
+      {
+        "rule": 31,
+        "item": "body: func_decl \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 31,
+      "lhs": "body"
+    }
+  },
+  {
+    "state": 142,
+    "items": [
+      {
+        "rule": 27,
+        "item": "body: expr_stmt \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 27,
+      "lhs": "body"
+    }
+  },
+  {
+    "state": 143,
+    "items": [
+      {
+        "rule": 74,
+        "item": "params: params ',' param \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 74,
+      "lhs": "params"
+    }
+  },
+  {
+    "state": 144,
+    "items": [
+      {
+        "rule": 71,
+        "item": "arg_list: arg_list ',' expr \u2022"
+      },
+      {
+        "rule": 79,
+        "item": "expr: expr \u2022 PLUS expr"
+      },
+      {
+        "rule": 80,
+        "item": "| expr \u2022 MINUS expr"
+      },
+      {
+        "rule": 81,
+        "item": "| expr \u2022 MULT expr"
+      },
+      {
+        "rule": 82,
+        "item": "| expr \u2022 DIV expr"
+      },
+      {
+        "rule": 83,
+        "item": "| expr \u2022 EQ expr"
+      },
+      {
+        "rule": 84,
+        "item": "| expr \u2022 NEQ expr"
+      },
+      {
+        "rule": 85,
+        "item": "| expr \u2022 LT expr"
+      },
+      {
+        "rule": 86,
+        "item": "| expr \u2022 GT expr"
+      },
+      {
+        "rule": 87,
+        "item": "| expr \u2022 LEQ expr"
+      },
+      {
+        "rule": 88,
+        "item": "| expr \u2022 GEQ expr"
+      },
+      {
+        "rule": 89,
+        "item": "| expr \u2022 AND expr"
+      },
+      {
+        "rule": 90,
+        "item": "| expr \u2022 OR expr"
+      },
+      {
+        "rule": 95,
+        "item": "| expr \u2022 INC"
+      },
+      {
+        "rule": 96,
+        "item": "| expr \u2022 DEC"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "PLUS",
+        "to": 71
+      },
+      {
+        "symbol": "MINUS",
+        "to": 72
+      },
+      {
+        "symbol": "MULT",
+        "to": 73
+      },
+      {
+        "symbol": "DIV",
+        "to": 74
+      },
+      {
+        "symbol": "INC",
+        "to": 75
+      },
+      {
+        "symbol": "DEC",
+        "to": 76
+      },
+      {
+        "symbol": "EQ",
+        "to": 77
+      },
+      {
+        "symbol": "NEQ",
+        "to": 78
+      },
+      {
+        "symbol": "LEQ",
+        "to": 79
+      },
+      {
+        "symbol": "GEQ",
+        "to": 80
+      },
+      {
+        "symbol": "LT",
+        "to": 81
+      },
+      {
+        "symbol": "GT",
+        "to": 82
+      },
+      {
+        "symbol": "AND",
+        "to": 83
+      },
+      {
+        "symbol": "OR",
+        "to": 84
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 71,
+      "lhs": "arg_list"
+    }
+  },
+  {
+    "state": 145,
+    "items": [
+      {
+        "rule": 40,
+        "item": "cond_stmt: IF '(' expr ')' if_enter \u2022 body if_exit else_part"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 4
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "IF",
+        "to": 8
+      },
+      {
+        "symbol": "WHILE",
+        "to": 9
+      },
+      {
+        "symbol": "FOR",
+        "to": 10
+      },
+      {
+        "symbol": "RETURN",
+        "to": 11
+      },
+      {
+        "symbol": "BREAK",
+        "to": 12
+      },
+      {
+        "symbol": "CONTINUE",
+        "to": 13
+      },
+      {
+        "symbol": "INT",
+        "to": 14
+      },
+      {
+        "symbol": "FLOAT",
+        "to": 15
+      },
+      {
+        "symbol": "CHAR",
+        "to": 16
+      },
+      {
+        "symbol": "VOID",
+        "to": 17
+      },
+      {
+        "symbol": "STRING",
+        "to": 18
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "';'",
+        "to": 129
+      },
+      {
+        "symbol": "'{'",
+        "to": 130
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "ret_stmt",
+        "to": 131
+      },
+      {
+        "symbol": "func_call_stmt",
+        "to": 132
+      },
+      {
+        "symbol": "assgn_stmt",
+        "to": 133
+      },
+      {
+        "symbol": "assgn_expr",
+        "to": 30
+      },
+      {
+        "symbol": "block_stmt_without_scope",
+        "to": 134
+      },
+      {
+        "symbol": "body",
+        "to": 150
+      },
+      {
+        "symbol": "break_stmt",
+        "to": 136
+      },
+      {
+        "symbol": "continue_stmt",
+        "to": 137
+      },
+      {
+        "symbol": "cond_stmt",
+        "to": 138
+      },
+      {
+        "symbol": "loop_stmt",
+        "to": 139
+      },
+      {
+        "symbol": "decl_stmt",
+        "to": 140
+      },
+      {
+        "symbol": "decl",
+        "to": 37
+      },
+      {
+        "symbol": "type_spec",
+        "to": 38
+      },
+      {
+        "symbol": "func_decl",
+        "to": 141
+      },
+      {
+        "symbol": "func_header",
+        "to": 40
+      },
+      {
+        "symbol": "func_call",
+        "to": 41
+      },
+      {
+        "symbol": "expr_stmt",
+        "to": 142
+      },
+      {
+        "symbol": "expr",
+        "to": 43
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 146,
+    "items": [
+      {
+        "rule": 46,
+        "item": "loop_stmt: WHILE '(' expr ')' while_enter \u2022 body"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 4
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "IF",
+        "to": 8
+      },
+      {
+        "symbol": "WHILE",
+        "to": 9
+      },
+      {
+        "symbol": "FOR",
+        "to": 10
+      },
+      {
+        "symbol": "RETURN",
+        "to": 11
+      },
+      {
+        "symbol": "BREAK",
+        "to": 12
+      },
+      {
+        "symbol": "CONTINUE",
+        "to": 13
+      },
+      {
+        "symbol": "INT",
+        "to": 14
+      },
+      {
+        "symbol": "FLOAT",
+        "to": 15
+      },
+      {
+        "symbol": "CHAR",
+        "to": 16
+      },
+      {
+        "symbol": "VOID",
+        "to": 17
+      },
+      {
+        "symbol": "STRING",
+        "to": 18
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "';'",
+        "to": 129
+      },
+      {
+        "symbol": "'{'",
+        "to": 130
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "ret_stmt",
+        "to": 131
+      },
+      {
+        "symbol": "func_call_stmt",
+        "to": 132
+      },
+      {
+        "symbol": "assgn_stmt",
+        "to": 133
+      },
+      {
+        "symbol": "assgn_expr",
+        "to": 30
+      },
+      {
+        "symbol": "block_stmt_without_scope",
+        "to": 134
+      },
+      {
+        "symbol": "body",
+        "to": 151
+      },
+      {
+        "symbol": "break_stmt",
+        "to": 136
+      },
+      {
+        "symbol": "continue_stmt",
+        "to": 137
+      },
+      {
+        "symbol": "cond_stmt",
+        "to": 138
+      },
+      {
+        "symbol": "loop_stmt",
+        "to": 139
+      },
+      {
+        "symbol": "decl_stmt",
+        "to": 140
+      },
+      {
+        "symbol": "decl",
+        "to": 37
+      },
+      {
+        "symbol": "type_spec",
+        "to": 38
+      },
+      {
+        "symbol": "func_decl",
+        "to": 141
+      },
+      {
+        "symbol": "func_header",
+        "to": 40
+      },
+      {
+        "symbol": "func_call",
+        "to": 41
+      },
+      {
+        "symbol": "expr_stmt",
+        "to": 142
+      },
+      {
+        "symbol": "expr",
+        "to": 43
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 147,
+    "items": [
+      {
+        "rule": 47,
+        "item": "loop_stmt: FOR '(' for_enter for_init ';' \u2022 for_expr ';' for_expr ')' body"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 4
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "assgn_expr",
+        "to": 118
+      },
+      {
+        "symbol": "expr_list",
+        "to": 152
+      },
+      {
+        "symbol": "expr_list_item",
+        "to": 121
+      },
+      {
+        "symbol": "for_expr",
+        "to": 153
+      },
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 124
+      }
+    ],
+    "default": {
+      "action": "reduce",
+      "rule": 56,
+      "lhs": "for_expr"
+    }
+  },
+  {
+    "state": 148,
+    "items": [
+      {
+        "rule": 51,
+        "item": "expr_list: expr_list ',' \u2022 expr_list_item"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 4
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "assgn_expr",
+        "to": 118
+      },
+      {
+        "symbol": "expr_list_item",
+        "to": 154
+      },
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 124
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 149,
+    "items": [
+      {
+        "rule": 2,
+        "item": "stmt_list: stmt_list \u2022 stmt"
+      },
+      {
+        "rule": 23,
+        "item": "block_stmt_without_scope: '{' stmt_list \u2022 '}'"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 4
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "IF",
+        "to": 8
+      },
+      {
+        "symbol": "WHILE",
+        "to": 9
+      },
+      {
+        "symbol": "FOR",
+        "to": 10
+      },
+      {
+        "symbol": "RETURN",
+        "to": 11
+      },
+      {
+        "symbol": "BREAK",
+        "to": 12
+      },
+      {
+        "symbol": "CONTINUE",
+        "to": 13
+      },
+      {
+        "symbol": "INT",
+        "to": 14
+      },
+      {
+        "symbol": "FLOAT",
+        "to": 15
+      },
+      {
+        "symbol": "CHAR",
+        "to": 16
+      },
+      {
+        "symbol": "VOID",
+        "to": 17
+      },
+      {
+        "symbol": "STRING",
+        "to": 18
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "';'",
+        "to": 23
+      },
+      {
+        "symbol": "'{'",
+        "to": 24
+      },
+      {
+        "symbol": "'}'",
+        "to": 155
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "stmt",
+        "to": 26
+      },
+      {
+        "symbol": "ret_stmt",
+        "to": 27
+      },
+      {
+        "symbol": "func_call_stmt",
+        "to": 28
+      },
+      {
+        "symbol": "assgn_stmt",
+        "to": 29
+      },
+      {
+        "symbol": "assgn_expr",
+        "to": 30
+      },
+      {
+        "symbol": "block_stmt",
+        "to": 31
+      },
+      {
+        "symbol": "break_stmt",
+        "to": 32
+      },
+      {
+        "symbol": "continue_stmt",
+        "to": 33
+      },
+      {
+        "symbol": "cond_stmt",
+        "to": 34
+      },
+      {
+        "symbol": "loop_stmt",
+        "to": 35
+      },
+      {
+        "symbol": "decl_stmt",
+        "to": 36
+      },
+      {
+        "symbol": "decl",
+        "to": 37
+      },
+      {
+        "symbol": "type_spec",
+        "to": 38
+      },
+      {
+        "symbol": "func_decl",
+        "to": 39
+      },
+      {
+        "symbol": "func_header",
+        "to": 40
+      },
+      {
+        "symbol": "func_call",
+        "to": 41
+      },
+      {
+        "symbol": "expr_stmt",
+        "to": 42
+      },
+      {
+        "symbol": "expr",
+        "to": 43
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 150,
+    "items": [
+      {
+        "rule": 40,
+        "item": "cond_stmt: IF '(' expr ')' if_enter body \u2022 if_exit else_part"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "if_exit",
+        "to": 156
+      }
+    ],
+    "default": {
+      "action": "reduce",
+      "rule": 39,
+      "lhs": "if_exit"
+    }
+  },
+  {
+    "state": 151,
+    "items": [
+      {
+        "rule": 46,
+        "item": "loop_stmt: WHILE '(' expr ')' while_enter body \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 46,
+      "lhs": "loop_stmt"
+    }
+  },
+  {
+    "state": 152,
+    "items": [
+      {
+        "rule": 51,
+        "item": "expr_list: expr_list \u2022 ',' expr_list_item"
+      },
+      {
+        "rule": 55,
+        "item": "for_expr: expr_list \u2022"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "','",
+        "to": 148
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 55,
+      "lhs": "for_expr"
+    }
+  },
+  {
+    "state": 153,
+    "items": [
+      {
+        "rule": 47,
+        "item": "loop_stmt: FOR '(' for_enter for_init ';' for_expr \u2022 ';' for_expr ')' body"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "';'",
+        "to": 157
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 154,
+    "items": [
+      {
+        "rule": 51,
+        "item": "expr_list: expr_list ',' expr_list_item \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 51,
+      "lhs": "expr_list"
+    }
+  },
+  {
+    "state": 155,
+    "items": [
+      {
+        "rule": 23,
+        "item": "block_stmt_without_scope: '{' stmt_list '}' \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 23,
+      "lhs": "block_stmt_without_scope"
+    }
+  },
+  {
+    "state": 156,
+    "items": [
+      {
+        "rule": 40,
+        "item": "cond_stmt: IF '(' expr ')' if_enter body if_exit \u2022 else_part"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ELSE",
+        "to": 158
+      }
+    ],
+    "reduces": [
+      {
+        "symbol": "ELSE",
+        "rule": 43,
+        "lhs": "else_part"
+      }
+    ],
+    "gotos": [
+      {
+        "symbol": "else_part",
+        "to": 159
+      }
+    ],
+    "default": {
+      "action": "reduce",
+      "rule": 43,
+      "lhs": "else_part"
+    }
+  },
+  {
+    "state": 157,
+    "items": [
+      {
+        "rule": 47,
+        "item": "loop_stmt: FOR '(' for_enter for_init ';' for_expr ';' \u2022 for_expr ')' body"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 4
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "assgn_expr",
+        "to": 118
+      },
+      {
+        "symbol": "expr_list",
+        "to": 152
+      },
+      {
+        "symbol": "expr_list_item",
+        "to": 121
+      },
+      {
+        "symbol": "for_expr",
+        "to": 160
+      },
+      {
+        "symbol": "func_call",
+        "to": 51
+      },
+      {
+        "symbol": "expr",
+        "to": 124
+      }
+    ],
+    "default": {
+      "action": "reduce",
+      "rule": 56,
+      "lhs": "for_expr"
+    }
+  },
+  {
+    "state": 158,
+    "items": [
+      {
+        "rule": 42,
+        "item": "else_part: ELSE \u2022 else_enter body"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "else_enter",
+        "to": 161
+      }
+    ],
+    "default": {
+      "action": "reduce",
+      "rule": 41,
+      "lhs": "else_enter"
+    }
+  },
+  {
+    "state": 159,
+    "items": [
+      {
+        "rule": 40,
+        "item": "cond_stmt: IF '(' expr ')' if_enter body if_exit else_part \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 40,
+      "lhs": "cond_stmt"
+    }
+  },
+  {
+    "state": 160,
+    "items": [
+      {
+        "rule": 47,
+        "item": "loop_stmt: FOR '(' for_enter for_init ';' for_expr ';' for_expr \u2022 ')' body"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "')'",
+        "to": 162
+      }
+    ],
+    "reduces": [],
+    "gotos": [],
+    "default": null
+  },
+  {
+    "state": 161,
+    "items": [
+      {
+        "rule": 42,
+        "item": "else_part: ELSE else_enter \u2022 body"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 4
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "IF",
+        "to": 8
+      },
+      {
+        "symbol": "WHILE",
+        "to": 9
+      },
+      {
+        "symbol": "FOR",
+        "to": 10
+      },
+      {
+        "symbol": "RETURN",
+        "to": 11
+      },
+      {
+        "symbol": "BREAK",
+        "to": 12
+      },
+      {
+        "symbol": "CONTINUE",
+        "to": 13
+      },
+      {
+        "symbol": "INT",
+        "to": 14
+      },
+      {
+        "symbol": "FLOAT",
+        "to": 15
+      },
+      {
+        "symbol": "CHAR",
+        "to": 16
+      },
+      {
+        "symbol": "VOID",
+        "to": 17
+      },
+      {
+        "symbol": "STRING",
+        "to": 18
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "';'",
+        "to": 129
+      },
+      {
+        "symbol": "'{'",
+        "to": 130
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "ret_stmt",
+        "to": 131
+      },
+      {
+        "symbol": "func_call_stmt",
+        "to": 132
+      },
+      {
+        "symbol": "assgn_stmt",
+        "to": 133
+      },
+      {
+        "symbol": "assgn_expr",
+        "to": 30
+      },
+      {
+        "symbol": "block_stmt_without_scope",
+        "to": 134
+      },
+      {
+        "symbol": "body",
+        "to": 163
+      },
+      {
+        "symbol": "break_stmt",
+        "to": 136
+      },
+      {
+        "symbol": "continue_stmt",
+        "to": 137
+      },
+      {
+        "symbol": "cond_stmt",
+        "to": 138
+      },
+      {
+        "symbol": "loop_stmt",
+        "to": 139
+      },
+      {
+        "symbol": "decl_stmt",
+        "to": 140
+      },
+      {
+        "symbol": "decl",
+        "to": 37
+      },
+      {
+        "symbol": "type_spec",
+        "to": 38
+      },
+      {
+        "symbol": "func_decl",
+        "to": 141
+      },
+      {
+        "symbol": "func_header",
+        "to": 40
+      },
+      {
+        "symbol": "func_call",
+        "to": 41
+      },
+      {
+        "symbol": "expr_stmt",
+        "to": 142
+      },
+      {
+        "symbol": "expr",
+        "to": 43
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 162,
+    "items": [
+      {
+        "rule": 47,
+        "item": "loop_stmt: FOR '(' for_enter for_init ';' for_expr ';' for_expr ')' \u2022 body"
+      }
+    ],
+    "shifts": [
+      {
+        "symbol": "ID",
+        "to": 4
+      },
+      {
+        "symbol": "STR_LITERAL",
+        "to": 5
+      },
+      {
+        "symbol": "INT_LITERAL",
+        "to": 6
+      },
+      {
+        "symbol": "CHAR_LITERAL",
+        "to": 7
+      },
+      {
+        "symbol": "IF",
+        "to": 8
+      },
+      {
+        "symbol": "WHILE",
+        "to": 9
+      },
+      {
+        "symbol": "FOR",
+        "to": 10
+      },
+      {
+        "symbol": "RETURN",
+        "to": 11
+      },
+      {
+        "symbol": "BREAK",
+        "to": 12
+      },
+      {
+        "symbol": "CONTINUE",
+        "to": 13
+      },
+      {
+        "symbol": "INT",
+        "to": 14
+      },
+      {
+        "symbol": "FLOAT",
+        "to": 15
+      },
+      {
+        "symbol": "CHAR",
+        "to": 16
+      },
+      {
+        "symbol": "VOID",
+        "to": 17
+      },
+      {
+        "symbol": "STRING",
+        "to": 18
+      },
+      {
+        "symbol": "MINUS",
+        "to": 19
+      },
+      {
+        "symbol": "INC",
+        "to": 20
+      },
+      {
+        "symbol": "DEC",
+        "to": 21
+      },
+      {
+        "symbol": "NOT",
+        "to": 22
+      },
+      {
+        "symbol": "';'",
+        "to": 129
+      },
+      {
+        "symbol": "'{'",
+        "to": 130
+      },
+      {
+        "symbol": "'('",
+        "to": 25
+      }
+    ],
+    "reduces": [],
+    "gotos": [
+      {
+        "symbol": "ret_stmt",
+        "to": 131
+      },
+      {
+        "symbol": "func_call_stmt",
+        "to": 132
+      },
+      {
+        "symbol": "assgn_stmt",
+        "to": 133
+      },
+      {
+        "symbol": "assgn_expr",
+        "to": 30
+      },
+      {
+        "symbol": "block_stmt_without_scope",
+        "to": 134
+      },
+      {
+        "symbol": "body",
+        "to": 164
+      },
+      {
+        "symbol": "break_stmt",
+        "to": 136
+      },
+      {
+        "symbol": "continue_stmt",
+        "to": 137
+      },
+      {
+        "symbol": "cond_stmt",
+        "to": 138
+      },
+      {
+        "symbol": "loop_stmt",
+        "to": 139
+      },
+      {
+        "symbol": "decl_stmt",
+        "to": 140
+      },
+      {
+        "symbol": "decl",
+        "to": 37
+      },
+      {
+        "symbol": "type_spec",
+        "to": 38
+      },
+      {
+        "symbol": "func_decl",
+        "to": 141
+      },
+      {
+        "symbol": "func_header",
+        "to": 40
+      },
+      {
+        "symbol": "func_call",
+        "to": 41
+      },
+      {
+        "symbol": "expr_stmt",
+        "to": 142
+      },
+      {
+        "symbol": "expr",
+        "to": 43
+      }
+    ],
+    "default": null
+  },
+  {
+    "state": 163,
+    "items": [
+      {
+        "rule": 42,
+        "item": "else_part: ELSE else_enter body \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 42,
+      "lhs": "else_part"
+    }
+  },
+  {
+    "state": 164,
+    "items": [
+      {
+        "rule": 47,
+        "item": "loop_stmt: FOR '(' for_enter for_init ';' for_expr ';' for_expr ')' body \u2022"
+      }
+    ],
+    "shifts": [],
+    "reduces": [],
+    "gotos": [],
+    "default": {
+      "action": "reduce",
+      "rule": 47,
+      "lhs": "loop_stmt"
+    }
+  }
+]

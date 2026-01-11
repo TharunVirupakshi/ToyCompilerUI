@@ -7,6 +7,7 @@ export type StepType =
   | "PARSE_ASSGN_SYM_TYPE"
   | "PARSE_ENTER_SCOPE"
   | "PARSE_CREATE_AST_NODE"
+  | "PARSE_STACK_SNAPSHOT"
   | "PARSE_EXIT_SCOPE";
 
 export interface ParseCreateScopeData {
@@ -18,14 +19,17 @@ export interface ParseCreateScopeData {
 export type NumericValue = number | string;
 
 export interface ParseReduceRuleData {
-  ruleId: NumericValue;
-  subRuleId: NumericValue;
+  ruleNo: NumericValue;
   rule: string;
 }
 
+export interface ParseStackSnapshot {
+  states: number[];
+  size: number;
+}
+
 export interface ParseSemanticStepData {
-  ruleId: NumericValue;
-  subRuleId: NumericValue;
+  ruleNo: NumericValue;
   stepNo: NumericValue;
   instr: string;
 }
@@ -69,6 +73,7 @@ export type ParseStepData =
   | ParseAddSymData
   | ParseAssgnSymType
   | ParseCreateASTNodeData
+  | ParseStackSnapshot
   | ParseEnterExitScopeData;
 
 export interface Step {
@@ -86,7 +91,6 @@ export interface StepsData {
 }
 
 export type ActiveRule = {
-  ruleId?: number;
-  subRuleId?: number;
+  ruleNo: number;
 };
 

@@ -68,10 +68,9 @@ export default function EditorWindow({
   useEffect(() => {
     if (!onActiveRuleChange) return;
     if (currentStep && currentStep.type === "PARSE_REDUCE_RULE") {
-      const { ruleId, subRuleId } = currentStep.data as ParseReduceRuleData;
+      const { ruleNo } = currentStep.data as ParseReduceRuleData;
       onActiveRuleChange({
-        ruleId: Number(ruleId),
-        subRuleId: Number(subRuleId),
+        ruleNo: Number(ruleNo)
       });
     }
   }, [currentStep, onActiveRuleChange]);
@@ -95,8 +94,8 @@ export default function EditorWindow({
       }
   
       case "PARSE_REDUCE_RULE": {
-        const { ruleId, subRuleId, rule } = step.data as ParseReduceRuleData;
-        return `REDUCE: ${rule} [${ruleId}.${subRuleId}]`;
+        const { ruleNo, rule } = step.data as ParseReduceRuleData;
+        return `REDUCE: ${rule} [${ruleNo}]`;
       }
   
       case "PARSE_SEMANTIC_STEP": {
