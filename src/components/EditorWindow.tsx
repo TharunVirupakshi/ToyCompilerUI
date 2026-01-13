@@ -8,6 +8,7 @@ import type {
   ParseCreateASTNodeData,
   ParseCreateScopeData,
   ParseEnterExitScopeData,
+  ParseEnteringState,
   ParseReduceRuleData,
   ParseSemanticStepData,
   Step,
@@ -130,6 +131,11 @@ export default function EditorWindow({
       case "PARSE_ASSGN_SYM_TYPE": {
         const d = step.data as ParseAssgnSymType;
         return `TYPE ASSIGN: ${d.name} ← ${d.sym_type}`;
+      }
+
+      case "PARSE_ENTERING_STATE": {
+        const d = step.data as ParseEnteringState;
+        return `ENTERING STATE: ${d.state}` 
       }
   
       default:

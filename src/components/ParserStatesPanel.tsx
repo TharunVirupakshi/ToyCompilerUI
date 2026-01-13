@@ -2,14 +2,32 @@ import { FC, useEffect, useMemo, useRef } from "react";
 import type { ParserState } from "../types/states";
 
 interface ParserStatesPanelProps {
-  states: ParserState[];
-  /** LR state stack from PARSE_STACK_SNAPSHOT */
-  stateStack?: number[] | null;
-}
+    states: ParserState[];
+  
+    /** From PARSE_STACK_SNAPSHOT */
+    stateStack: number[];
+  
+    /** Parallel symbol stack */
+    symbolStack: string[];
+  
+    /** Lookahead terminal (from lexer / parser) */
+    lookahead?: string | null;
+  
+    /** Reduce visualization */
+    reduceCount?: number;      // RHS length
+
+    highlightReduce: boolean;
+  }
+  
 
 const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
   states,
-  stateStack = null,
+  stateStack = [],
+  symbolStack = [],
+  reduceCount,
+  lookahead,
+  highlightReduce = false
+  
 }) => {
   const activeRef = useRef<HTMLDivElement | null>(null);
 
@@ -39,33 +57,34 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
       </div>
 
       {/* 🔒 Sticky Stack Bar */}
-      <div className="sticky top-0 z-10 bg-neutral-900 border-b border-neutral-700 px-2 py-1">
-        <div className="flex items-center gap-2 text-xs overflow-x-auto">
-          <span className="text-gray-400 select-none">Stack:</span>
+      <div className="sticky top-0 z-10 bg-neutral-900 border-b border-neutral-700 px-2 py-2 space-y-1">
+        {/* State Stack */}
+        <StackRow
+          label="States"
+          items={stateStack}
+          highlightCount={reduceCount}
+          highlightReduce={highlightReduce}
+        />
 
-          {stateStack && stateStack.length > 0 ? (
-            stateStack.map((st, idx) => {
-              const isTop = idx === stateStack.length - 1;
-              return (
-                <div
-                  key={`${st}-${idx}`}
-                  className={`
-                    px-2 py-[2px] rounded-sm border
-                    whitespace-nowrap
-                    ${
-                      isTop
-                        ? "border-neutral-300 bg-neutral-700 text-gray-100"
-                        : "border-neutral-700 bg-neutral-800 text-gray-400"
-                    }
-                  `}
-                >
-                  {st}
-                </div>
-              );
-            })
-          ) : (
-            <span className="text-gray-500">—</span>
-          )}
+        <div className="flex">
+          {/* Symbol Stack */}
+          <div className="flex-1">
+            <StackRow
+              label="Symbols"
+              items={symbolStack}
+              highlightCount={reduceCount}
+              highlightReduce={highlightReduce}
+            />
+          </div>
+          {/* Lookahead */}
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-gray-400">Lookahead:</span>
+            {lookahead && (
+              <span className="px-2 py-[2px] bg-neutral-800 border border-neutral-700 rounded-sm">
+                {lookahead}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
@@ -88,9 +107,7 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
               `}
             >
               {/* State label */}
-              <div className="text-xs text-gray-400 mb-2">
-                State {st.state}
-              </div>
+              <div className="text-xs text-gray-400 mb-2">State {st.state}</div>
 
               {/* Items */}
               <div className="space-y-[2px]">
@@ -103,9 +120,7 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
               </div>
 
               {/* Actions table */}
-              {(st.shifts.length > 0 ||
-                st.gotos.length > 0 ||
-                st.default) && (
+              {(st.shifts.length > 0 || st.gotos.length > 0 || st.default) && (
                 <div className="mt-3 text-xs">
                   <table className="w-full border-collapse">
                     <thead>
@@ -163,3 +178,49 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
 };
 
 export default ParserStatesPanel;
+
+
+interface StackRowProps {
+    label: string;
+    items: (string | number)[];
+    highlightCount?: number;
+    highlightReduce: boolean
+  }
+  
+  const StackRow: FC<StackRowProps> = ({
+    label,
+    items,
+    highlightCount = 0,
+    highlightReduce = false
+  }) => {
+    const startHighlight = items.length - highlightCount;
+  
+    return (
+      <div className="flex items-center gap-2 text-xs overflow-x-auto">
+        <span className="text-gray-400 w-14">{label}:</span>
+  
+        {items.map((item, idx) => {
+          const isHighlighted = idx >= startHighlight && highlightReduce;
+          const isTop = idx == items.length - 1;
+  
+          return (
+            <div
+              key={`${label}-${idx}`}
+              className={`
+                px-2 py-[2px] rounded-sm border whitespace-nowrap
+                
+                ${
+                  isHighlighted
+                    ? "border-red-600 bg-red-400 text-gray-100"
+                    : isTop ? "border-blue-600 bg-blue-400 text-gray-100" : "border-neutral-700 bg-neutral-800 text-gray-400"
+                }
+              `}
+            >
+              {item}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+  

@@ -7,11 +7,12 @@ import SymbolTablesPane from "./components/SymbolTablesPane";
 import StepTimeline from "./components/StepTimeline";
 import InsightsPanel from "./components/InsightsPanel";
 import { sampleStepsData, sampleAstJson, sampleStatesJson } from "./data";
-import type { ActiveRule, ParseCreateASTNodeData, Step, StepsData, ParseSemanticStepData, ParseStackSnapshot } from "./types/steps";
+import type { ActiveRule, ParseCreateASTNodeData, Step, StepsData, ParseSemanticStepData, ParseStackSnapshot, ParseReduceRuleData, LexReadTokenData, ParseReduceRuleCompleteData } from "./types/steps";
 import { deriveSymbolTableState } from "./utils/symbolTables";
 import ASTPane from "./components/ASTPane";
 import type { ASTPaneHandle } from "./components/ASTPane";
 import ParserStatesPanel from "./components/ParserStatesPanel";
+import { topMost } from "vis-util/esnext";
 
 function App() {
   const [stepsData, setStepsData] = useState<StepsData>(sampleStepsData);
@@ -22,65 +23,118 @@ function App() {
   const [showSemanticRules, setShowSemanticRules] = useState<boolean>(false);
   const [activeSemanticStep, setActiveSemanticStep] = useState<ParseSemanticStepData | null>(null);
   const [parseStatesStack, setParseStatesStack] = useState<number[]>([]); 
+  const [symbolsStack, setSymbolsStack] = useState<string[]>([]);
+  const [reduceCount, setReduceCount] = useState<number>(0);
+  const [reduceLhs, setReduceLhs] = useState<string | null>(null);
+  const [lookahead, setLookahead] = useState<string | null>(null);
+  const [highlightReduce, setHighlightReduce] = useState<boolean>(false);
 
 
   const steps = useMemo(() => stepsData.phases[0]?.steps ?? [], [stepsData]);
   const astRef = useRef<ASTPaneHandle>(null);
 
+  function rhsLength(ruleText: string): number {
+    // "var → ID ASSIGN expr"
+    const rhs = ruleText.split("→")[1]?.trim();
+    if (!rhs || rhs === "ε") return 0;
+    return rhs.split(/\s+/).length;
+  }
+
   const isSemanticStep = (step: Step | undefined) =>
     step?.type === "PARSE_SEMANTIC_STEP";
 
-    useEffect(() => {
-      if (currentStepIndex < 0 || steps.length === 0) return;
-    
-      let idx = currentStepIndex;
-    
-      // 🔁 Skip semantic steps if disabled
-      if (!showSemanticRules) {
-        while (idx < steps.length && isSemanticStep(steps[idx])) {
-          idx++;
-        }
-      }
-    
-      // 🚨 Clamp
-      if (idx >= steps.length) {
-        idx = steps.length - 1;
-      }
-    
-      // 🔄 Update index ONCE and EXIT
-      if (idx !== currentStepIndex) {
-        setCurrentStepIndex(idx);
-        return; // 🔑 critical
-      }
-    
-      const step = steps[idx];
-      if (!step) return;
-    
-      // 🔥 Semantic highlighting
-      if (showSemanticRules && isSemanticStep(step)) {
-        const data = step.data as ParseSemanticStepData
-        // console.log("Set semantic step ", data.instr)
-        setActiveSemanticStep(data);
-      } 
-    
-      // 🌳 AST node handling
-      if (step.type === "PARSE_CREATE_AST_NODE") {
-        const nodeId = Number(
-          (step.data as ParseCreateASTNodeData)?.node_id
-        );
-        console.log("Enabling node: ", nodeId)
-        if (!Number.isNaN(nodeId)) {
-          astRef.current?.enableNode(nodeId);
-        }
-      }
+  useEffect(() => {
+    if (currentStepIndex < 0 || steps.length === 0) return;
 
-      if (step.type == "PARSE_STACK_SNAPSHOT") {
-        const statesStack = (step.data as ParseStackSnapshot)?.states
-        setParseStatesStack(statesStack)
+    let idx = currentStepIndex;
+
+    // 🔁 Skip semantic steps if disabled
+    if (!showSemanticRules) {
+      while (idx < steps.length && isSemanticStep(steps[idx])) {
+        idx++;
       }
-    }, [steps, currentStepIndex, showSemanticRules]);
-    
-  
+    }
+
+    // 🚨 Clamp
+    if (idx >= steps.length) {
+      idx = steps.length - 1;
+    }
+
+    // 🔄 Update index ONCE and EXIT
+    if (idx !== currentStepIndex) {
+      setCurrentStepIndex(idx);
+      return; // 🔑 critical
+    }
+
+    const step = steps[idx];
+    if (!step) return;
+
+    // 🔥 Semantic highlighting
+    if (showSemanticRules && isSemanticStep(step)) {
+      const data = step.data as ParseSemanticStepData;
+      // console.log("Set semantic step ", data.instr)
+      setActiveSemanticStep(data);
+    }
+
+    // 🌳 AST node handling
+    if (step.type === "PARSE_CREATE_AST_NODE") {
+      const nodeId = Number((step.data as ParseCreateASTNodeData)?.node_id);
+      console.log("Enabling node: ", nodeId);
+      if (!Number.isNaN(nodeId)) {
+        astRef.current?.enableNode(nodeId);
+      }
+    }
+
+    if (step.type === "LEX_READ_TOKEN") {
+      const { token, value } = (step.data as LexReadTokenData);
+      switch(token) {
+        case "KEYWORD":
+        case "READ_CHARACTER": 
+        case "OPERATOR": setLookahead(value); break;
+        case "ID":
+        case "INT_LITERAL": 
+        case "STR_LITERAL":
+        case "CHAR_LITERAL": setLookahead(`${token}(${value})`)
+        
+
+      }
+    }
+
+    if (step.type === "PARSE_REDUCE_RULE") {
+      const data = step.data as ParseReduceRuleData;
+      setReduceCount(rhsLength(data.rule));
+      console.log("rhsLength: ", rhsLength(data.rule));
+      setReduceLhs(data.rule.split("→")[0].trim());
+      setHighlightReduce(true);
+    }
+
+    if (step.type == "PARSE_REDUCE_RULE_COMPLETE") {
+      setReduceCount(0);
+      setHighlightReduce(false);
+      const data = step.data as ParseReduceRuleCompleteData;
+      setParseStatesStack(prev => {
+        const next = prev.slice(0, prev.length - Number(data.rhsLength));
+        return next;
+      })
+      setSymbolsStack(prev => [...prev, data.lhs]);
+    }
+
+    if (step.type === "PARSE_STACK_SNAPSHOT") {
+      const snapshot = step.data as ParseStackSnapshot;
+      const statesStack = snapshot.states.map(Number);
+
+      setParseStatesStack(statesStack);
+
+      if (lookahead) {
+        setSymbolsStack((prev) => [...prev, lookahead]);
+        setLookahead(null);
+      }
+    }
+  }, [steps, currentStepIndex, showSemanticRules]);
+
+  // useEffect(() => {
+  //   console.log("Is Highlight: ", highlightReduce);
+  // }, [highlightReduce])
 
   const symbolTables = useMemo(() => {
     if (currentStepIndex < 0) {
@@ -88,31 +142,33 @@ function App() {
     }
     return deriveSymbolTableState(steps, currentStepIndex);
   }, [steps, currentStepIndex]);
-  
 
-  const handleFileUpload = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    file
-      .text()
-      .then((text) => {
-        const parsed = JSON.parse(text) as StepsData;
-        if (!parsed?.phases?.length) {
-          throw new Error("Unexpected log format");
-        }
-        setStepsData(parsed);
-        setCurrentStepIndex(0);
-        setActiveRule(null);
-        setLogLabel(file.name);
-        setLoadError(null);
-      })
-      .catch(() => {
-        setLoadError("Could not parse the selected log file.");
-      })
-      .finally(() => {
-        event.target.value = "";
-      });
-  }, []);
+  const handleFileUpload = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      file
+        .text()
+        .then((text) => {
+          const parsed = JSON.parse(text) as StepsData;
+          if (!parsed?.phases?.length) {
+            throw new Error("Unexpected log format");
+          }
+          setStepsData(parsed);
+          setCurrentStepIndex(0);
+          setActiveRule(null);
+          setLogLabel(file.name);
+          setLoadError(null);
+        })
+        .catch(() => {
+          setLoadError("Could not parse the selected log file.");
+        })
+        .finally(() => {
+          event.target.value = "";
+        });
+    },
+    []
+  );
 
   const handleUseSample = useCallback(() => {
     setStepsData(sampleStepsData);
@@ -177,6 +233,10 @@ function App() {
             <ParserStatesPanel
               states={sampleStatesJson}
               stateStack={parseStatesStack}
+              symbolStack={symbolsStack}
+              lookahead={lookahead}
+              reduceCount={reduceCount}
+              highlightReduce={highlightReduce}
             />
           }
           topLeft={
