@@ -12,7 +12,8 @@ import { deriveSymbolTableState } from "./utils/symbolTables";
 import ASTPane from "./components/ASTPane";
 import type { ASTPaneHandle } from "./components/ASTPane";
 import ParserStatesPanel from "./components/ParserStatesPanel";
-import { topMost } from "vis-util/esnext";
+import type { SymbolData } from "./components/ParserStatesPanel";
+
 
 function App() {
   const [stepsData, setStepsData] = useState<StepsData>(sampleStepsData);
@@ -23,11 +24,12 @@ function App() {
   const [showSemanticRules, setShowSemanticRules] = useState<boolean>(false);
   const [activeSemanticStep, setActiveSemanticStep] = useState<ParseSemanticStepData | null>(null);
   const [parseStatesStack, setParseStatesStack] = useState<number[]>([]); 
-  const [symbolsStack, setSymbolsStack] = useState<string[]>([]);
+  const [symbolsStack, setSymbolsStack] = useState<SymbolData[]>([]);
   const [reduceCount, setReduceCount] = useState<number>(0);
   const [reduceLhs, setReduceLhs] = useState<string | null>(null);
-  const [lookahead, setLookahead] = useState<string | null>(null);
+  const [lookahead, setLookahead] = useState<SymbolData | null>(null);
   const [highlightReduce, setHighlightReduce] = useState<boolean>(false);
+  const [highlightReduceComplete, setHighlightReduceComplete] = useState<boolean>(false);
 
 
   const steps = useMemo(() => stepsData.phases[0]?.steps ?? [], [stepsData]);
@@ -90,13 +92,11 @@ function App() {
       switch(token) {
         case "KEYWORD":
         case "READ_CHARACTER": 
-        case "OPERATOR": setLookahead(value); break;
+        case "OPERATOR": setLookahead({displayValue: value, value: value}); break;
         case "ID":
         case "INT_LITERAL": 
         case "STR_LITERAL":
-        case "CHAR_LITERAL": setLookahead(`${token}(${value})`)
-        
-
+        case "CHAR_LITERAL": setLookahead({displayValue: `${token}(${value})`, value: token})
       }
     }
 
@@ -111,18 +111,20 @@ function App() {
     if (step.type == "PARSE_REDUCE_RULE_COMPLETE") {
       setReduceCount(0);
       setHighlightReduce(false);
+      setHighlightReduceComplete(true);
       const data = step.data as ParseReduceRuleCompleteData;
       setParseStatesStack(prev => {
         const next = prev.slice(0, prev.length - Number(data.rhsLength));
         return next;
       })
-      setSymbolsStack(prev => [...prev, data.lhs]);
+      setSymbolsStack(prev => [...prev, {displayValue: data.lhs, value: data.lhs}]);
     }
 
     if (step.type === "PARSE_STACK_SNAPSHOT") {
       const snapshot = step.data as ParseStackSnapshot;
       const statesStack = snapshot.states.map(Number);
 
+      if (highlightReduceComplete) setHighlightReduceComplete(false)
       setParseStatesStack(statesStack);
 
       if (lookahead) {
@@ -132,9 +134,10 @@ function App() {
     }
   }, [steps, currentStepIndex, showSemanticRules]);
 
-  // useEffect(() => {
-  //   console.log("Is Highlight: ", highlightReduce);
-  // }, [highlightReduce])
+  useEffect(() => {
+    // console.log("Is Highlight: ", highlightReduce);
+    console.log("Is Reduce Complete: ", highlightReduceComplete)
+  }, [highlightReduceComplete])
 
   const symbolTables = useMemo(() => {
     if (currentStepIndex < 0) {
@@ -237,6 +240,7 @@ function App() {
               lookahead={lookahead}
               reduceCount={reduceCount}
               highlightReduce={highlightReduce}
+              highlightReduceComplete={highlightReduceComplete}
             />
           }
           topLeft={

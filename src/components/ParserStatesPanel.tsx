@@ -1,24 +1,29 @@
 import { FC, useEffect, useMemo, useRef } from "react";
 import type { ParserState } from "../types/states";
 
+export type SymbolData = {
+  displayValue: string,
+  value: string
+}
 interface ParserStatesPanelProps {
-    states: ParserState[];
-  
-    /** From PARSE_STACK_SNAPSHOT */
-    stateStack: number[];
-  
-    /** Parallel symbol stack */
-    symbolStack: string[];
-  
-    /** Lookahead terminal (from lexer / parser) */
-    lookahead?: string | null;
-  
-    /** Reduce visualization */
-    reduceCount?: number;      // RHS length
+  states: ParserState[];
 
-    highlightReduce: boolean;
-  }
-  
+  /** From PARSE_STACK_SNAPSHOT */
+  stateStack: number[];
+
+  /** Parallel symbol stack */
+  symbolStack: SymbolData[];
+
+  /** Lookahead terminal (from lexer / parser) */
+  lookahead?: SymbolData | null;
+
+  /** Reduce visualization */
+  reduceCount?: number; // RHS length
+
+  highlightReduce: boolean;
+
+  highlightReduceComplete: boolean;
+}
 
 const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
   states,
@@ -26,8 +31,8 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
   symbolStack = [],
   reduceCount,
   lookahead,
-  highlightReduce = false
-  
+  highlightReduce = false,
+  highlightReduceComplete = false
 }) => {
   const activeRef = useRef<HTMLDivElement | null>(null);
 
@@ -37,6 +42,11 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
     return stateStack[stateStack.length - 1];
   }, [stateStack]);
 
+  const topSymbol = useMemo(() => {
+    if (!symbolStack.length) return null;
+    return symbolStack[symbolStack.length - 1];
+  }, [symbolStack]);
+
   useEffect(() => {
     if (activeRef.current) {
       activeRef.current.scrollIntoView({
@@ -44,7 +54,25 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
         block: "center",
       });
     }
-  }, [activeState]);
+  }, [activeState, lookahead]);
+
+  const shouldHighlightSymbolRow = (symbol: string, isActive: boolean) => {
+    if (!isActive) return false;
+
+    if (lookahead) {
+      return symbol === lookahead.value;
+    }
+
+    if (highlightReduce || highlightReduceComplete) {
+      return symbol === topSymbol?.value;
+    } 
+
+    return false;
+  };
+
+  const shouldHighlightDefault = (isActive: boolean, isAlreadyHighlighted: boolean) => {
+    return isActive && (highlightReduce && !lookahead) || !isAlreadyHighlighted;
+  };
 
   return (
     <div className="h-full flex flex-col font-mono text-sm text-gray-200">
@@ -71,7 +99,7 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
           <div className="flex-1">
             <StackRow
               label="Symbols"
-              items={symbolStack}
+              items={symbolStack.map(item => item.value)}
               highlightCount={reduceCount}
               highlightReduce={highlightReduce}
             />
@@ -81,7 +109,7 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
             <span className="text-gray-400">Lookahead:</span>
             {lookahead && (
               <span className="px-2 py-[2px] bg-neutral-800 border border-neutral-700 rounded-sm">
-                {lookahead}
+                {lookahead.displayValue}
               </span>
             )}
           </div>
@@ -92,7 +120,7 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
       <div className="mt-2 space-y-2 overflow-y-auto px-2 flex-1">
         {states.map((st) => {
           const isActive = st.state === activeState;
-
+          var isAlreadyHighlighted = false;
           return (
             <div
               key={st.state}
@@ -138,24 +166,52 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
                     </thead>
 
                     <tbody className="text-gray-300">
-                      {st.shifts.map((s, idx) => (
-                        <tr key={`shift-${idx}`}>
-                          <td className="px-2 py-1">{s.symbol}</td>
-                          <td className="px-2 py-1">shift</td>
-                          <td className="px-2 py-1">{s.to}</td>
-                        </tr>
-                      ))}
+                      {st.shifts.map((s, idx) => {
+                        const highlight = shouldHighlightSymbolRow(
+                          s.symbol,
+                          isActive
+                        );
+                        if (highlight) isAlreadyHighlighted = true
 
-                      {st.gotos.map((g, idx) => (
-                        <tr key={`goto-${idx}`}>
-                          <td className="px-2 py-1">{g.symbol}</td>
-                          <td className="px-2 py-1">-</td>
-                          <td className="px-2 py-1">{g.to}</td>
-                        </tr>
-                      ))}
+                        return (
+                          <tr
+                            key={`shift-${idx}`}
+                            className={highlight ? "bg-neutral-700" : ""}
+                          >
+                            <td className="px-2 py-1">{s.symbol}</td>
+                            <td className="px-2 py-1">shift</td>
+                            <td className="px-2 py-1">{s.to}</td>
+                          </tr>
+                        );
+                      })}
+
+                      {st.gotos.map((g, idx) => {
+                        const highlight = shouldHighlightSymbolRow(
+                          g.symbol,
+                          isActive
+                        );
+                        if (highlight) isAlreadyHighlighted = true
+
+                        return (
+                          <tr
+                            key={`goto-${idx}`}
+                            className={highlight ? "bg-neutral-700" : ""}
+                          >
+                            <td className="px-2 py-1">{g.symbol}</td>
+                            <td className="px-2 py-1">-</td>
+                            <td className="px-2 py-1">{g.to}</td>
+                          </tr>
+                        );
+                      })}
 
                       {st.default && (
-                        <tr>
+                        <tr
+                          className={
+                            shouldHighlightDefault(isActive, isAlreadyHighlighted)
+                              ? "bg-neutral-700"
+                              : ""
+                          }
+                        >
                           <td className="px-2 py-1">$default</td>
                           <td className="px-2 py-1">
                             {st.default.action === "reduce"
@@ -179,48 +235,48 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
 
 export default ParserStatesPanel;
 
-
 interface StackRowProps {
-    label: string;
-    items: (string | number)[];
-    highlightCount?: number;
-    highlightReduce: boolean
-  }
-  
-  const StackRow: FC<StackRowProps> = ({
-    label,
-    items,
-    highlightCount = 0,
-    highlightReduce = false
-  }) => {
-    const startHighlight = items.length - highlightCount;
-  
-    return (
-      <div className="flex items-center gap-2 text-xs overflow-x-auto">
-        <span className="text-gray-400 w-14">{label}:</span>
-  
-        {items.map((item, idx) => {
-          const isHighlighted = idx >= startHighlight && highlightReduce;
-          const isTop = idx == items.length - 1;
-  
-          return (
-            <div
-              key={`${label}-${idx}`}
-              className={`
+  label: string;
+  items: (string | number)[];
+  highlightCount?: number;
+  highlightReduce: boolean;
+}
+
+const StackRow: FC<StackRowProps> = ({
+  label,
+  items,
+  highlightCount = 0,
+  highlightReduce = false,
+}) => {
+  const startHighlight = items.length - highlightCount;
+
+  return (
+    <div className="flex items-center gap-2 text-xs overflow-x-auto">
+      <span className="text-gray-400 w-14">{label}:</span>
+
+      {items.map((item, idx) => {
+        const isHighlighted = idx >= startHighlight && highlightReduce;
+        const isTop = idx == items.length - 1;
+
+        return (
+          <div
+            key={`${label}-${idx}`}
+            className={`
                 px-2 py-[2px] rounded-sm border whitespace-nowrap
                 
                 ${
                   isHighlighted
                     ? "border-red-600 bg-red-400 text-gray-100"
-                    : isTop ? "border-blue-600 bg-blue-400 text-gray-100" : "border-neutral-700 bg-neutral-800 text-gray-400"
+                    : isTop
+                    ? "border-blue-600 bg-blue-400 text-gray-100"
+                    : "border-neutral-700 bg-neutral-800 text-gray-400"
                 }
               `}
-            >
-              {item}
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-  
+          >
+            {item}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
