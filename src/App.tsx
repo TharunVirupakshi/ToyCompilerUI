@@ -90,8 +90,8 @@ function App() {
     if (step.type === "LEX_READ_TOKEN") {
       const { token, value } = (step.data as LexReadTokenData);
       switch(token) {
+        case "READ_CHARACTER": setLookahead({displayValue: value, value: `'${value}'`}); break;
         case "KEYWORD":
-        case "READ_CHARACTER": 
         case "OPERATOR": setLookahead({displayValue: value, value: value}); break;
         case "ID":
         case "INT_LITERAL": 
@@ -117,17 +117,26 @@ function App() {
         const next = prev.slice(0, prev.length - Number(data.rhsLength));
         return next;
       })
-      setSymbolsStack(prev => [...prev, {displayValue: data.lhs, value: data.lhs}]);
+      setSymbolsStack(prev => {
+        const next = prev.slice(0, prev.length - Number(data.rhsLength));
+        next.push({displayValue: data.lhs, value: data.lhs})
+        return next;
+      });
     }
 
     if (step.type === "PARSE_STACK_SNAPSHOT") {
       const snapshot = step.data as ParseStackSnapshot;
       const statesStack = snapshot.states.map(Number);
 
-      if (highlightReduceComplete) setHighlightReduceComplete(false)
       setParseStatesStack(statesStack);
+      if (highlightReduceComplete) {
+        setHighlightReduceComplete(false)
+        return;
+      } 
 
-      if (lookahead) {
+      // Shift only if no reduce is in progress
+      if (lookahead && !highlightReduceComplete) {
+        console.log("Shifted :", lookahead)
         setSymbolsStack((prev) => [...prev, lookahead]);
         setLookahead(null);
       }
@@ -138,6 +147,12 @@ function App() {
     // console.log("Is Highlight: ", highlightReduce);
     console.log("Is Reduce Complete: ", highlightReduceComplete)
   }, [highlightReduceComplete])
+
+  useEffect(() => {
+    // console.log("Is Highlight: ", highlightReduce);
+    console.log("Is Reduce : ", highlightReduce)
+  }, [highlightReduce]) 
+
 
   const symbolTables = useMemo(() => {
     if (currentStepIndex < 0) {

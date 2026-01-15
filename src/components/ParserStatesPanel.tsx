@@ -2,9 +2,9 @@ import { FC, useEffect, useMemo, useRef } from "react";
 import type { ParserState } from "../types/states";
 
 export type SymbolData = {
-  displayValue: string,
-  value: string
-}
+  displayValue: string;
+  value: string;
+};
 interface ParserStatesPanelProps {
   states: ParserState[];
 
@@ -32,47 +32,101 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
   reduceCount,
   lookahead,
   highlightReduce = false,
-  highlightReduceComplete = false
+  highlightReduceComplete = false,
 }) => {
   const activeRef = useRef<HTMLDivElement | null>(null);
 
   /** Top of LR stack = active state */
   const activeState = useMemo(() => {
-    if (!stateStack || stateStack.length === 0) return null;
-    return stateStack[stateStack.length - 1];
-  }, [stateStack]);
+      if (!stateStack || stateStack.length === 0) return null;
+      return stateStack[stateStack.length - 1];
+    }, [stateStack]);
 
-  const topSymbol = useMemo(() => {
-    if (!symbolStack.length) return null;
-    return symbolStack[symbolStack.length - 1];
-  }, [symbolStack]);
+    const topSymbol = useMemo(() => {
+      if (!symbolStack.length) return null;
+      return symbolStack[symbolStack.length - 1];
+    }, [symbolStack]);
 
-  useEffect(() => {
-    if (activeRef.current) {
-      activeRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-  }, [activeState, lookahead]);
+    const highlightedAction: {
+      state: number;
+      kind: "shift" | "goto" | "default" | null;
+      index?: number;
+    } | null = useMemo(() => {
+      console.log("Active state: ", activeState)
+      if (activeState == null) return null;
 
-  const shouldHighlightSymbolRow = (symbol: string, isActive: boolean) => {
-    if (!isActive) return false;
+      const state = states.find((s) => s.state === activeState);
+      console.log("State info: ", state)
+      if (!state) return null;
 
-    if (lookahead) {
-      return symbol === lookahead.value;
-    }
+      /* 🔴 REDUCE IN PROGRESS */
+      if (highlightReduce || highlightReduceComplete) {
+        if (topSymbol) {
+          const gotoIdx = state.gotos.findIndex((g) => g.symbol === topSymbol.value);
 
-    if (highlightReduce || highlightReduceComplete) {
-      return symbol === topSymbol?.value;
-    } 
+          if (gotoIdx !== -1) {
+            console.log("GOTO action")
+            return {
+              state: activeState,
+              kind: "goto",
+              index: gotoIdx,
+            };
+          }
+        }
 
-    return false;
-  };
+        console.log("DEFAULT action after Reduce")
+        // fallback → default reduce
+        return {
+          state: activeState,
+          kind: "default",
+        };
+      }
 
-  const shouldHighlightDefault = (isActive: boolean, isAlreadyHighlighted: boolean) => {
-    return isActive && (highlightReduce && !lookahead) || !isAlreadyHighlighted;
-  };
+      /* 🟢 NORMAL SHIFT MODE */
+      if (lookahead) {
+        const shiftIdx = state.shifts.findIndex(
+          (s) => s.symbol === lookahead.value
+        );
+
+        if (shiftIdx !== -1) {
+          console.log("SHIFT action")
+          return {
+            state: activeState,
+            kind: "shift",
+            index: shiftIdx,
+          };
+        }
+      }
+
+      /* ⚪ DEFAULT */
+      if (state.default) {
+        console.log("DEFAULT action")
+        return {
+          state: activeState,
+          kind: "default",
+        };
+      }
+
+      console.log("Retruning NULL")
+      return null;
+    }, [
+      activeState,
+      topSymbol,
+      states,
+      symbolStack,
+      lookahead,
+      highlightReduce,
+      highlightReduceComplete,
+    ]);
+
+    useEffect(() => {
+      if (activeRef.current) {
+        activeRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    }, [activeState]);
 
   return (
     <div className="h-full flex flex-col font-mono text-sm text-gray-200">
@@ -99,7 +153,7 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
           <div className="flex-1">
             <StackRow
               label="Symbols"
-              items={symbolStack.map(item => item.value)}
+              items={symbolStack.map((item) => item.value)}
               highlightCount={reduceCount}
               highlightReduce={highlightReduce}
             />
@@ -166,17 +220,18 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
                     </thead>
 
                     <tbody className="text-gray-300">
+                      {/* SHIFTS */}
                       {st.shifts.map((s, idx) => {
-                        const highlight = shouldHighlightSymbolRow(
-                          s.symbol,
-                          isActive
-                        );
-                        if (highlight) isAlreadyHighlighted = true
+                        const isHighlighted =
+                          isActive &&
+                          highlightedAction?.kind === "shift" &&
+                          highlightedAction.state === st.state &&
+                          highlightedAction.index === idx;
 
                         return (
                           <tr
                             key={`shift-${idx}`}
-                            className={highlight ? "bg-neutral-700" : ""}
+                            className={isHighlighted ? "bg-neutral-700" : ""}
                           >
                             <td className="px-2 py-1">{s.symbol}</td>
                             <td className="px-2 py-1">shift</td>
@@ -185,17 +240,18 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
                         );
                       })}
 
+                      {/* GOTOS */}
                       {st.gotos.map((g, idx) => {
-                        const highlight = shouldHighlightSymbolRow(
-                          g.symbol,
-                          isActive
-                        );
-                        if (highlight) isAlreadyHighlighted = true
+                        const isHighlighted =
+                          isActive &&
+                          highlightedAction?.kind === "goto" &&
+                          highlightedAction.state === st.state &&
+                          highlightedAction.index === idx;
 
                         return (
                           <tr
                             key={`goto-${idx}`}
-                            className={highlight ? "bg-neutral-700" : ""}
+                            className={isHighlighted ? "bg-neutral-700" : ""}
                           >
                             <td className="px-2 py-1">{g.symbol}</td>
                             <td className="px-2 py-1">-</td>
@@ -204,10 +260,13 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
                         );
                       })}
 
+                      {/* DEFAULT */}
                       {st.default && (
                         <tr
                           className={
-                            shouldHighlightDefault(isActive, isAlreadyHighlighted)
+                            isActive &&
+                            highlightedAction?.kind === "default" &&
+                            highlightedAction.state === st.state
                               ? "bg-neutral-700"
                               : ""
                           }
@@ -249,21 +308,34 @@ const StackRow: FC<StackRowProps> = ({
   highlightReduce = false,
 }) => {
   const startHighlight = items.length - highlightCount;
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  /* 🔁 Always keep stack scrolled to the right */
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+    }
+  }, [items.length]);
 
   return (
-    <div className="flex items-center gap-2 text-xs overflow-x-auto">
-      <span className="text-gray-400 w-14">{label}:</span>
+    <div className="flex items-center gap-2 text-xs">
+      {/* Label */}
+      <span className="text-gray-400 w-14 shrink-0">{label}:</span>
 
-      {items.map((item, idx) => {
-        const isHighlighted = idx >= startHighlight && highlightReduce;
-        const isTop = idx == items.length - 1;
+      {/* Scroll container */}
+      <div
+        ref={scrollRef}
+        className="flex gap-1 overflow-x-auto scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-neutral-900"
+      >
+        {items.map((item, idx) => {
+          const isHighlighted = idx >= startHighlight && highlightReduce;
+          const isTop = idx === items.length - 1;
 
-        return (
-          <div
-            key={`${label}-${idx}`}
-            className={`
-                px-2 py-[2px] rounded-sm border whitespace-nowrap
-                
+          return (
+            <div
+              key={`${label}-${idx}`}
+              className={`
+                px-2 py-[2px] rounded-sm border whitespace-nowrap shrink-0
                 ${
                   isHighlighted
                     ? "border-red-600 bg-red-400 text-gray-100"
@@ -272,11 +344,12 @@ const StackRow: FC<StackRowProps> = ({
                     : "border-neutral-700 bg-neutral-800 text-gray-400"
                 }
               `}
-          >
-            {item}
-          </div>
-        );
-      })}
+            >
+              {item}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
