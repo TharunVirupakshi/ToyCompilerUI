@@ -87,6 +87,9 @@ export default function EditorWindow({
     return lexStep.location;
   }, [lexStep]);
 
+  const stepSummary = currentStep ? getStepSummary(currentStep) : "—";
+  const isEnteringStateSummary = stepSummary.startsWith("ENTERING STATE");
+
   function getStepSummary(step: Step): string {
     switch (step.type) {
       case "LEX_READ_TOKEN": {
@@ -152,8 +155,12 @@ export default function EditorWindow({
             STEP {currentStepIndex + 1}/{steps.length || 1}
           </span>
           <span>•</span>
-          <span className="truncate max-w-[600px] text-gray-300">
-          {currentStep ? getStepSummary(currentStep) : "—"}
+          <span
+            className={`truncate max-w-[600px] text-gray-300 ${
+              isEnteringStateSummary ? "animate-[pulse_0.8s_ease-in-out_infinite]" : ""
+            }`}
+          >
+          {stepSummary}
           </span>
         </div>
         <div className="flex items-center gap-1.5">

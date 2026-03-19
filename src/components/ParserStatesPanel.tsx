@@ -1,4 +1,5 @@
-import { FC, useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import type { FC } from "react";
 import type { ParserState } from "../types/states";
 
 export type SymbolData = {
@@ -338,9 +339,9 @@ const StackRow: FC<StackRowProps> = ({
                 px-2 py-[2px] rounded-sm border whitespace-nowrap shrink-0
                 ${
                   isHighlighted
-                    ? "border-red-600 bg-red-400 text-gray-100"
+                    ? "border-red-600 bg-red-400 text-gray-100 animate-[pulse_0.8s_ease-in-out_infinite]"
                     : isTop
-                    ? "border-blue-600 bg-blue-400 text-gray-100"
+                    ? "border-blue-600 bg-blue-400 text-gray-100 animate-[pulse_0.45s_ease-out_2]"
                     : "border-neutral-700 bg-neutral-800 text-gray-400"
                 }
               `}
