@@ -12,6 +12,18 @@ export type StepType =
   | "PARSE_STACK_SNAPSHOT"
   | "PARSE_EXIT_SCOPE";
 
+export type PhaseName = "PHASE_LEX_PARSE" | "PHASE_SEMANTIC";
+
+export const PHASE_ORDER: PhaseName[] = ["PHASE_LEX_PARSE", "PHASE_SEMANTIC"];
+
+export const PHASE_LABELS: Record<PhaseName, string> = {
+  PHASE_LEX_PARSE: "LEX PARSE",
+  PHASE_SEMANTIC: "SEMANTIC",
+};
+
+export const isKnownPhaseName = (phaseName: string): phaseName is PhaseName =>
+  PHASE_ORDER.includes(phaseName as PhaseName);
+
 export interface ParseCreateScopeData {
   table_id: string;
   name: string;
@@ -107,4 +119,3 @@ export interface StepsData {
 export type ActiveRule = {
   ruleNo: number;
 };
-

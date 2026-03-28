@@ -1,4 +1,5 @@
-import { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent } from "react";
 import "./App.css";
 import EditorWindow from "./components/EditorWindow";
 import GrammarPanel from "./components/GrammarPanel";
@@ -7,7 +8,22 @@ import SymbolTablesPane from "./components/SymbolTablesPane";
 import StepTimeline from "./components/StepTimeline";
 import InsightsPanel from "./components/InsightsPanel";
 import { sampleStepsData, sampleAstJson, sampleStatesJson } from "./data";
-import type { ActiveRule, ParseCreateASTNodeData, Step, StepsData, ParseSemanticStepData, ParseStackSnapshot, ParseReduceRuleData, LexReadTokenData, ParseReduceRuleCompleteData } from "./types/steps";
+import {
+  PHASE_LABELS,
+  PHASE_ORDER,
+  isKnownPhaseName,
+} from "./types/steps";
+import type {
+  ActiveRule,
+  ParseCreateASTNodeData,
+  Step,
+  StepsData,
+  ParseSemanticStepData,
+  ParseStackSnapshot,
+  ParseReduceRuleData,
+  LexReadTokenData,
+  ParseReduceRuleCompleteData,
+} from "./types/steps";
 import { deriveSymbolTableState } from "./utils/symbolTables";
 import ASTPane from "./components/ASTPane";
 import type { ASTPaneHandle } from "./components/ASTPane";
@@ -17,6 +33,7 @@ import type { SymbolData } from "./components/ParserStatesPanel";
 
 function App() {
   const [stepsData, setStepsData] = useState<StepsData>(sampleStepsData);
+  const [activePhaseIndex, setActivePhaseIndex] = useState<number>(0);
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(-1);
   const [activeRule, setActiveRule] = useState<ActiveRule | null>(null);
   const [logLabel, setLogLabel] = useState("Sample data");
@@ -31,8 +48,24 @@ function App() {
   const [highlightReduce, setHighlightReduce] = useState<boolean>(false);
   const [highlightReduceComplete, setHighlightReduceComplete] = useState<boolean>(false);
 
+  const phaseSlots = useMemo(
+    () =>
+      PHASE_ORDER.map((phaseName) => {
+        const logPhase =
+          stepsData.phases.find((phase) => isKnownPhaseName(phase.phase) && phase.phase === phaseName) ??
+          null;
 
-  const steps = useMemo(() => stepsData.phases[0]?.steps ?? [], [stepsData]);
+        return {
+          phaseName,
+          label: PHASE_LABELS[phaseName],
+          logPhase,
+          isAvailable: logPhase !== null,
+        };
+      }),
+    [stepsData]
+  );
+  const activePhaseSlot = phaseSlots[activePhaseIndex] ?? phaseSlots[0] ?? null;
+  const steps = useMemo(() => activePhaseSlot?.logPhase?.steps ?? [], [activePhaseSlot]);
   const astRef = useRef<ASTPaneHandle>(null);
 
   function rhsLength(ruleText: string): number {
@@ -44,6 +77,14 @@ function App() {
 
   const isSemanticStep = (step: Step | undefined) =>
     step?.type === "PARSE_SEMANTIC_STEP";
+
+  useEffect(() => {
+    if (phaseSlots.length === 0) return;
+    if (activePhaseSlot?.isAvailable) return;
+
+    const firstAvailableIndex = phaseSlots.findIndex((slot) => slot.isAvailable);
+    setActivePhaseIndex(firstAvailableIndex >= 0 ? firstAvailableIndex : 0);
+  }, [activePhaseSlot, phaseSlots]);
 
   useEffect(() => {
     if (currentStepIndex < 0 || steps.length === 0) return;
@@ -209,6 +250,35 @@ function App() {
           <span className="toolbar-file">{logLabel}</span>
           {loadError && <span className="text-muted">({loadError})</span>}
         </div>
+        {phaseSlots.length > 0 && (
+          <div className="phase-slider">
+            <div
+              className="phase-slider__thumb"
+              style={{
+                width: `${100 / phaseSlots.length}%`,
+                transform: `translateX(${activePhaseIndex * 100}%)`,
+              }}
+            />
+            {phaseSlots.map((slot, index) => (
+              <button
+                key={`${slot.phaseName}-${index}`}
+                type="button"
+                className={`phase-slider__item ${
+                  index === activePhaseIndex ? "phase-slider__item--active" : ""
+                } ${
+                  !slot.isAvailable ? "phase-slider__item--disabled" : ""
+                }`}
+                onClick={() => {
+                  if (!slot.isAvailable) return;
+                  setActivePhaseIndex(index);
+                }}
+                disabled={!slot.isAvailable}
+              >
+                {slot.label}
+              </button>
+            ))}
+          </div>
+        )}
         <div className="toolbar-actions">
         {currentStepIndex < 0 && (
           <button className="bg-neutral-600 rounded-sm p-1 px-3 font-mono font-light text-sm cursor-pointer" onClick={() => setCurrentStepIndex(0)}>

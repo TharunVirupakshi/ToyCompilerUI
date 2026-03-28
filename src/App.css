@@ -11,9 +11,60 @@
   background: #333333;
   border-bottom: 1px solid var(--panel-border);
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  gap: 12px;
   font-size: 13px;
   color: var(--text);
+}
+
+.toolbar-left,
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.phase-slider {
+  position: relative;
+  display: flex;
+  flex: 0 1 420px;
+  min-width: 220px;
+  padding: 4px;
+  border: 1px solid #4a4a4a;
+  border-radius: 10px;
+  background: #262626;
+}
+
+.phase-slider__thumb {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  border-radius: 7px;
+  background: #2563eb;
+  transition: transform 180ms ease-in-out;
+}
+
+.phase-slider__item {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  padding: 6px 14px;
+  border: 0;
+  background: transparent;
+  color: #cbd5e1;
+  font: inherit;
+  cursor: pointer;
+}
+
+.phase-slider__item--active {
+  color: #f8fafc;
+}
+
+.phase-slider__item--disabled {
+  color: #64748b;
+  cursor: not-allowed;
 }
 
 /* Workspace under navbar */
@@ -47,4 +98,3 @@
 .panel-bg {
   background-color: var(--panel);
 }
-
