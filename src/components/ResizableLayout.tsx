@@ -1,10 +1,10 @@
-import { FC, ReactNode, useState } from "react";
+import type { FC, ReactNode } from "react";
 import Split from "react-split";
 
 interface ResizableLayoutProps {
   leftTop: ReactNode;     // Editor
   leftBottom: ReactNode;  // Parser States (placeholder)
-  topLeft: ReactNode;
+  topLeft: ReactNode | null;
   topRight: ReactNode;
   bottomLeft: ReactNode;
   bottomRight?: ReactNode;
@@ -17,6 +17,8 @@ const ResizableLayout: FC<ResizableLayoutProps> = ({
   topRight,
   bottomLeft,
 }) => {
+  const showSplitTopRow = topLeft !== null;
+
   return (
     <div className="h-full w-full">
 
@@ -53,15 +55,19 @@ const ResizableLayout: FC<ResizableLayoutProps> = ({
           className="flex flex-col h-full"
         >
           {/* TOP RIGHT ROW */}
-          <Split
-            sizes={[50, 50]}
-            minSize={120}
-            gutterSize={8}
-            className="flex h-full"
-          >
-            <div className="pane h-full">{topLeft}</div>
+          {showSplitTopRow ? (
+            <Split
+              sizes={[50, 50]}
+              minSize={120}
+              gutterSize={8}
+              className="flex h-full"
+            >
+              <div className="pane h-full">{topLeft}</div>
+              <div className="pane h-full">{topRight}</div>
+            </Split>
+          ) : (
             <div className="pane h-full">{topRight}</div>
-          </Split>
+          )}
 
           {/* BOTTOM RIGHT */}
           <div className="pane h-full">{bottomLeft}</div>

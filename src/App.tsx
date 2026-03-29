@@ -29,7 +29,16 @@ import ASTPane from "./components/ASTPane";
 import type { ASTPaneHandle } from "./components/ASTPane";
 import ParserStatesPanel from "./components/ParserStatesPanel";
 import type { SymbolData } from "./components/ParserStatesPanel";
+import SemanticLoggerPanel from "./components/SemanticLoggerPanel";
 
+type PhaseSwitchTrigger = "manual" | "end_of_phase";
+
+interface PendingPhaseSwitch {
+  sourcePhaseLabel: string;
+  targetPhaseIndex: number;
+  targetPhaseLabel: string;
+  trigger: PhaseSwitchTrigger;
+}
 
 function App() {
   const [stepsData, setStepsData] = useState<StepsData>(sampleStepsData);
@@ -47,6 +56,8 @@ function App() {
   const [lookahead, setLookahead] = useState<SymbolData | null>(null);
   const [highlightReduce, setHighlightReduce] = useState<boolean>(false);
   const [highlightReduceComplete, setHighlightReduceComplete] = useState<boolean>(false);
+  const [pendingPhaseSwitch, setPendingPhaseSwitch] = useState<PendingPhaseSwitch | null>(null);
+  const [astResetVersion, setAstResetVersion] = useState<number>(0);
 
   const phaseSlots = useMemo(
     () =>
@@ -66,6 +77,15 @@ function App() {
   );
   const activePhaseSlot = phaseSlots[activePhaseIndex] ?? phaseSlots[0] ?? null;
   const steps = useMemo(() => activePhaseSlot?.logPhase?.steps ?? [], [activePhaseSlot]);
+  const isSemanticPhase = activePhaseSlot?.phaseName === "PHASE_SEMANTIC";
+  const parsePhaseSlot = useMemo(
+    () => phaseSlots.find((slot) => slot.phaseName === "PHASE_LEX_PARSE") ?? null,
+    [phaseSlots]
+  );
+  const nextAvailablePhaseIndex = useMemo(
+    () => phaseSlots.findIndex((slot, index) => index > activePhaseIndex && slot.isAvailable),
+    [activePhaseIndex, phaseSlots]
+  );
   const astRef = useRef<ASTPaneHandle>(null);
 
   function rhsLength(ruleText: string): number {
@@ -78,13 +98,65 @@ function App() {
   const isSemanticStep = (step: Step | undefined) =>
     step?.type === "PARSE_SEMANTIC_STEP";
 
+  const firstAvailablePhaseIndex = useMemo(() => {
+    const index = phaseSlots.findIndex((slot) => slot.isAvailable);
+    return index >= 0 ? index : 0;
+  }, [phaseSlots]);
+
+  const getFirstAvailablePhaseIndex = useCallback((data: StepsData) => {
+    const index = PHASE_ORDER.findIndex((phaseName) =>
+      data.phases.some((phase) => isKnownPhaseName(phase.phase) && phase.phase === phaseName)
+    );
+    return index >= 0 ? index : 0;
+  }, []);
+
+  const resetPhaseState = useCallback(() => {
+    setCurrentStepIndex(-1);
+    setActiveRule(null);
+    setActiveSemanticStep(null);
+    setParseStatesStack([]);
+    setSymbolsStack([]);
+    setReduceCount(0);
+    setReduceLhs(null);
+    setLookahead(null);
+    setHighlightReduce(false);
+    setHighlightReduceComplete(false);
+  }, []);
+
+  const requestPhaseSwitch = useCallback(
+    (targetPhaseIndex: number, trigger: PhaseSwitchTrigger) => {
+      const targetSlot = phaseSlots[targetPhaseIndex];
+      if (!targetSlot || !targetSlot.isAvailable || targetPhaseIndex === activePhaseIndex) {
+        return;
+      }
+
+      setPendingPhaseSwitch({
+        sourcePhaseLabel: activePhaseSlot?.label ?? "CURRENT PHASE",
+        targetPhaseIndex,
+        targetPhaseLabel: targetSlot.label,
+        trigger,
+      });
+    },
+    [activePhaseIndex, activePhaseSlot, phaseSlots]
+  );
+
+  const confirmPhaseSwitch = useCallback(() => {
+    if (!pendingPhaseSwitch) return;
+    resetPhaseState();
+    setActivePhaseIndex(pendingPhaseSwitch.targetPhaseIndex);
+    setAstResetVersion((prev) => prev + 1);
+    setPendingPhaseSwitch(null);
+  }, [pendingPhaseSwitch, resetPhaseState]);
+
+  const cancelPhaseSwitch = useCallback(() => {
+    setPendingPhaseSwitch(null);
+  }, []);
+
   useEffect(() => {
     if (phaseSlots.length === 0) return;
     if (activePhaseSlot?.isAvailable) return;
-
-    const firstAvailableIndex = phaseSlots.findIndex((slot) => slot.isAvailable);
-    setActivePhaseIndex(firstAvailableIndex >= 0 ? firstAvailableIndex : 0);
-  }, [activePhaseSlot, phaseSlots]);
+    setActivePhaseIndex(firstAvailablePhaseIndex);
+  }, [activePhaseSlot, firstAvailablePhaseIndex, phaseSlots.length]);
 
   useEffect(() => {
     if (currentStepIndex < 0 || steps.length === 0) return;
@@ -169,6 +241,13 @@ function App() {
       const snapshot = step.data as ParseStackSnapshot;
       const statesStack = snapshot.states.map(Number);
 
+      if (statesStack.at(-1) == 1) {
+        setLookahead({
+          displayValue: "$end",
+          value: "$end"
+        });
+      }
+
       setParseStatesStack(statesStack);
       if (highlightReduceComplete) {
         setHighlightReduceComplete(false)
@@ -194,6 +273,24 @@ function App() {
     console.log("Is Reduce : ", highlightReduce)
   }, [highlightReduce]) 
 
+  useEffect(() => {
+    if (!isSemanticPhase) return;
+    if (astResetVersion === 0) return;
+    if (!parsePhaseSlot?.logPhase?.steps.length) return;
+
+    const timer = window.setTimeout(() => {
+      parsePhaseSlot.logPhase?.steps.forEach((step) => {
+        if (step.type !== "PARSE_CREATE_AST_NODE") return;
+        const nodeId = Number((step.data as ParseCreateASTNodeData)?.node_id);
+        if (!Number.isNaN(nodeId)) {
+          astRef.current?.enableNode(nodeId);
+        }
+      });
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [astResetVersion, isSemanticPhase, parsePhaseSlot]);
+
 
   const symbolTables = useMemo(() => {
     if (currentStepIndex < 0) {
@@ -214,8 +311,10 @@ function App() {
             throw new Error("Unexpected log format");
           }
           setStepsData(parsed);
-          setCurrentStepIndex(0);
-          setActiveRule(null);
+          setActivePhaseIndex(getFirstAvailablePhaseIndex(parsed));
+          resetPhaseState();
+          setPendingPhaseSwitch(null);
+          setAstResetVersion(0);
           setLogLabel(file.name);
           setLoadError(null);
         })
@@ -231,11 +330,13 @@ function App() {
 
   const handleUseSample = useCallback(() => {
     setStepsData(sampleStepsData);
-    setCurrentStepIndex(0);
-    setActiveRule(null);
+    setActivePhaseIndex(getFirstAvailablePhaseIndex(sampleStepsData));
+    resetPhaseState();
+    setPendingPhaseSwitch(null);
+    setAstResetVersion(0);
     setLogLabel("Sample data");
     setLoadError(null);
-  }, []);
+  }, [getFirstAvailablePhaseIndex, resetPhaseState]);
 
   const totalSymbols = useMemo(
     () => symbolTables.tables.reduce((acc, table) => acc + table.symbols.length, 0),
@@ -270,7 +371,7 @@ function App() {
                 }`}
                 onClick={() => {
                   if (!slot.isAvailable) return;
-                  setActivePhaseIndex(index);
+                  requestPhaseSwitch(index, "manual");
                 }}
                 disabled={!slot.isAvailable}
               >
@@ -314,28 +415,39 @@ function App() {
                 currentStepIndex={currentStepIndex}
                 onStepChange={setCurrentStepIndex}
                 onActiveRuleChange={setActiveRule}
+                onPhaseEndNext={() => {
+                  if (nextAvailablePhaseIndex >= 0) {
+                    requestPhaseSwitch(nextAvailablePhaseIndex, "end_of_phase");
+                  }
+                }}
               />
             </div>
           }
           leftBottom={
-            <ParserStatesPanel
-              states={sampleStatesJson}
-              stateStack={parseStatesStack}
-              symbolStack={symbolsStack}
-              lookahead={lookahead}
-              reduceCount={reduceCount}
-              highlightReduce={highlightReduce}
-              highlightReduceComplete={highlightReduceComplete}
-            />
+            isSemanticPhase ? (
+              <SemanticLoggerPanel />
+            ) : (
+              <ParserStatesPanel
+                states={sampleStatesJson}
+                stateStack={parseStatesStack}
+                symbolStack={symbolsStack}
+                lookahead={lookahead}
+                reduceCount={reduceCount}
+                highlightReduce={highlightReduce}
+                highlightReduceComplete={highlightReduceComplete}
+              />
+            )
           }
           topLeft={
-            <div className="panel h-full">
-              <GrammarPanel
-                activeRuleNo={activeRule?.ruleNo}
-                showSemanticSteps={showSemanticRules}
-                activeSemanticStep={activeSemanticStep}
-              />
-            </div>
+            isSemanticPhase ? null : (
+              <div className="panel h-full">
+                <GrammarPanel
+                  activeRuleNo={activeRule?.ruleNo}
+                  showSemanticSteps={showSemanticRules}
+                  activeSemanticStep={activeSemanticStep}
+                />
+              </div>
+            )
           }
           topRight={
             <div className="panel h-full">
@@ -354,6 +466,30 @@ function App() {
           }
         />
       </main>
+      {pendingPhaseSwitch && (
+        <div className="phase-modal-overlay">
+          <div className="phase-modal">
+            <h2 className="phase-modal__title">Switch Phase</h2>
+            <p className="phase-modal__body">
+              Switching from {pendingPhaseSwitch.sourcePhaseLabel} to {pendingPhaseSwitch.targetPhaseLabel} resets the current phase state.
+            </p>
+            <p className="phase-modal__body">
+              Switching to semantic rebuilds the AST from completed parse steps. Switching back to parse starts that phase from the beginning.
+            </p>
+            <p className="phase-modal__meta">
+              Trigger: {pendingPhaseSwitch.trigger === "manual" ? "manual phase selection" : "end of current phase"}
+            </p>
+            <div className="phase-modal__actions">
+              <button className="phase-modal__button phase-modal__button--secondary" onClick={cancelPhaseSwitch}>
+                Cancel
+              </button>
+              <button className="phase-modal__button phase-modal__button--primary" onClick={confirmPhaseSwitch}>
+                Switch Phase
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

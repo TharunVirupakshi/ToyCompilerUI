@@ -20,6 +20,7 @@ interface EditorWindowProps {
   currentStepIndex: number;
   onStepChange: (nextIndex: number) => void;
   onActiveRuleChange?: (rule: ActiveRule | null) => void;
+  onPhaseEndNext?: () => void;
 }
 
 export default function EditorWindow({
@@ -27,6 +28,7 @@ export default function EditorWindow({
   currentStepIndex,
   onStepChange,
   onActiveRuleChange,
+  onPhaseEndNext,
 }: EditorWindowProps) {
   const [code, setCode] = useState<string>("");
   const editorRef = useRef<any>(null);
@@ -78,6 +80,10 @@ export default function EditorWindow({
 
   const handleStep = (delta: number) => {
     const next = currentStepIndex + delta;
+    if (delta > 0 && currentStepIndex >= steps.length - 1) {
+      onPhaseEndNext?.();
+      return;
+    }
     if (next < 0 || next >= steps.length) return;
     onStepChange(next);
   };
