@@ -5,31 +5,24 @@ import EditorWindow from "./components/EditorWindow";
 import GrammarPanel from "./components/GrammarPanel";
 import ResizableLayout from "./components/ResizableLayout";
 import SymbolTablesPane from "./components/SymbolTablesPane";
-import StepTimeline from "./components/StepTimeline";
-import InsightsPanel from "./components/InsightsPanel";
-import { sampleStepsData, sampleAstJson, sampleStatesJson } from "./data";
+import { sampleStepsData, sampleAstJson, sampleStatesJson, sampleInputCode } from "./data";
 import {
   PHASE_LABELS,
   PHASE_ORDER,
   isKnownPhaseName,
 } from "./types/steps";
 import type {
-  ActiveRule,
-  ParseCreateASTNodeData,
-  Step,
   StepsData,
-  ParseSemanticStepData,
-  ParseStackSnapshot,
-  ParseReduceRuleData,
-  LexReadTokenData,
-  ParseReduceRuleCompleteData,
 } from "./types/steps";
 import { deriveSymbolTableState } from "./utils/symbolTables";
 import ASTPane from "./components/ASTPane";
-import type { ASTPaneHandle } from "./components/ASTPane";
+import type { ASTData, ASTPaneHandle } from "./components/ASTPane";
 import ParserStatesPanel from "./components/ParserStatesPanel";
-import type { SymbolData } from "./components/ParserStatesPanel";
 import SemanticLoggerPanel from "./components/SemanticLoggerPanel";
+import { compileSource } from "./api/compiler";
+import { deriveParsePlaybackState, getNextVisibleStepIndex } from "./utils/parsePlayback";
+import { deriveParserStatesView } from "./utils/parserStatesView";
+import { deriveAstNodeIds } from "./utils/astPlayback";
 
 type PhaseSwitchTrigger = "manual" | "end_of_phase";
 
@@ -42,22 +35,15 @@ interface PendingPhaseSwitch {
 
 function App() {
   const [stepsData, setStepsData] = useState<StepsData>(sampleStepsData);
+  const [astData, setAstData] = useState<ASTData>(sampleAstJson);
+  const [sourceCode, setSourceCode] = useState<string>(sampleInputCode);
   const [activePhaseIndex, setActivePhaseIndex] = useState<number>(0);
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(-1);
-  const [activeRule, setActiveRule] = useState<ActiveRule | null>(null);
   const [logLabel, setLogLabel] = useState("Sample data");
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showSemanticRules, setShowSemanticRules] = useState<boolean>(false);
-  const [activeSemanticStep, setActiveSemanticStep] = useState<ParseSemanticStepData | null>(null);
-  const [parseStatesStack, setParseStatesStack] = useState<number[]>([]); 
-  const [symbolsStack, setSymbolsStack] = useState<SymbolData[]>([]);
-  const [reduceCount, setReduceCount] = useState<number>(0);
-  const [reduceLhs, setReduceLhs] = useState<string | null>(null);
-  const [lookahead, setLookahead] = useState<SymbolData | null>(null);
-  const [highlightReduce, setHighlightReduce] = useState<boolean>(false);
-  const [highlightReduceComplete, setHighlightReduceComplete] = useState<boolean>(false);
+  const [isCompiling, setIsCompiling] = useState<boolean>(false);
   const [pendingPhaseSwitch, setPendingPhaseSwitch] = useState<PendingPhaseSwitch | null>(null);
-  const [astResetVersion, setAstResetVersion] = useState<number>(0);
 
   const phaseSlots = useMemo(
     () =>
@@ -88,16 +74,6 @@ function App() {
   );
   const astRef = useRef<ASTPaneHandle>(null);
 
-  function rhsLength(ruleText: string): number {
-    // "var → ID ASSIGN expr"
-    const rhs = ruleText.split("→")[1]?.trim();
-    if (!rhs || rhs === "ε") return 0;
-    return rhs.split(/\s+/).length;
-  }
-
-  const isSemanticStep = (step: Step | undefined) =>
-    step?.type === "PARSE_SEMANTIC_STEP";
-
   const firstAvailablePhaseIndex = useMemo(() => {
     const index = phaseSlots.findIndex((slot) => slot.isAvailable);
     return index >= 0 ? index : 0;
@@ -112,15 +88,7 @@ function App() {
 
   const resetPhaseState = useCallback(() => {
     setCurrentStepIndex(-1);
-    setActiveRule(null);
-    setActiveSemanticStep(null);
-    setParseStatesStack([]);
-    setSymbolsStack([]);
-    setReduceCount(0);
-    setReduceLhs(null);
-    setLookahead(null);
-    setHighlightReduce(false);
-    setHighlightReduceComplete(false);
+    astRef.current?.resetGraph();
   }, []);
 
   const requestPhaseSwitch = useCallback(
@@ -144,7 +112,6 @@ function App() {
     if (!pendingPhaseSwitch) return;
     resetPhaseState();
     setActivePhaseIndex(pendingPhaseSwitch.targetPhaseIndex);
-    setAstResetVersion((prev) => prev + 1);
     setPendingPhaseSwitch(null);
   }, [pendingPhaseSwitch, resetPhaseState]);
 
@@ -158,190 +125,105 @@ function App() {
     setActivePhaseIndex(firstAvailablePhaseIndex);
   }, [activePhaseSlot, firstAvailablePhaseIndex, phaseSlots.length]);
 
-  useEffect(() => {
-    if (currentStepIndex < 0 || steps.length === 0) return;
+  const parsePlayback = useMemo(
+    () =>
+      isSemanticPhase
+        ? deriveParsePlaybackState([], -1, showSemanticRules)
+        : deriveParsePlaybackState(steps, currentStepIndex, showSemanticRules),
+    [currentStepIndex, isSemanticPhase, showSemanticRules, steps]
+  );
 
-    let idx = currentStepIndex;
+  const parserStatesView = useMemo(
+    () =>
+      deriveParserStatesView(
+        sampleStatesJson,
+        parsePlayback.stateStack,
+        parsePlayback.symbolStack,
+        parsePlayback.lookahead,
+        parsePlayback.highlightReduce,
+        parsePlayback.highlightReduceComplete
+      ),
+    [parsePlayback]
+  );
 
-    // 🔁 Skip semantic steps if disabled
-    if (!showSemanticRules) {
-      while (idx < steps.length && isSemanticStep(steps[idx])) {
-        idx++;
-      }
-    }
+  const parseAstNodeIds = useMemo(() => {
+    const parseSteps = parsePhaseSlot?.logPhase?.steps ?? [];
+    return deriveAstNodeIds(parseSteps, parseSteps.length - 1);
+  }, [parsePhaseSlot]);
 
-    // 🚨 Clamp
-    if (idx >= steps.length) {
-      idx = steps.length - 1;
-    }
+  const visibleParseAstNodeIds = useMemo(
+    () => deriveAstNodeIds(steps, parsePlayback.visibleStepIndex),
+    [parsePlayback.visibleStepIndex, steps]
+  );
 
-    // 🔄 Update index ONCE and EXIT
-    if (idx !== currentStepIndex) {
-      setCurrentStepIndex(idx);
-      return; // 🔑 critical
-    }
-
-    const step = steps[idx];
-    if (!step) return;
-
-    // 🔥 Semantic highlighting
-    if (showSemanticRules && isSemanticStep(step)) {
-      const data = step.data as ParseSemanticStepData;
-      // console.log("Set semantic step ", data.instr)
-      setActiveSemanticStep(data);
-    }
-
-    // 🌳 AST node handling
-    if (step.type === "PARSE_CREATE_AST_NODE") {
-      const nodeId = Number((step.data as ParseCreateASTNodeData)?.node_id);
-      console.log("Enabling node: ", nodeId);
-      if (!Number.isNaN(nodeId)) {
-        astRef.current?.enableNode(nodeId);
-      }
-    }
-
-    if (step.type === "LEX_READ_TOKEN") {
-      const { token, value } = (step.data as LexReadTokenData);
-      switch(token) {
-        case "READ_CHARACTER": setLookahead({displayValue: value, value: `'${value}'`}); break;
-        case "KEYWORD":
-        case "OPERATOR": setLookahead({displayValue: value, value: value}); break;
-        case "ID":
-        case "INT_LITERAL": 
-        case "STR_LITERAL":
-        case "CHAR_LITERAL": setLookahead({displayValue: `${token}(${value})`, value: token})
-      }
-    }
-
-    if (step.type === "PARSE_REDUCE_RULE") {
-      const data = step.data as ParseReduceRuleData;
-      setReduceCount(rhsLength(data.rule));
-      console.log("rhsLength: ", rhsLength(data.rule));
-      setReduceLhs(data.rule.split("→")[0].trim());
-      setHighlightReduce(true);
-    }
-
-    if (step.type == "PARSE_REDUCE_RULE_COMPLETE") {
-      setReduceCount(0);
-      setHighlightReduce(false);
-      setHighlightReduceComplete(true);
-      const data = step.data as ParseReduceRuleCompleteData;
-      setParseStatesStack(prev => {
-        const next = prev.slice(0, prev.length - Number(data.rhsLength));
-        return next;
-      })
-      setSymbolsStack(prev => {
-        const next = prev.slice(0, prev.length - Number(data.rhsLength));
-        next.push({displayValue: data.lhs, value: data.lhs})
-        return next;
-      });
-    }
-
-    if (step.type === "PARSE_STACK_SNAPSHOT") {
-      const snapshot = step.data as ParseStackSnapshot;
-      const statesStack = snapshot.states.map(Number);
-
-      if (statesStack.at(-1) == 1) {
-        setLookahead({
-          displayValue: "$end",
-          value: "$end"
-        });
-      }
-
-      setParseStatesStack(statesStack);
-      if (highlightReduceComplete) {
-        setHighlightReduceComplete(false)
-        return;
-      } 
-
-      // Shift only if no reduce is in progress
-      if (lookahead && !highlightReduceComplete) {
-        console.log("Shifted :", lookahead)
-        setSymbolsStack((prev) => [...prev, lookahead]);
-        setLookahead(null);
-      }
-    }
-  }, [steps, currentStepIndex, showSemanticRules]);
+  const effectiveStepIndex = isSemanticPhase ? currentStepIndex : parsePlayback.visibleStepIndex;
 
   useEffect(() => {
-    // console.log("Is Highlight: ", highlightReduce);
-    console.log("Is Reduce Complete: ", highlightReduceComplete)
-  }, [highlightReduceComplete])
+    if (isSemanticPhase) return;
+    if (parsePlayback.visibleStepIndex === currentStepIndex) return;
+    setCurrentStepIndex(parsePlayback.visibleStepIndex);
+  }, [currentStepIndex, isSemanticPhase, parsePlayback.visibleStepIndex]);
 
   useEffect(() => {
-    // console.log("Is Highlight: ", highlightReduce);
-    console.log("Is Reduce : ", highlightReduce)
-  }, [highlightReduce]) 
+    if (isSemanticPhase) return;
+    visibleParseAstNodeIds.forEach((nodeId) => {
+      astRef.current?.enableNode(nodeId);
+    });
+  }, [isSemanticPhase, visibleParseAstNodeIds]);
 
   useEffect(() => {
     if (!isSemanticPhase) return;
-    if (astResetVersion === 0) return;
-    if (!parsePhaseSlot?.logPhase?.steps.length) return;
-
-    const timer = window.setTimeout(() => {
-      parsePhaseSlot.logPhase?.steps.forEach((step) => {
-        if (step.type !== "PARSE_CREATE_AST_NODE") return;
-        const nodeId = Number((step.data as ParseCreateASTNodeData)?.node_id);
-        if (!Number.isNaN(nodeId)) {
-          astRef.current?.enableNode(nodeId);
-        }
-      });
-    }, 0);
-
-    return () => window.clearTimeout(timer);
-  }, [astResetVersion, isSemanticPhase, parsePhaseSlot]);
+    parseAstNodeIds.forEach((nodeId) => {
+      astRef.current?.enableNode(nodeId);
+    });
+  }, [isSemanticPhase, parseAstNodeIds]);
 
 
   const symbolTables = useMemo(() => {
-    if (currentStepIndex < 0) {
+    if (effectiveStepIndex < 0) {
       return { tables: [], focusId: null };
     }
-    return deriveSymbolTableState(steps, currentStepIndex);
-  }, [steps, currentStepIndex]);
-
-  const handleFileUpload = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const file = event.target.files?.[0];
-      if (!file) return;
-      file
-        .text()
-        .then((text) => {
-          const parsed = JSON.parse(text) as StepsData;
-          if (!parsed?.phases?.length) {
-            throw new Error("Unexpected log format");
-          }
-          setStepsData(parsed);
-          setActivePhaseIndex(getFirstAvailablePhaseIndex(parsed));
-          resetPhaseState();
-          setPendingPhaseSwitch(null);
-          setAstResetVersion(0);
-          setLogLabel(file.name);
-          setLoadError(null);
-        })
-        .catch(() => {
-          setLoadError("Could not parse the selected log file.");
-        })
-        .finally(() => {
-          event.target.value = "";
-        });
-    },
-    []
-  );
+    return deriveSymbolTableState(steps, effectiveStepIndex);
+  }, [effectiveStepIndex, steps]);
 
   const handleUseSample = useCallback(() => {
     setStepsData(sampleStepsData);
+    setAstData(sampleAstJson);
+    setSourceCode(sampleInputCode);
     setActivePhaseIndex(getFirstAvailablePhaseIndex(sampleStepsData));
     resetPhaseState();
     setPendingPhaseSwitch(null);
-    setAstResetVersion(0);
     setLogLabel("Sample data");
     setLoadError(null);
   }, [getFirstAvailablePhaseIndex, resetPhaseState]);
 
-  const totalSymbols = useMemo(
-    () => symbolTables.tables.reduce((acc, table) => acc + table.symbols.length, 0),
-    [symbolTables.tables]
-  );
+  const handleCompile = useCallback(async () => {
+    setIsCompiling(true);
+    setLoadError(null);
+    const compileStartedAt = Date.now();
+
+    try {
+      const result = await compileSource(sourceCode);
+
+      setStepsData(result.stepsData);
+      setAstData(result.astData as ASTData);
+      setActivePhaseIndex(getFirstAvailablePhaseIndex(result.stepsData));
+      resetPhaseState();
+      setPendingPhaseSwitch(null);
+      setLogLabel("Compiled source");
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "Compilation failed.");
+    } finally {
+      const elapsedMs = Date.now() - compileStartedAt;
+      const remainingDelayMs = Math.max(0, 1000 - elapsedMs);
+
+      if (remainingDelayMs > 0) {
+        await new Promise((resolve) => window.setTimeout(resolve, remainingDelayMs));
+      }
+
+      setIsCompiling(false);
+    }
+  }, [getFirstAvailablePhaseIndex, resetPhaseState, sourceCode]);
 
   return (
     <div className="app-root flex flex-col h-screen">
@@ -381,7 +263,18 @@ function App() {
           </div>
         )}
         <div className="toolbar-actions">
-        {currentStepIndex < 0 && (
+        <button
+          className={`rounded-sm p-1 px-3 font-mono font-light text-sm cursor-pointer transition-colors disabled:cursor-default ${
+            isCompiling
+              ? "bg-blue-600 text-white animate-[pulse_0.8s_ease-in-out_infinite]"
+              : "bg-neutral-600 text-gray-100"
+          }`}
+          onClick={handleCompile}
+          disabled={isCompiling}
+        >
+          {isCompiling ? "Compiling..." : "Compile"}
+        </button>
+        {effectiveStepIndex < 0 && (
           <button className="bg-neutral-600 rounded-sm p-1 px-3 font-mono font-light text-sm cursor-pointer" onClick={() => setCurrentStepIndex(0)}>
             START
           </button>
@@ -397,10 +290,6 @@ function App() {
         >
           {showSemanticRules ? "Semantic: ON" : "Semantic: OFF"}
         </button>
-          <label className="file-input">
-            Load log
-            <input type="file" accept="application/json" onChange={handleFileUpload} />
-          </label>
           <button className="bg-neutral-600 rounded-sm p-1 px-3 font-mono font-light text-sm cursor-pointer" onClick={handleUseSample}>
             Reset sample
           </button>
@@ -411,14 +300,26 @@ function App() {
           leftTop={
             <div className="panel panel--editor h-full">
               <EditorWindow
+                code={sourceCode}
                 steps={steps}
-                currentStepIndex={currentStepIndex}
+                currentStepIndex={effectiveStepIndex}
+                onCodeChange={setSourceCode}
                 onStepChange={setCurrentStepIndex}
-                onActiveRuleChange={setActiveRule}
                 onPhaseEndNext={() => {
                   if (nextAvailablePhaseIndex >= 0) {
                     requestPhaseSwitch(nextAvailablePhaseIndex, "end_of_phase");
                   }
+                }}
+                resolveStepIndex={(stepIndex, delta, currentSteps) => {
+                  if (isSemanticPhase) {
+                    const nextIndex = stepIndex + delta;
+                    if (nextIndex < 0 || nextIndex >= currentSteps.length) {
+                      return null;
+                    }
+                    return nextIndex;
+                  }
+
+                  return getNextVisibleStepIndex(currentSteps, stepIndex, delta, showSemanticRules);
                 }}
               />
             </div>
@@ -429,12 +330,14 @@ function App() {
             ) : (
               <ParserStatesPanel
                 states={sampleStatesJson}
-                stateStack={parseStatesStack}
-                symbolStack={symbolsStack}
-                lookahead={lookahead}
-                reduceCount={reduceCount}
-                highlightReduce={highlightReduce}
-                highlightReduceComplete={highlightReduceComplete}
+                stateStack={parsePlayback.stateStack}
+                symbolStack={parsePlayback.symbolStack}
+                lookahead={parsePlayback.lookahead}
+                reduceCount={parsePlayback.reduceCount}
+                highlightReduce={parsePlayback.highlightReduce}
+                highlightReduceComplete={parsePlayback.highlightReduceComplete}
+                activeState={parserStatesView.activeState}
+                highlightedAction={parserStatesView.highlightedAction}
               />
             )
           }
@@ -442,9 +345,9 @@ function App() {
             isSemanticPhase ? null : (
               <div className="panel h-full">
                 <GrammarPanel
-                  activeRuleNo={activeRule?.ruleNo}
+                  activeRuleNo={parsePlayback.activeRule?.ruleNo}
                   showSemanticSteps={showSemanticRules}
-                  activeSemanticStep={activeSemanticStep}
+                  activeSemanticStep={parsePlayback.activeSemanticStep}
                 />
               </div>
             )
@@ -456,7 +359,7 @@ function App() {
           }
           bottomLeft={
             <div className="panel h-full">
-              <ASTPane ref={astRef} astData={sampleAstJson}/> 
+              <ASTPane ref={astRef} astData={astData}/> 
             </div>
           }
           bottomRight={

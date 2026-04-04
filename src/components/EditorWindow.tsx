@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Editor from "@monaco-editor/react";
 import type {
-  ActiveRule,
   LexReadTokenData,
   ParseAddSymData,
   ParseAssgnSymType,
@@ -13,29 +12,29 @@ import type {
   ParseSemanticStepData,
   Step,
 } from "../types/steps";
-import { sampleInputCode } from "../data";
-
 interface EditorWindowProps {
+  code: string;
   steps: Step[];
   currentStepIndex: number;
+  onCodeChange: (code: string) => void;
   onStepChange: (nextIndex: number) => void;
-  onActiveRuleChange?: (rule: ActiveRule | null) => void;
   onPhaseEndNext?: () => void;
+  resolveStepIndex?: (currentStepIndex: number, delta: -1 | 1, steps: Step[]) => number | null;
 }
 
 export default function EditorWindow({
+  code,
   steps,
   currentStepIndex,
+  onCodeChange,
   onStepChange,
-  onActiveRuleChange,
   onPhaseEndNext,
+  resolveStepIndex,
 }: EditorWindowProps) {
-  const [code, setCode] = useState<string>("");
   const editorRef = useRef<any>(null);
   const lastLocationRef = useRef<{ line: number; char: number } | null>(null);
-  const [lexStep, setLexStep] = useState<LexReadTokenData | null>(null);
 
-  const handleEditorMount = (editor: any, monaco: any) => {
+  const handleEditorMount = (editor: any) => {
     editorRef.current = editor;
   };
 
@@ -45,7 +44,6 @@ export default function EditorWindow({
   // Highlight on step change
   useEffect(() => {
     if (!editorRef.current || !currentStep || currentStep.type !== "LEX_READ_TOKEN") {
-      setLexStep(null);
       return;
     }
 
@@ -65,33 +63,21 @@ export default function EditorWindow({
     editorRef.current.revealLineInCenter(line);
 
     lastLocationRef.current = { line, char };
-    setLexStep(currentStep.data as LexReadTokenData);
   }, [currentStep]);
 
-  useEffect(() => {
-    if (!onActiveRuleChange) return;
-    if (currentStep && currentStep.type === "PARSE_REDUCE_RULE") {
-      const { ruleNo } = currentStep.data as ParseReduceRuleData;
-      onActiveRuleChange({
-        ruleNo: Number(ruleNo)
-      });
-    }
-  }, [currentStep, onActiveRuleChange]);
-
   const handleStep = (delta: number) => {
-    const next = currentStepIndex + delta;
-    if (delta > 0 && currentStepIndex >= steps.length - 1) {
+    const next =
+      resolveStepIndex && (delta === -1 || delta === 1)
+        ? resolveStepIndex(currentStepIndex, delta, steps)
+        : currentStepIndex + delta;
+
+    if (delta > 0 && next === null && currentStepIndex >= steps.length - 1) {
       onPhaseEndNext?.();
       return;
     }
-    if (next < 0 || next >= steps.length) return;
+    if (next === null || next < 0 || next >= steps.length) return;
     onStepChange(next);
   };
-
-  const locationLabel = useMemo(() => {
-    if (!lexStep?.location) return null;
-    return lexStep.location;
-  }, [lexStep]);
 
   const stepSummary = currentStep ? getStepSummary(currentStep) : "—";
   const isEnteringStateSummary = stepSummary.startsWith("ENTERING STATE");
@@ -192,11 +178,10 @@ export default function EditorWindow({
           height="100%"
           width="100%"
           defaultLanguage="c"
-          defaultValue={sampleInputCode}
           theme="vs-dark"
           value={code}
           onMount={handleEditorMount}
-          onChange={(value) => setCode(value || "")}
+          onChange={(value) => onCodeChange(value || "")}
           options={{
             minimap: { enabled: false },
             automaticLayout: true,

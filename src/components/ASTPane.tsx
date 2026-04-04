@@ -8,24 +8,25 @@ import {
   import { DataSet, Network } from "vis-network/standalone";
   
   /* AST blueprint types */
-  interface ASTNodeDef {
+  export interface ASTNodeDef {
     id: number;
     node_id: number;
     label: string;
   }
   
-  interface ASTEdgeDef {
+  export interface ASTEdgeDef {
     from: number;
     to: number;
   }
   
-  interface ASTData {
+  export interface ASTData {
     nodes: ASTNodeDef[];
     edges: ASTEdgeDef[];
   }
   
   export interface ASTPaneHandle {
     enableNode: (nodeId: number) => void;
+    resetGraph: () => void;
   }
   
   interface ASTPaneProps {
@@ -120,9 +121,20 @@ import {
           graphOptions
         );
       }, []);
+
+      useEffect(() => {
+        nodes.current.clear();
+        edges.current.clear();
+        networkRef.current?.unselectAll();
+      }, [astData]);
   
       /* Expose imperative API */
       useImperativeHandle(ref, () => ({
+        resetGraph() {
+          nodes.current.clear();
+          edges.current.clear();
+          networkRef.current?.unselectAll();
+        },
         enableNode(nodeId: number) {
           const visId = nodeIdToVisId.get(nodeId);
           if (visId === undefined) return;

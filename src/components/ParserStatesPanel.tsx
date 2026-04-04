@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { FC } from "react";
 import type { ParserState } from "../types/states";
+import type { HighlightedParserAction } from "../utils/parserStatesView";
+import type { ParserStackSymbol } from "../utils/parsePlayback";
 
-export type SymbolData = {
-  displayValue: string;
-  value: string;
-};
+export type SymbolData = ParserStackSymbol;
 interface ParserStatesPanelProps {
   states: ParserState[];
 
@@ -24,6 +23,9 @@ interface ParserStatesPanelProps {
   highlightReduce: boolean;
 
   highlightReduceComplete: boolean;
+
+  activeState: number | null;
+  highlightedAction: HighlightedParserAction | null;
 }
 
 const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
@@ -33,101 +35,19 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
   reduceCount,
   lookahead,
   highlightReduce = false,
-  highlightReduceComplete = false,
+  activeState,
+  highlightedAction,
 }) => {
   const activeRef = useRef<HTMLDivElement | null>(null);
 
-  /** Top of LR stack = active state */
-  const activeState = useMemo(() => {
-      if (!stateStack || stateStack.length === 0) return null;
-      return stateStack[stateStack.length - 1];
-    }, [stateStack]);
-
-    const topSymbol = useMemo(() => {
-      if (!symbolStack.length) return null;
-      return symbolStack[symbolStack.length - 1];
-    }, [symbolStack]);
-
-    const highlightedAction: {
-      state: number;
-      kind: "shift" | "goto" | "default" | null;
-      index?: number;
-    } | null = useMemo(() => {
-      console.log("Active state: ", activeState)
-      if (activeState == null) return null;
-
-      const state = states.find((s) => s.state === activeState);
-      console.log("State info: ", state)
-      if (!state) return null;
-
-      /* 🔴 REDUCE IN PROGRESS */
-      if (highlightReduce || highlightReduceComplete) {
-        if (topSymbol) {
-          const gotoIdx = state.gotos.findIndex((g) => g.symbol === topSymbol.value);
-
-          if (gotoIdx !== -1) {
-            console.log("GOTO action")
-            return {
-              state: activeState,
-              kind: "goto",
-              index: gotoIdx,
-            };
-          }
-        }
-
-        console.log("DEFAULT action after Reduce")
-        // fallback → default reduce
-        return {
-          state: activeState,
-          kind: "default",
-        };
-      }
-
-      /* 🟢 NORMAL SHIFT MODE */
-      if (lookahead) {
-        const shiftIdx = state.shifts.findIndex(
-          (s) => s.symbol === lookahead.value
-        );
-
-        if (shiftIdx !== -1) {
-          console.log("SHIFT action")
-          return {
-            state: activeState,
-            kind: "shift",
-            index: shiftIdx,
-          };
-        }
-      }
-
-      /* ⚪ DEFAULT */
-      if (state.default) {
-        console.log("DEFAULT action")
-        return {
-          state: activeState,
-          kind: "default",
-        };
-      }
-
-      console.log("Retruning NULL")
-      return null;
-    }, [
-      activeState,
-      topSymbol,
-      states,
-      symbolStack,
-      lookahead,
-      highlightReduce,
-      highlightReduceComplete,
-    ]);
-
-    useEffect(() => {
-      if (activeRef.current) {
-        activeRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "center",
-        });
-      }
-    }, [activeState]);
+  useEffect(() => {
+    if (activeRef.current) {
+      activeRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [activeState]);
 
   return (
     <div className="h-full flex flex-col font-mono text-sm text-gray-200">
@@ -175,7 +95,6 @@ const ParserStatesPanel: FC<ParserStatesPanelProps> = ({
       <div className="mt-2 space-y-2 overflow-y-auto px-2 flex-1">
         {states.map((st) => {
           const isActive = st.state === activeState;
-          var isAlreadyHighlighted = false;
           return (
             <div
               key={st.state}
