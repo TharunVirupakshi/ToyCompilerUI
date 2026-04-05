@@ -28,32 +28,6 @@ export interface ParsePlaybackState {
   enteringState: number | null;
 }
 
-const isSemanticStep = (step: Step | undefined) => step?.type === "PARSE_SEMANTIC_STEP";
-
-const normalizeStepIndex = (
-  steps: Step[],
-  currentStepIndex: number,
-  showSemanticRules: boolean
-) => {
-  if (currentStepIndex < 0 || steps.length === 0) {
-    return currentStepIndex;
-  }
-
-  let index = currentStepIndex;
-
-  if (!showSemanticRules) {
-    while (index < steps.length && isSemanticStep(steps[index])) {
-      index += 1;
-    }
-  }
-
-  if (index >= steps.length) {
-    return steps.length - 1;
-  }
-
-  return index;
-};
-
 const getRhsLength = (ruleText: string) => {
   const rhs = ruleText.split("→")[1]?.trim();
   if (!rhs || rhs === "ε") return 0;
@@ -82,10 +56,8 @@ export const deriveParsePlaybackState = (
   currentStepIndex: number,
   showSemanticRules: boolean
 ): ParsePlaybackState => {
-  const visibleStepIndex = normalizeStepIndex(steps, currentStepIndex, showSemanticRules);
-
   const state: ParsePlaybackState = {
-    visibleStepIndex,
+    visibleStepIndex: currentStepIndex,
     activeRule: null,
     activeSemanticStep: null,
     stateStack: [],
@@ -98,11 +70,12 @@ export const deriveParsePlaybackState = (
     enteringState: null,
   };
 
-  if (visibleStepIndex < 0) {
+  if (currentStepIndex < 0) {
     return state;
   }
 
-  for (const step of steps.slice(0, visibleStepIndex + 1)) {
+  const upperBound = Math.min(currentStepIndex, steps.length - 1);
+  for (const step of steps.slice(0, upperBound + 1)) {
     switch (step.type) {
       case "LEX_READ_TOKEN": {
         const nextLookahead = deriveLookahead(step.data as LexReadTokenData);
@@ -175,6 +148,7 @@ export const getNextVisibleStepIndex = (
   delta: -1 | 1,
   showSemanticRules: boolean
 ) => {
+  const isSemanticStep = (step: Step | undefined) => step?.type === "PARSE_SEMANTIC_STEP";
   let nextIndex = currentStepIndex + delta;
 
   while (

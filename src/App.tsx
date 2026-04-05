@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { ChangeEvent } from "react";
 import "./App.css";
 import EditorWindow from "./components/EditorWindow";
 import GrammarPanel from "./components/GrammarPanel";
@@ -20,9 +19,13 @@ import type { ASTData, ASTPaneHandle } from "./components/ASTPane";
 import ParserStatesPanel from "./components/ParserStatesPanel";
 import SemanticLoggerPanel from "./components/SemanticLoggerPanel";
 import { compileSource } from "./api/compiler";
-import { deriveParsePlaybackState, getNextVisibleStepIndex } from "./utils/parsePlayback";
+import { deriveParsePlaybackState } from "./utils/parsePlayback";
 import { deriveParserStatesView } from "./utils/parserStatesView";
-import { deriveAstNodeIds } from "./utils/astPlayback";
+import { deriveASTPlaybackState } from "./utils/astPlayback";
+import {
+  deriveParseVisibleTimeline,
+  findVisibleIndexForRawIndex,
+} from "./utils/parseTimeline";
 
 type PhaseSwitchTrigger = "manual" | "end_of_phase";
 
@@ -73,6 +76,7 @@ function App() {
     [activePhaseIndex, phaseSlots]
   );
   const astRef = useRef<ASTPaneHandle>(null);
+  const pendingParseRawAnchorRef = useRef<number | null>(null);
 
   const firstAvailablePhaseIndex = useMemo(() => {
     const index = phaseSlots.findIndex((slot) => slot.isAvailable);
@@ -125,12 +129,26 @@ function App() {
     setActivePhaseIndex(firstAvailablePhaseIndex);
   }, [activePhaseSlot, firstAvailablePhaseIndex, phaseSlots.length]);
 
+  const parseRawSteps = parsePhaseSlot?.logPhase?.steps ?? [];
+
+  const parseVisibleTimeline = useMemo(
+    () =>
+      deriveParseVisibleTimeline(
+        parseRawSteps,
+        showSemanticRules,
+        isSemanticPhase ? -1 : currentStepIndex
+      ),
+    [currentStepIndex, isSemanticPhase, parseRawSteps, showSemanticRules]
+  );
+
   const parsePlayback = useMemo(
     () =>
-      isSemanticPhase
-        ? deriveParsePlaybackState([], -1, showSemanticRules)
-        : deriveParsePlaybackState(steps, currentStepIndex, showSemanticRules),
-    [currentStepIndex, isSemanticPhase, showSemanticRules, steps]
+      deriveParsePlaybackState(
+        parseRawSteps,
+        isSemanticPhase ? -1 : parseVisibleTimeline.currentRawStepIndex,
+        showSemanticRules
+      ),
+    [isSemanticPhase, parseRawSteps, parseVisibleTimeline.currentRawStepIndex, showSemanticRules]
   );
 
   const parserStatesView = useMemo(
@@ -146,45 +164,77 @@ function App() {
     [parsePlayback]
   );
 
-  const parseAstNodeIds = useMemo(() => {
-    const parseSteps = parsePhaseSlot?.logPhase?.steps ?? [];
-    return deriveAstNodeIds(parseSteps, parseSteps.length - 1);
-  }, [parsePhaseSlot]);
-
-  const visibleParseAstNodeIds = useMemo(
-    () => deriveAstNodeIds(steps, parsePlayback.visibleStepIndex),
-    [parsePlayback.visibleStepIndex, steps]
+  const parseASTPlayback = useMemo(
+    () =>
+      deriveASTPlaybackState(
+        parseRawSteps,
+        isSemanticPhase ? -1 : parseVisibleTimeline.currentRawStepIndex
+      ),
+    [isSemanticPhase, parseRawSteps, parseVisibleTimeline.currentRawStepIndex]
   );
 
-  const effectiveStepIndex = isSemanticPhase ? currentStepIndex : parsePlayback.visibleStepIndex;
+  const semanticASTPlayback = useMemo(
+    () => deriveASTPlaybackState(parseRawSteps, parseRawSteps.length - 1),
+    [parseRawSteps]
+  );
+
+  const visibleSteps = isSemanticPhase ? steps : parseVisibleTimeline.visibleSteps;
+  const effectiveStepIndex = isSemanticPhase
+    ? currentStepIndex
+    : parseVisibleTimeline.currentVisibleStepIndex;
 
   useEffect(() => {
     if (isSemanticPhase) return;
-    if (parsePlayback.visibleStepIndex === currentStepIndex) return;
-    setCurrentStepIndex(parsePlayback.visibleStepIndex);
-  }, [currentStepIndex, isSemanticPhase, parsePlayback.visibleStepIndex]);
+    if (parseVisibleTimeline.currentVisibleStepIndex === currentStepIndex) return;
+    setCurrentStepIndex(parseVisibleTimeline.currentVisibleStepIndex);
+  }, [currentStepIndex, isSemanticPhase, parseVisibleTimeline.currentVisibleStepIndex]);
 
   useEffect(() => {
-    if (isSemanticPhase) return;
-    visibleParseAstNodeIds.forEach((nodeId) => {
-      astRef.current?.enableNode(nodeId);
-    });
-  }, [isSemanticPhase, visibleParseAstNodeIds]);
+    if (isSemanticPhase) {
+      astRef.current?.showNodes(semanticASTPlayback.visibleNodeIds);
+      return;
+    }
+
+    astRef.current?.showNodes(parseASTPlayback.visibleNodeIds);
+    if (parseASTPlayback.focusNodeId !== null) {
+      astRef.current?.focusNode(parseASTPlayback.focusNodeId);
+    }
+  }, [
+    isSemanticPhase,
+    parseASTPlayback.focusNodeId,
+    parseASTPlayback.visibleNodeIds,
+    semanticASTPlayback.visibleNodeIds,
+  ]);
 
   useEffect(() => {
-    if (!isSemanticPhase) return;
-    parseAstNodeIds.forEach((nodeId) => {
-      astRef.current?.enableNode(nodeId);
-    });
-  }, [isSemanticPhase, parseAstNodeIds]);
+    if (isSemanticPhase) {
+      pendingParseRawAnchorRef.current = null;
+      return;
+    }
+
+    const rawAnchorIndex = pendingParseRawAnchorRef.current;
+    if (rawAnchorIndex === null) return;
+
+    pendingParseRawAnchorRef.current = null;
+    setCurrentStepIndex(
+      findVisibleIndexForRawIndex(rawAnchorIndex, parseVisibleTimeline.visibleToRawIndex)
+    );
+  }, [isSemanticPhase, parseVisibleTimeline.visibleToRawIndex]);
 
 
   const symbolTables = useMemo(() => {
-    if (effectiveStepIndex < 0) {
+    if (isSemanticPhase) {
+      if (currentStepIndex < 0) {
+        return { tables: [], focusId: null };
+      }
+      return deriveSymbolTableState(steps, currentStepIndex);
+    }
+
+    if (parseVisibleTimeline.currentRawStepIndex < 0) {
       return { tables: [], focusId: null };
     }
-    return deriveSymbolTableState(steps, effectiveStepIndex);
-  }, [effectiveStepIndex, steps]);
+    return deriveSymbolTableState(parseRawSteps, parseVisibleTimeline.currentRawStepIndex);
+  }, [currentStepIndex, isSemanticPhase, parseRawSteps, parseVisibleTimeline.currentRawStepIndex, steps]);
 
   const handleUseSample = useCallback(() => {
     setStepsData(sampleStepsData);
@@ -286,7 +336,12 @@ function App() {
               ? "bg-blue-600 text-white"
               : "bg-neutral-700 text-gray-300"}
           `}
-          onClick={() => setShowSemanticRules(v => !v)}
+          onClick={() => {
+            if (!isSemanticPhase && currentStepIndex >= 0) {
+              pendingParseRawAnchorRef.current = parseVisibleTimeline.currentRawStepIndex;
+            }
+            setShowSemanticRules((value) => !value);
+          }}
         >
           {showSemanticRules ? "Semantic: ON" : "Semantic: OFF"}
         </button>
@@ -301,7 +356,7 @@ function App() {
             <div className="panel panel--editor h-full">
               <EditorWindow
                 code={sourceCode}
-                steps={steps}
+                steps={visibleSteps}
                 currentStepIndex={effectiveStepIndex}
                 onCodeChange={setSourceCode}
                 onStepChange={setCurrentStepIndex}
@@ -309,17 +364,6 @@ function App() {
                   if (nextAvailablePhaseIndex >= 0) {
                     requestPhaseSwitch(nextAvailablePhaseIndex, "end_of_phase");
                   }
-                }}
-                resolveStepIndex={(stepIndex, delta, currentSteps) => {
-                  if (isSemanticPhase) {
-                    const nextIndex = stepIndex + delta;
-                    if (nextIndex < 0 || nextIndex >= currentSteps.length) {
-                      return null;
-                    }
-                    return nextIndex;
-                  }
-
-                  return getNextVisibleStepIndex(currentSteps, stepIndex, delta, showSemanticRules);
                 }}
               />
             </div>

@@ -25,7 +25,8 @@ import {
   }
   
   export interface ASTPaneHandle {
-    enableNode: (nodeId: number) => void;
+    showNodes: (nodeIds: number[]) => void;
+    focusNode: (nodeId: number) => void;
     resetGraph: () => void;
   }
   
@@ -135,40 +136,53 @@ import {
           edges.current.clear();
           networkRef.current?.unselectAll();
         },
-        enableNode(nodeId: number) {
-          const visId = nodeIdToVisId.get(nodeId);
-          if (visId === undefined) return;
-        
-          if (nodes.current.get(visId)) return;
-        
-          const def = nodeMap.get(visId);
-          if (!def) return;
-        
-          // ✅ Add node
-          nodes.current.add({
-            id: visId,
-            label: def.label,
-          });
-        
-          const tryAddEdge = (fromVis: number, toVis: number) => {
-            if (!nodes.current.get(fromVis) || !nodes.current.get(toVis)) return;
-        
-            const edgeId = `${fromVis}->${toVis}`;
-            if (!edges.current.get(edgeId)) {
-              edges.current.add({ id: edgeId, from: fromVis, to: toVis });
+        showNodes(nodeIds: number[]) {
+          const visibleVisIds = new Set<number>();
+
+          nodes.current.clear();
+          edges.current.clear();
+          networkRef.current?.unselectAll();
+
+          nodeIds.forEach((nodeId) => {
+            const visId = nodeIdToVisId.get(nodeId);
+            if (visId === undefined || visibleVisIds.has(visId)) {
+              return;
             }
-          };
-        
-          // ✅ Only VIS-ID edges
-          (outgoingEdgeMap.get(visId) ?? []).forEach(e =>
-            tryAddEdge(e.from, e.to)
-          );
-        
-          (incomingEdgeMap.get(visId) ?? []).forEach(e =>
-            tryAddEdge(e.from, e.to)
-          );
-        
-          // Pan + select
+
+            const def = nodeMap.get(visId);
+            if (!def) {
+              return;
+            }
+
+            visibleVisIds.add(visId);
+            nodes.current.add({
+              id: visId,
+              label: def.label,
+            });
+          });
+
+          visibleVisIds.forEach((visId) => {
+            (outgoingEdgeMap.get(visId) ?? []).forEach((edge) => {
+              if (!visibleVisIds.has(edge.to)) return;
+              const edgeId = `${edge.from}->${edge.to}`;
+              if (!edges.current.get(edgeId)) {
+                edges.current.add({ id: edgeId, from: edge.from, to: edge.to });
+              }
+            });
+
+            (incomingEdgeMap.get(visId) ?? []).forEach((edge) => {
+              if (!visibleVisIds.has(edge.from)) return;
+              const edgeId = `${edge.from}->${edge.to}`;
+              if (!edges.current.get(edgeId)) {
+                edges.current.add({ id: edgeId, from: edge.from, to: edge.to });
+              }
+            });
+          });
+        },
+        focusNode(nodeId: number) {
+          const visId = nodeIdToVisId.get(nodeId);
+          if (visId === undefined || !nodes.current.get(visId)) return;
+
           const network = networkRef.current;
           if (!network) return;
         
@@ -181,8 +195,7 @@ import {
           });
         
           network.selectNodes([visId]);
-        }
-        ,
+        },
       }));
   
       return (

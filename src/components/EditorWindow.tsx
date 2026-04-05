@@ -19,7 +19,6 @@ interface EditorWindowProps {
   onCodeChange: (code: string) => void;
   onStepChange: (nextIndex: number) => void;
   onPhaseEndNext?: () => void;
-  resolveStepIndex?: (currentStepIndex: number, delta: -1 | 1, steps: Step[]) => number | null;
 }
 
 export default function EditorWindow({
@@ -29,7 +28,6 @@ export default function EditorWindow({
   onCodeChange,
   onStepChange,
   onPhaseEndNext,
-  resolveStepIndex,
 }: EditorWindowProps) {
   const editorRef = useRef<any>(null);
   const lastLocationRef = useRef<{ line: number; char: number } | null>(null);
@@ -66,16 +64,13 @@ export default function EditorWindow({
   }, [currentStep]);
 
   const handleStep = (delta: number) => {
-    const next =
-      resolveStepIndex && (delta === -1 || delta === 1)
-        ? resolveStepIndex(currentStepIndex, delta, steps)
-        : currentStepIndex + delta;
+    const next = currentStepIndex + delta;
 
-    if (delta > 0 && next === null && currentStepIndex >= steps.length - 1) {
+    if (delta > 0 && currentStepIndex >= steps.length - 1) {
       onPhaseEndNext?.();
       return;
     }
-    if (next === null || next < 0 || next >= steps.length) return;
+    if (next < 0 || next >= steps.length) return;
     onStepChange(next);
   };
 
