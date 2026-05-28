@@ -8,6 +8,7 @@ import { sampleStepsData, sampleAstJson, sampleStatesJson, sampleInputCode } fro
 import {
   PHASE_LABELS,
   PHASE_ORDER,
+  type PhaseName,
   isKnownPhaseName,
 } from "./types/steps";
 import type {
@@ -36,17 +37,44 @@ interface PendingPhaseSwitch {
   trigger: PhaseSwitchTrigger;
 }
 
+interface SinglePhasePlaybackState {
+  currentVisibleStepIndex: number;
+  pendingParseRawAnchor: number | null;
+}
+
+type PhasePlaybackState = Record<PhaseName, SinglePhasePlaybackState>;
+
+interface SemanticPhaseCache {
+  astNodeIds: number[];
+  symbolTables: ReturnType<typeof deriveSymbolTableState>;
+}
+
+const createInitialPhasePlaybackState = (): PhasePlaybackState => ({
+  PHASE_LEX_PARSE: {
+    currentVisibleStepIndex: -1,
+    pendingParseRawAnchor: null,
+  },
+  PHASE_SEMANTIC: {
+    currentVisibleStepIndex: -1,
+    pendingParseRawAnchor: null,
+  },
+});
+
 function App() {
   const [stepsData, setStepsData] = useState<StepsData>(sampleStepsData);
   const [astData, setAstData] = useState<ASTData>(sampleAstJson);
   const [sourceCode, setSourceCode] = useState<string>(sampleInputCode);
   const [activePhaseIndex, setActivePhaseIndex] = useState<number>(0);
-  const [currentStepIndex, setCurrentStepIndex] = useState<number>(-1);
+  const [phasePlaybackState, setPhasePlaybackState] = useState<PhasePlaybackState>(
+    createInitialPhasePlaybackState
+  );
+  const [semanticPhaseCache, setSemanticPhaseCache] = useState<SemanticPhaseCache | null>(null);
   const [logLabel, setLogLabel] = useState("Sample data");
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showSemanticRules, setShowSemanticRules] = useState<boolean>(false);
   const [isCompiling, setIsCompiling] = useState<boolean>(false);
   const [pendingPhaseSwitch, setPendingPhaseSwitch] = useState<PendingPhaseSwitch | null>(null);
+  const [astPaneReadyVersion, setAstPaneReadyVersion] = useState<number>(0);
 
   const phaseSlots = useMemo(
     () =>
@@ -65,6 +93,7 @@ function App() {
     [stepsData]
   );
   const activePhaseSlot = phaseSlots[activePhaseIndex] ?? phaseSlots[0] ?? null;
+  const activePhaseName = activePhaseSlot?.phaseName ?? "PHASE_LEX_PARSE";
   const steps = useMemo(() => activePhaseSlot?.logPhase?.steps ?? [], [activePhaseSlot]);
   const isSemanticPhase = activePhaseSlot?.phaseName === "PHASE_SEMANTIC";
   const parsePhaseSlot = useMemo(
@@ -76,7 +105,6 @@ function App() {
     [activePhaseIndex, phaseSlots]
   );
   const astRef = useRef<ASTPaneHandle>(null);
-  const pendingParseRawAnchorRef = useRef<number | null>(null);
 
   const firstAvailablePhaseIndex = useMemo(() => {
     const index = phaseSlots.findIndex((slot) => slot.isAvailable);
@@ -90,9 +118,42 @@ function App() {
     return index >= 0 ? index : 0;
   }, []);
 
-  const resetPhaseState = useCallback(() => {
-    setCurrentStepIndex(-1);
+  const hardResetPhaseState = useCallback(() => {
+    setPhasePlaybackState(createInitialPhasePlaybackState());
+    setSemanticPhaseCache(null);
     astRef.current?.resetGraph();
+  }, []);
+
+  const setPhaseVisibleStepIndex = useCallback((phaseName: PhaseName, nextIndex: number) => {
+    setPhasePlaybackState((previous) => {
+      if (previous[phaseName].currentVisibleStepIndex === nextIndex) {
+        return previous;
+      }
+
+      return {
+        ...previous,
+        [phaseName]: {
+          ...previous[phaseName],
+          currentVisibleStepIndex: nextIndex,
+        },
+      };
+    });
+  }, []);
+
+  const setPhasePendingParseRawAnchor = useCallback((phaseName: PhaseName, rawIndex: number | null) => {
+    setPhasePlaybackState((previous) => {
+      if (previous[phaseName].pendingParseRawAnchor === rawIndex) {
+        return previous;
+      }
+
+      return {
+        ...previous,
+        [phaseName]: {
+          ...previous[phaseName],
+          pendingParseRawAnchor: rawIndex,
+        },
+      };
+    });
   }, []);
 
   const requestPhaseSwitch = useCallback(
@@ -114,10 +175,9 @@ function App() {
 
   const confirmPhaseSwitch = useCallback(() => {
     if (!pendingPhaseSwitch) return;
-    resetPhaseState();
     setActivePhaseIndex(pendingPhaseSwitch.targetPhaseIndex);
     setPendingPhaseSwitch(null);
-  }, [pendingPhaseSwitch, resetPhaseState]);
+  }, [pendingPhaseSwitch]);
 
   const cancelPhaseSwitch = useCallback(() => {
     setPendingPhaseSwitch(null);
@@ -130,25 +190,27 @@ function App() {
   }, [activePhaseSlot, firstAvailablePhaseIndex, phaseSlots.length]);
 
   const parseRawSteps = parsePhaseSlot?.logPhase?.steps ?? [];
+  const parsePhaseState = phasePlaybackState.PHASE_LEX_PARSE;
+  const semanticPhaseState = phasePlaybackState.PHASE_SEMANTIC;
 
   const parseVisibleTimeline = useMemo(
     () =>
       deriveParseVisibleTimeline(
         parseRawSteps,
         showSemanticRules,
-        isSemanticPhase ? -1 : currentStepIndex
+        parsePhaseState.currentVisibleStepIndex
       ),
-    [currentStepIndex, isSemanticPhase, parseRawSteps, showSemanticRules]
+    [parsePhaseState.currentVisibleStepIndex, parseRawSteps, showSemanticRules]
   );
 
   const parsePlayback = useMemo(
     () =>
       deriveParsePlaybackState(
         parseRawSteps,
-        isSemanticPhase ? -1 : parseVisibleTimeline.currentRawStepIndex,
+        parseVisibleTimeline.currentRawStepIndex,
         showSemanticRules
       ),
-    [isSemanticPhase, parseRawSteps, parseVisibleTimeline.currentRawStepIndex, showSemanticRules]
+    [parseRawSteps, parseVisibleTimeline.currentRawStepIndex, showSemanticRules]
   );
 
   const parserStatesView = useMemo(
@@ -168,30 +230,54 @@ function App() {
     () =>
       deriveASTPlaybackState(
         parseRawSteps,
-        isSemanticPhase ? -1 : parseVisibleTimeline.currentRawStepIndex
+        parseVisibleTimeline.currentRawStepIndex
       ),
-    [isSemanticPhase, parseRawSteps, parseVisibleTimeline.currentRawStepIndex]
+    [parseRawSteps, parseVisibleTimeline.currentRawStepIndex]
   );
 
-  const semanticASTPlayback = useMemo(
+  const semanticBaselineASTPlayback = useMemo(
     () => deriveASTPlaybackState(parseRawSteps, parseRawSteps.length - 1),
+    [parseRawSteps]
+  );
+
+  const semanticBaselineSymbolTables = useMemo(
+    () => deriveSymbolTableState(parseRawSteps, parseRawSteps.length - 1),
     [parseRawSteps]
   );
 
   const visibleSteps = isSemanticPhase ? steps : parseVisibleTimeline.visibleSteps;
   const effectiveStepIndex = isSemanticPhase
-    ? currentStepIndex
+    ? semanticPhaseState.currentVisibleStepIndex
     : parseVisibleTimeline.currentVisibleStepIndex;
 
   useEffect(() => {
-    if (isSemanticPhase) return;
-    if (parseVisibleTimeline.currentVisibleStepIndex === currentStepIndex) return;
-    setCurrentStepIndex(parseVisibleTimeline.currentVisibleStepIndex);
-  }, [currentStepIndex, isSemanticPhase, parseVisibleTimeline.currentVisibleStepIndex]);
+    if (parseVisibleTimeline.currentVisibleStepIndex === parsePhaseState.currentVisibleStepIndex) return;
+    setPhaseVisibleStepIndex("PHASE_LEX_PARSE", parseVisibleTimeline.currentVisibleStepIndex);
+  }, [
+    parsePhaseState.currentVisibleStepIndex,
+    parseVisibleTimeline.currentVisibleStepIndex,
+    setPhaseVisibleStepIndex,
+  ]);
+
+  useEffect(() => {
+    if (!isSemanticPhase || semanticPhaseCache !== null) return;
+
+    setSemanticPhaseCache({
+      astNodeIds: semanticBaselineASTPlayback.visibleNodeIds,
+      symbolTables: semanticBaselineSymbolTables,
+    });
+  }, [
+    isSemanticPhase,
+    semanticBaselineASTPlayback.visibleNodeIds,
+    semanticBaselineSymbolTables,
+    semanticPhaseCache,
+  ]);
 
   useEffect(() => {
     if (isSemanticPhase) {
-      astRef.current?.showNodes(semanticASTPlayback.visibleNodeIds);
+      astRef.current?.showNodes(
+        semanticPhaseCache?.astNodeIds ?? semanticBaselineASTPlayback.visibleNodeIds
+      );
       return;
     }
 
@@ -200,52 +286,59 @@ function App() {
       astRef.current?.focusNode(parseASTPlayback.focusNodeId);
     }
   }, [
+    astPaneReadyVersion,
     isSemanticPhase,
     parseASTPlayback.focusNodeId,
     parseASTPlayback.visibleNodeIds,
-    semanticASTPlayback.visibleNodeIds,
+    semanticBaselineASTPlayback.visibleNodeIds,
+    semanticPhaseCache,
   ]);
 
   useEffect(() => {
-    if (isSemanticPhase) {
-      pendingParseRawAnchorRef.current = null;
-      return;
-    }
-
-    const rawAnchorIndex = pendingParseRawAnchorRef.current;
+    const rawAnchorIndex = parsePhaseState.pendingParseRawAnchor;
     if (rawAnchorIndex === null) return;
 
-    pendingParseRawAnchorRef.current = null;
-    setCurrentStepIndex(
+    setPhaseVisibleStepIndex(
+      "PHASE_LEX_PARSE",
       findVisibleIndexForRawIndex(rawAnchorIndex, parseVisibleTimeline.visibleToRawIndex)
     );
-  }, [isSemanticPhase, parseVisibleTimeline.visibleToRawIndex]);
+    setPhasePendingParseRawAnchor("PHASE_LEX_PARSE", null);
+  }, [
+    parsePhaseState.pendingParseRawAnchor,
+    parseVisibleTimeline.visibleToRawIndex,
+    setPhasePendingParseRawAnchor,
+    setPhaseVisibleStepIndex,
+  ]);
 
 
   const symbolTables = useMemo(() => {
     if (isSemanticPhase) {
-      if (currentStepIndex < 0) {
-        return { tables: [], focusId: null };
-      }
-      return deriveSymbolTableState(steps, currentStepIndex);
+      return semanticPhaseCache?.symbolTables ?? semanticBaselineSymbolTables;
     }
 
     if (parseVisibleTimeline.currentRawStepIndex < 0) {
       return { tables: [], focusId: null };
     }
     return deriveSymbolTableState(parseRawSteps, parseVisibleTimeline.currentRawStepIndex);
-  }, [currentStepIndex, isSemanticPhase, parseRawSteps, parseVisibleTimeline.currentRawStepIndex, steps]);
+  }, [
+    isSemanticPhase,
+    parseRawSteps,
+    parseVisibleTimeline.currentRawStepIndex,
+    semanticBaselineSymbolTables,
+    semanticPhaseCache,
+    semanticPhaseState.currentVisibleStepIndex,
+  ]);
 
   const handleUseSample = useCallback(() => {
     setStepsData(sampleStepsData);
     setAstData(sampleAstJson);
     setSourceCode(sampleInputCode);
     setActivePhaseIndex(getFirstAvailablePhaseIndex(sampleStepsData));
-    resetPhaseState();
+    hardResetPhaseState();
     setPendingPhaseSwitch(null);
     setLogLabel("Sample data");
     setLoadError(null);
-  }, [getFirstAvailablePhaseIndex, resetPhaseState]);
+  }, [getFirstAvailablePhaseIndex, hardResetPhaseState]);
 
   const handleCompile = useCallback(async () => {
     setIsCompiling(true);
@@ -258,7 +351,7 @@ function App() {
       setStepsData(result.stepsData);
       setAstData(result.astData as ASTData);
       setActivePhaseIndex(getFirstAvailablePhaseIndex(result.stepsData));
-      resetPhaseState();
+      hardResetPhaseState();
       setPendingPhaseSwitch(null);
       setLogLabel("Compiled source");
     } catch (error) {
@@ -273,7 +366,7 @@ function App() {
 
       setIsCompiling(false);
     }
-  }, [getFirstAvailablePhaseIndex, resetPhaseState, sourceCode]);
+  }, [getFirstAvailablePhaseIndex, hardResetPhaseState, sourceCode]);
 
   return (
     <div className="app-root flex flex-col h-screen">
@@ -325,7 +418,10 @@ function App() {
           {isCompiling ? "Compiling..." : "Compile"}
         </button>
         {effectiveStepIndex < 0 && (
-          <button className="bg-neutral-600 rounded-sm p-1 px-3 font-mono font-light text-sm cursor-pointer" onClick={() => setCurrentStepIndex(0)}>
+          <button
+            className="bg-neutral-600 rounded-sm p-1 px-3 font-mono font-light text-sm cursor-pointer"
+            onClick={() => setPhaseVisibleStepIndex(activePhaseName, 0)}
+          >
             START
           </button>
         )}
@@ -337,8 +433,11 @@ function App() {
               : "bg-neutral-700 text-gray-300"}
           `}
           onClick={() => {
-            if (!isSemanticPhase && currentStepIndex >= 0) {
-              pendingParseRawAnchorRef.current = parseVisibleTimeline.currentRawStepIndex;
+            if (parsePhaseState.currentVisibleStepIndex >= 0) {
+              setPhasePendingParseRawAnchor(
+                "PHASE_LEX_PARSE",
+                parseVisibleTimeline.currentRawStepIndex
+              );
             }
             setShowSemanticRules((value) => !value);
           }}
@@ -359,7 +458,7 @@ function App() {
                 steps={visibleSteps}
                 currentStepIndex={effectiveStepIndex}
                 onCodeChange={setSourceCode}
-                onStepChange={setCurrentStepIndex}
+                onStepChange={(nextIndex) => setPhaseVisibleStepIndex(activePhaseName, nextIndex)}
                 onPhaseEndNext={() => {
                   if (nextAvailablePhaseIndex >= 0) {
                     requestPhaseSwitch(nextAvailablePhaseIndex, "end_of_phase");
@@ -403,7 +502,11 @@ function App() {
           }
           bottomLeft={
             <div className="panel h-full">
-              <ASTPane ref={astRef} astData={astData}/> 
+              <ASTPane
+                ref={astRef}
+                astData={astData}
+                onReady={() => setAstPaneReadyVersion((value) => value + 1)}
+              />
             </div>
           }
           bottomRight={
@@ -418,10 +521,10 @@ function App() {
           <div className="phase-modal">
             <h2 className="phase-modal__title">Switch Phase</h2>
             <p className="phase-modal__body">
-              Switching from {pendingPhaseSwitch.sourcePhaseLabel} to {pendingPhaseSwitch.targetPhaseLabel} resets the current phase state.
+              Switching from {pendingPhaseSwitch.sourcePhaseLabel} to {pendingPhaseSwitch.targetPhaseLabel} preserves each phase's playback position and derived UI state.
             </p>
             <p className="phase-modal__body">
-              Switching to semantic rebuilds the AST from completed parse steps. Switching back to parse starts that phase from the beginning.
+              On first semantic entry, the AST and symbol tables are rebuilt from completed parse steps and cached. Returning to parse restores its prior state as-is.
             </p>
             <p className="phase-modal__meta">
               Trigger: {pendingPhaseSwitch.trigger === "manual" ? "manual phase selection" : "end of current phase"}

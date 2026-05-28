@@ -32,6 +32,7 @@ import {
   
   interface ASTPaneProps {
     astData: ASTData;
+    onReady?: () => void;
   }
   
   /* VS Code–like graph options */
@@ -73,7 +74,7 @@ import {
   };
   
   const ASTPane = forwardRef<ASTPaneHandle, ASTPaneProps>(
-    ({ astData }, ref) => {
+    ({ astData, onReady }, ref) => {
       const containerRef = useRef<HTMLDivElement | null>(null);
       const networkRef = useRef<Network | null>(null);
   
@@ -126,6 +127,8 @@ import {
         networkRef.current.on("stabilizationIterationsDone", () => {
           networkRef.current?.redraw();
         });
+
+        onReady?.();
       }, []);
 
       useEffect(() => {
