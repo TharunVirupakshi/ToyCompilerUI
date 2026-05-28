@@ -48,6 +48,7 @@ const ResizableLayout: FC<ResizableLayoutProps> = ({
 
         {/* RIGHT COLUMN */}
         <Split
+          key={showSplitTopRow ? "right-column-split" : "right-column-single"}
           direction="vertical"
           sizes={[50, 50]}
           minSize={120}
@@ -55,19 +56,21 @@ const ResizableLayout: FC<ResizableLayoutProps> = ({
           className="flex flex-col h-full"
         >
           {/* TOP RIGHT ROW */}
-          {showSplitTopRow ? (
-            <Split
-              sizes={[50, 50]}
-              minSize={120}
-              gutterSize={8}
-              className="flex h-full"
-            >
-              <div className="pane h-full">{topLeft}</div>
-              <div className="pane h-full">{topRight}</div>
-            </Split>
-          ) : (
-            <div className="pane h-full">{topRight}</div>
-          )}
+          <div className="pane h-full">
+            {showSplitTopRow ? (
+              <Split
+                sizes={[50, 50]}
+                minSize={120}
+                gutterSize={8}
+                className="flex h-full"
+              >
+                <div className="pane h-full">{topLeft}</div>
+                <div className="pane h-full">{topRight}</div>
+              </Split>
+            ) : (
+              <div className="h-full w-full">{topRight}</div>
+            )}
+          </div>
 
           {/* BOTTOM RIGHT */}
           <div className="pane h-full">{bottomLeft}</div>
