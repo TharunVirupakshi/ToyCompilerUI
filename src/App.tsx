@@ -19,6 +19,7 @@ import ASTPane from "./components/ASTPane";
 import type { ASTData, ASTPaneHandle } from "./components/ASTPane";
 import ParserStatesPanel from "./components/ParserStatesPanel";
 import SemanticLoggerPanel from "./components/SemanticLoggerPanel";
+import StepPickerModal from "./components/StepPickerModal";
 import { compileSource } from "./api/compiler";
 import { deriveParsePlaybackState } from "./utils/parsePlayback";
 import { deriveParserStatesView } from "./utils/parserStatesView";
@@ -27,15 +28,6 @@ import {
   deriveParseVisibleTimeline,
   findVisibleIndexForRawIndex,
 } from "./utils/parseTimeline";
-
-type PhaseSwitchTrigger = "manual" | "end_of_phase";
-
-interface PendingPhaseSwitch {
-  sourcePhaseLabel: string;
-  targetPhaseIndex: number;
-  targetPhaseLabel: string;
-  trigger: PhaseSwitchTrigger;
-}
 
 interface SinglePhasePlaybackState {
   currentVisibleStepIndex: number;
@@ -73,8 +65,10 @@ function App() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [showSemanticRules, setShowSemanticRules] = useState<boolean>(false);
   const [isCompiling, setIsCompiling] = useState<boolean>(false);
-  const [pendingPhaseSwitch, setPendingPhaseSwitch] = useState<PendingPhaseSwitch | null>(null);
   const [astPaneReadyVersion, setAstPaneReadyVersion] = useState<number>(0);
+  const [isStepPickerOpen, setIsStepPickerOpen] = useState<boolean>(false);
+  const [isParseSuccessModalOpen, setIsParseSuccessModalOpen] = useState<boolean>(false);
+  const [hasDismissedParseSuccessModal, setHasDismissedParseSuccessModal] = useState<boolean>(false);
 
   const phaseSlots = useMemo(
     () =>
@@ -156,38 +150,27 @@ function App() {
     });
   }, []);
 
-  const requestPhaseSwitch = useCallback(
-    (targetPhaseIndex: number, trigger: PhaseSwitchTrigger) => {
+  const switchPhase = useCallback(
+    (targetPhaseIndex: number) => {
       const targetSlot = phaseSlots[targetPhaseIndex];
       if (!targetSlot || !targetSlot.isAvailable || targetPhaseIndex === activePhaseIndex) {
         return;
       }
 
-      setPendingPhaseSwitch({
-        sourcePhaseLabel: activePhaseSlot?.label ?? "CURRENT PHASE",
-        targetPhaseIndex,
-        targetPhaseLabel: targetSlot.label,
-        trigger,
-      });
+      setActivePhaseIndex(targetPhaseIndex);
     },
-    [activePhaseIndex, activePhaseSlot, phaseSlots]
+    [activePhaseIndex, phaseSlots]
   );
-
-  const confirmPhaseSwitch = useCallback(() => {
-    if (!pendingPhaseSwitch) return;
-    setActivePhaseIndex(pendingPhaseSwitch.targetPhaseIndex);
-    setPendingPhaseSwitch(null);
-  }, [pendingPhaseSwitch]);
-
-  const cancelPhaseSwitch = useCallback(() => {
-    setPendingPhaseSwitch(null);
-  }, []);
 
   useEffect(() => {
     if (phaseSlots.length === 0) return;
     if (activePhaseSlot?.isAvailable) return;
     setActivePhaseIndex(firstAvailablePhaseIndex);
   }, [activePhaseSlot, firstAvailablePhaseIndex, phaseSlots.length]);
+
+  useEffect(() => {
+    setIsStepPickerOpen(false);
+  }, [activePhaseIndex, stepsData]);
 
   const parseRawSteps = parsePhaseSlot?.logPhase?.steps ?? [];
   const parsePhaseState = phasePlaybackState.PHASE_LEX_PARSE;
@@ -249,6 +232,22 @@ function App() {
   const effectiveStepIndex = isSemanticPhase
     ? semanticPhaseState.currentVisibleStepIndex
     : parseVisibleTimeline.currentVisibleStepIndex;
+  const isParsePhaseComplete =
+    activePhaseName === "PHASE_LEX_PARSE" &&
+    parseVisibleTimeline.visibleSteps.length > 0 &&
+    parseVisibleTimeline.currentVisibleStepIndex === parseVisibleTimeline.visibleSteps.length - 1;
+
+  useEffect(() => {
+    if (!isParsePhaseComplete) {
+      setIsParseSuccessModalOpen(false);
+      setHasDismissedParseSuccessModal(false);
+      return;
+    }
+
+    if (!hasDismissedParseSuccessModal) {
+      setIsParseSuccessModalOpen(true);
+    }
+  }, [hasDismissedParseSuccessModal, isParsePhaseComplete]);
 
   useEffect(() => {
     if (parseVisibleTimeline.currentVisibleStepIndex === parsePhaseState.currentVisibleStepIndex) return;
@@ -335,7 +334,9 @@ function App() {
     setSourceCode(sampleInputCode);
     setActivePhaseIndex(getFirstAvailablePhaseIndex(sampleStepsData));
     hardResetPhaseState();
-    setPendingPhaseSwitch(null);
+    setIsStepPickerOpen(false);
+    setIsParseSuccessModalOpen(false);
+    setHasDismissedParseSuccessModal(false);
     setLogLabel("Sample data");
     setLoadError(null);
   }, [getFirstAvailablePhaseIndex, hardResetPhaseState]);
@@ -352,7 +353,9 @@ function App() {
       setAstData(result.astData as ASTData);
       setActivePhaseIndex(getFirstAvailablePhaseIndex(result.stepsData));
       hardResetPhaseState();
-      setPendingPhaseSwitch(null);
+      setIsStepPickerOpen(false);
+      setIsParseSuccessModalOpen(false);
+      setHasDismissedParseSuccessModal(false);
       setLogLabel("Compiled source");
     } catch (error) {
       setLoadError(error instanceof Error ? error.message : "Compilation failed.");
@@ -396,7 +399,7 @@ function App() {
                 }`}
                 onClick={() => {
                   if (!slot.isAvailable) return;
-                  requestPhaseSwitch(index, "manual");
+                  switchPhase(index);
                 }}
                 disabled={!slot.isAvailable}
               >
@@ -457,13 +460,10 @@ function App() {
                 code={sourceCode}
                 steps={visibleSteps}
                 currentStepIndex={effectiveStepIndex}
+                phaseName={activePhaseName}
                 onCodeChange={setSourceCode}
                 onStepChange={(nextIndex) => setPhaseVisibleStepIndex(activePhaseName, nextIndex)}
-                onPhaseEndNext={() => {
-                  if (nextAvailablePhaseIndex >= 0) {
-                    requestPhaseSwitch(nextAvailablePhaseIndex, "end_of_phase");
-                  }
-                }}
+                onOpenStepPicker={() => setIsStepPickerOpen(true)}
               />
             </div>
           }
@@ -516,30 +516,53 @@ function App() {
           }
         />
       </main>
-      {pendingPhaseSwitch && (
-        <div className="phase-modal-overlay">
-          <div className="phase-modal">
-            <h2 className="phase-modal__title">Switch Phase</h2>
+      {isParseSuccessModalOpen && (
+        <div
+          className="phase-modal-overlay"
+          onClick={() => {
+            setIsParseSuccessModalOpen(false);
+            setHasDismissedParseSuccessModal(true);
+          }}
+        >
+          <div className="phase-modal" onClick={(event) => event.stopPropagation()}>
+            <h2 className="phase-modal__title">PARSING SUCCESS</h2>
             <p className="phase-modal__body">
-              Switching from {pendingPhaseSwitch.sourcePhaseLabel} to {pendingPhaseSwitch.targetPhaseLabel} preserves each phase's playback position and derived UI state.
-            </p>
-            <p className="phase-modal__body">
-              On first semantic entry, the AST and symbol tables are rebuilt from completed parse steps and cached. Returning to parse restores its prior state as-is.
-            </p>
-            <p className="phase-modal__meta">
-              Trigger: {pendingPhaseSwitch.trigger === "manual" ? "manual phase selection" : "end of current phase"}
+              Parsing completed successfully. You can continue reviewing parse steps or move to the next phase.
             </p>
             <div className="phase-modal__actions">
-              <button className="phase-modal__button phase-modal__button--secondary" onClick={cancelPhaseSwitch}>
-                Cancel
+              <button
+                className="phase-modal__button phase-modal__button--secondary"
+                onClick={() => {
+                  setIsParseSuccessModalOpen(false);
+                  setHasDismissedParseSuccessModal(true);
+                }}
+              >
+                Stay Here
               </button>
-              <button className="phase-modal__button phase-modal__button--primary" onClick={confirmPhaseSwitch}>
-                Switch Phase
-              </button>
+              {nextAvailablePhaseIndex >= 0 && (
+                <button
+                  className="phase-modal__button phase-modal__button--primary"
+                  onClick={() => {
+                    setIsParseSuccessModalOpen(false);
+                    setHasDismissedParseSuccessModal(true);
+                    switchPhase(nextAvailablePhaseIndex);
+                  }}
+                >
+                  Go To {phaseSlots[nextAvailablePhaseIndex]?.label ?? "Next Phase"}
+                </button>
+              )}
             </div>
           </div>
         </div>
       )}
+      <StepPickerModal
+        isOpen={isStepPickerOpen}
+        phaseLabel={activePhaseSlot?.label ?? "CURRENT"}
+        steps={visibleSteps}
+        currentStepIndex={effectiveStepIndex}
+        onClose={() => setIsStepPickerOpen(false)}
+        onSelectStep={(stepIndex) => setPhaseVisibleStepIndex(activePhaseName, stepIndex)}
+      />
     </div>
   );
 }

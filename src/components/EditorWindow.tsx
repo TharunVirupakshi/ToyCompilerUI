@@ -2,32 +2,27 @@ import { useEffect, useRef } from "react";
 import Editor from "@monaco-editor/react";
 import type {
   LexReadTokenData,
-  ParseAddSymData,
-  ParseAssgnSymType,
-  ParseCreateASTNodeData,
-  ParseCreateScopeData,
-  ParseEnterExitScopeData,
-  ParseEnteringState,
-  ParseReduceRuleData,
-  ParseSemanticStepData,
   Step,
 } from "../types/steps";
+import { getStepSummary } from "../utils/stepSummary";
 interface EditorWindowProps {
   code: string;
   steps: Step[];
   currentStepIndex: number;
+  phaseName: string;
   onCodeChange: (code: string) => void;
   onStepChange: (nextIndex: number) => void;
-  onPhaseEndNext?: () => void;
+  onOpenStepPicker?: () => void;
 }
 
 export default function EditorWindow({
   code,
   steps,
   currentStepIndex,
+  phaseName,
   onCodeChange,
   onStepChange,
-  onPhaseEndNext,
+  onOpenStepPicker,
 }: EditorWindowProps) {
   const editorRef = useRef<any>(null);
   const lastLocationRef = useRef<{ line: number; char: number } | null>(null);
@@ -66,72 +61,16 @@ export default function EditorWindow({
   const handleStep = (delta: number) => {
     const next = currentStepIndex + delta;
 
-    if (delta > 0 && currentStepIndex >= steps.length - 1) {
-      onPhaseEndNext?.();
-      return;
-    }
     if (next < 0 || next >= steps.length) return;
     onStepChange(next);
   };
 
   const stepSummary = currentStep ? getStepSummary(currentStep) : "—";
   const isEnteringStateSummary = stepSummary.startsWith("ENTERING STATE");
-
-  function getStepSummary(step: Step): string {
-    switch (step.type) {
-      case "LEX_READ_TOKEN": {
-        const { token, value, location } = step.data as LexReadTokenData;
-        return `LEX: ${token}${value ? `(${value})` : ""} @ ${location}`;
-      }
-  
-      case "PARSE_REDUCE_RULE": {
-        const { ruleNo, rule } = step.data as ParseReduceRuleData;
-        return `REDUCE: ${rule} [${ruleNo}]`;
-      }
-  
-      case "PARSE_SEMANTIC_STEP": {
-        const { instr, stepNo } = step.data as ParseSemanticStepData;
-        return `SEMANTIC(${stepNo}): ${instr}`;
-      }
-  
-      case "PARSE_CREATE_AST_NODE": {
-        return `AST NODE CREATED: #${(step.data as ParseCreateASTNodeData).node_id}`;
-      }
-  
-      case "PARSE_CREATE_SCOPE": {
-        const { name, table_id, parent_id } = step.data as ParseCreateScopeData;
-        return `SCOPE CREATE: ${name} (id=${table_id}, parent=${parent_id})`;
-      }
-  
-      case "PARSE_ENTER_SCOPE": {
-        const { name, table_id } = step.data as ParseEnterExitScopeData
-        return `ENTER SCOPE: ${name} (id=${table_id})`;
-      }
-
-      case "PARSE_EXIT_SCOPE": {
-        const { name, table_id } = step.data as ParseEnterExitScopeData
-        return `EXIT SCOPE: ${name} (id=${table_id})`;
-      }
-  
-      case "PARSE_ADD_SYM": {
-        const d = step.data as ParseAddSymData;
-        return `ADD SYMBOL: ${d.name} : ${d.sym_type} (scope ${d.scope_id})`;
-      }
-  
-      case "PARSE_ASSGN_SYM_TYPE": {
-        const d = step.data as ParseAssgnSymType;
-        return `TYPE ASSIGN: ${d.name} ← ${d.sym_type}`;
-      }
-
-      case "PARSE_ENTERING_STATE": {
-        const d = step.data as ParseEnteringState;
-        return `ENTERING STATE: ${d.state}` 
-      }
-  
-      default:
-        return step.type;
-    }
-  }
+  const isParsePhaseComplete =
+    phaseName === "PHASE_LEX_PARSE" &&
+    currentStepIndex >= 0 &&
+    currentStepIndex === steps.length - 1;
   
 
   return (
@@ -141,6 +80,11 @@ export default function EditorWindow({
           <span>
             STEP {currentStepIndex + 1}/{steps.length || 1}
           </span>
+          {isParsePhaseComplete && (
+            <span className="text-green-400 font-medium animate-[pulse_0.8s_ease-in-out_infinite]">
+              PARSING SUCCESS
+            </span>
+          )}
           <span>•</span>
           <span
             className={`truncate max-w-[600px] text-gray-300 ${
@@ -151,6 +95,14 @@ export default function EditorWindow({
           </span>
         </div>
         <div className="flex items-center gap-1.5">
+        <button
+          className="bg-neutral-600 rounded-sm p-1 px-3 font-mono font-light text-sm cursor-pointer"
+          onClick={onOpenStepPicker}
+          title="View all steps"
+          aria-label="View all steps"
+        >
+          Steps
+        </button>
         <button
           className="bg-neutral-600 rounded-sm p-1 px-3 font-mono font-light text-sm cursor-pointer"
           onClick={() => handleStep(-1)}

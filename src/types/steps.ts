@@ -10,7 +10,12 @@ export type StepType =
   | "PARSE_CREATE_AST_NODE"
   | "PARSE_ENTERING_STATE"
   | "PARSE_STACK_SNAPSHOT"
-  | "PARSE_EXIT_SCOPE";
+  | "PARSE_EXIT_SCOPE"
+  | "SEMANTIC_PASS_STATUS"
+  | "SEMANTIC_SYMBOL_HIGHLIGHT"
+  | "SEMANTIC_NODE_HIGHLIGHT"
+  | "SEMANTIC_ERROR"
+  | "SEMANTIC_ANALYSIS_COMPLETE";
 
 export type PhaseName = "PHASE_LEX_PARSE" | "PHASE_SEMANTIC";
 
@@ -89,6 +94,47 @@ export interface ParseCreateASTNodeData {
   node_id: NumericValue;
 }
 
+export interface SemanticPassStatusData {
+  pass: string;
+  status: string;
+  message: string;
+}
+
+export interface SemanticSymbolHighlightData {
+  scope_id: string;
+  symbol_name: string;
+  reason: string;
+  old_type?: string;
+  new_type?: string;
+  line_no?: string;
+  char_no?: string;
+}
+
+export interface SemanticNodeHighlightData {
+  pass: string;
+  node_id: string;
+  node_type: string;
+  line_no: string;
+  char_no: string;
+  action: string;
+  message?: string;
+}
+
+export interface SemanticErrorData {
+  pass: string;
+  message: string;
+  line_no: string;
+  char_no: string;
+  node_id?: string;
+  scope_id?: string;
+  symbol_name?: string;
+}
+
+export interface SemanticAnalysisCompleteData {
+  status: string;
+  total_errors: string;
+}
+
 export type ParseStepData =
   | ParseCreateScopeData
   | ParseReduceRuleData
@@ -100,7 +146,12 @@ export type ParseStepData =
   | ParseCreateASTNodeData
   | ParseEnteringState
   | ParseStackSnapshot
-  | ParseEnterExitScopeData;
+  | ParseEnterExitScopeData
+  | SemanticPassStatusData
+  | SemanticSymbolHighlightData
+  | SemanticNodeHighlightData
+  | SemanticErrorData
+  | SemanticAnalysisCompleteData;
 
 export interface Step {
   type: StepType;
