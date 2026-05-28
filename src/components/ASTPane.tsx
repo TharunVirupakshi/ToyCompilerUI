@@ -79,6 +79,7 @@ import {
   
       const nodes = useRef(new DataSet<any>());
       const edges = useRef(new DataSet<any>());
+      const redrawFrameRef = useRef<number | null>(null);
   
       /* Lookup maps */
       const nodeMap = useMemo(
@@ -121,6 +122,18 @@ import {
           { nodes: nodes.current, edges: edges.current },
           graphOptions
         );
+
+        networkRef.current.on("stabilizationIterationsDone", () => {
+          networkRef.current?.redraw();
+        });
+      }, []);
+
+      useEffect(() => {
+        return () => {
+          if (redrawFrameRef.current !== null) {
+            window.cancelAnimationFrame(redrawFrameRef.current);
+          }
+        };
       }, []);
 
       useEffect(() => {
@@ -137,11 +150,12 @@ import {
           networkRef.current?.unselectAll();
         },
         showNodes(nodeIds: number[]) {
+          const network = networkRef.current;
           const visibleVisIds = new Set<number>();
 
           nodes.current.clear();
           edges.current.clear();
-          networkRef.current?.unselectAll();
+          network?.unselectAll();
 
           nodeIds.forEach((nodeId) => {
             const visId = nodeIdToVisId.get(nodeId);
@@ -178,6 +192,21 @@ import {
               }
             });
           });
+
+          if (!network) return;
+
+          if (redrawFrameRef.current !== null) {
+            window.cancelAnimationFrame(redrawFrameRef.current);
+          }
+
+          redrawFrameRef.current = window.requestAnimationFrame(() => {
+            redrawFrameRef.current = null;
+            network.redraw();
+            network.fit({
+              animation: false,
+            });
+            network.stabilize(30);
+          });
         },
         focusNode(nodeId: number) {
           const visId = nodeIdToVisId.get(nodeId);
@@ -185,15 +214,11 @@ import {
 
           const network = networkRef.current;
           if (!network) return;
-        
-          const pos = network.getPositions([visId])[visId];
-          if (!pos) return;
-        
-          network.moveTo({
-            position: pos,
+
+          network.focus(visId, {
+            scale: 1,
             animation: { duration: 300, easingFunction: "easeInOutQuad" },
           });
-        
           network.selectNodes([visId]);
         },
       }));
