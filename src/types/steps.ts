@@ -11,6 +11,7 @@ export type StepType =
   | "PARSE_ENTERING_STATE"
   | "PARSE_STACK_SNAPSHOT"
   | "PARSE_EXIT_SCOPE"
+  | "PARSE_ERROR"
   | "SEMANTIC_PASS_STATUS"
   | "SEMANTIC_SYMBOL_HIGHLIGHT"
   | "SEMANTIC_NODE_HIGHLIGHT"
@@ -29,6 +30,11 @@ export const PHASE_LABELS: Record<PhaseName, string> = {
 export const isKnownPhaseName = (phaseName: string): phaseName is PhaseName =>
   PHASE_ORDER.includes(phaseName as PhaseName);
 
+export interface ParseErrorData {
+  message: string;
+  line_no: string;
+  char_no: string;
+}
 export interface ParseCreateScopeData {
   table_id: string;
   name: string;
@@ -142,6 +148,7 @@ export type ParseStepData =
   | ParseSemanticStepData
   | LexReadTokenData
   | ParseAddSymData
+  | ParseErrorData
   | ParseAssgnSymType
   | ParseCreateASTNodeData
   | ParseEnteringState

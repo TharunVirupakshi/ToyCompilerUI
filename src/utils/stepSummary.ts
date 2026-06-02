@@ -6,6 +6,7 @@ import type {
   ParseCreateScopeData,
   ParseEnterExitScopeData,
   ParseEnteringState,
+  ParseErrorData,
   ParseReduceRuleData,
   ParseSemanticStepData,
   SemanticAnalysisCompleteData,
@@ -64,6 +65,11 @@ export const getStepSummary = (step: Step): string => {
     case "PARSE_ENTERING_STATE": {
       const data = step.data as ParseEnteringState;
       return `ENTERING STATE: ${data.state}`;
+    }
+
+    case "PARSE_ERROR": {
+      const data = step.data as ParseErrorData;
+      return `${data.message} at line ${data.line_no}, char ${data.char_no}`;
     }
 
     case "SEMANTIC_PASS_STATUS": {

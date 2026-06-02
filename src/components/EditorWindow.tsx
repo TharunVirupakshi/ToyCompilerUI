@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import Editor from "@monaco-editor/react";
+import type * as Monaco from "monaco-editor";
 import type {
   LexReadTokenData,
   Step,
@@ -26,10 +27,17 @@ export default function EditorWindow({
 }: EditorWindowProps) {
   const editorRef = useRef<any>(null);
   const lastLocationRef = useRef<{ line: number; char: number } | null>(null);
+  const monacoRef = useRef<typeof Monaco | null>(null);
 
-  const handleEditorMount = (editor: any) => {
-    editorRef.current = editor;
-  };
+  const handleEditorMount = (
+  editor: any,
+  monaco: typeof Monaco
+) => {
+  editorRef.current = editor;
+  monacoRef.current = monaco;
+};
+
+
 
   const currentStep =
   currentStepIndex >= 0 ? steps[currentStepIndex] : null;
@@ -65,13 +73,68 @@ export default function EditorWindow({
     onStepChange(next);
   };
 
+  useEffect(() => {
+  if (!editorRef.current || !monacoRef.current) {
+    return;
+  }
+
+  const model = editorRef.current.getModel();
+
+  if (!model) {
+    return;
+  }
+
+  const parseErrorStep = currentStep?.type === "PARSE_ERROR"
+    ? currentStep
+    : null;
+
+  if (!parseErrorStep) {
+    monacoRef.current.editor.setModelMarkers(
+      model,
+      "parse-errors",
+      []
+    );
+    return;
+  }
+
+  const data = parseErrorStep.data as {
+    line_no: string;
+    char_no: string;
+    message: string;
+  };
+
+  const line = Number(data.line_no);
+  const col = Number(data.char_no);
+  const lineContent = model.getLineContent(line);
+  editorRef.current.revealLineInCenter(line);
+  editorRef.current.setPosition({
+    lineNumber: line,
+    column: col,
+  });
+
+  monacoRef.current.editor.setModelMarkers(
+    model,
+    "parse-errors",
+    [
+      {
+        startLineNumber: line,
+        startColumn: col,
+        endLineNumber: line,
+        endColumn: lineContent.length + 1,
+        message: data.message,
+        severity: monacoRef.current.MarkerSeverity.Error,
+      },
+    ]
+  );
+}, [currentStep]);
+
   const stepSummary = currentStep ? getStepSummary(currentStep) : "—";
   const isEnteringStateSummary = stepSummary.startsWith("ENTERING STATE");
+  const isParseError = currentStep?.type === "PARSE_ERROR";
   const isParsePhaseComplete =
     phaseName === "PHASE_LEX_PARSE" &&
     currentStepIndex >= 0 &&
     currentStepIndex === steps.length - 1;
-  
 
   return (
     <div className="h-full">
@@ -80,18 +143,27 @@ export default function EditorWindow({
           <span>
             STEP {currentStepIndex + 1}/{steps.length || 1}
           </span>
-          {isParsePhaseComplete && (
+          {isParseError && (
+            <span className="text-red-400 font-medium animate-[pulse_0.8s_ease-in-out_infinite]">
+              PARSE ERROR
+            </span>
+          )}
+          {!isParseError &&isParsePhaseComplete && (
             <span className="text-green-400 font-medium animate-[pulse_0.8s_ease-in-out_infinite]">
               PARSING SUCCESS
             </span>
           )}
+          
           <span>•</span>
           <span
-            className={`truncate max-w-[600px] text-gray-300 ${
-              isEnteringStateSummary ? "animate-[pulse_0.8s_ease-in-out_infinite]" : ""
+            title={stepSummary}
+            className={`truncate max-w-[200px] text-gray-300 ${
+              isEnteringStateSummary
+                ? "animate-[pulse_0.8s_ease-in-out_infinite]"
+                : ""
             }`}
           >
-          {stepSummary}
+            {stepSummary}
           </span>
         </div>
         <div className="flex items-center gap-1.5">

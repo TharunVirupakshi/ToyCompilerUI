@@ -20,7 +20,7 @@ export const compileSource = async (sourceCode: string): Promise<CompileResponse
     error?: string;
     details?: string;
   };
-
+  console.log("Received compile response:", payload);
   if (!response.ok) {
     const errorMessage = [payload.error, payload.details].filter(Boolean).join(" ");
     throw new Error(errorMessage || "Compilation failed.");

@@ -234,6 +234,7 @@ function App() {
     : parseVisibleTimeline.currentVisibleStepIndex;
   const isParsePhaseComplete =
     activePhaseName === "PHASE_LEX_PARSE" &&
+    parsePlayback.parseError === null &&
     parseVisibleTimeline.visibleSteps.length > 0 &&
     parseVisibleTimeline.currentVisibleStepIndex === parseVisibleTimeline.visibleSteps.length - 1;
 

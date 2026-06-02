@@ -2,6 +2,7 @@ import type {
   ActiveRule,
   LexReadTokenData,
   ParseEnteringState,
+  ParseErrorData,
   ParseReduceRuleCompleteData,
   ParseReduceRuleData,
   ParseSemanticStepData,
@@ -26,6 +27,7 @@ export interface ParsePlaybackState {
   highlightReduce: boolean;
   highlightReduceComplete: boolean;
   enteringState: number | null;
+  parseError: ParseErrorData | null;
 }
 
 const getRhsLength = (ruleText: string) => {
@@ -68,6 +70,7 @@ export const deriveParsePlaybackState = (
     highlightReduce: false,
     highlightReduceComplete: false,
     enteringState: null,
+    parseError: null,
   };
 
   if (currentStepIndex < 0) {
@@ -134,6 +137,11 @@ export const deriveParsePlaybackState = (
         }
         break;
       }
+      case "PARSE_ERROR": {
+        const data = step.data as ParseErrorData;
+        state.parseError = data;
+        break;
+      }  
       default:
         break;
     }
