@@ -262,3 +262,7 @@
 .panel-bg {
   background-color: var(--panel);
 }
+
+.ast-node-highlight {
+  background-color: rgba(255, 255, 0, 0.25);
+}

@@ -12,6 +12,12 @@ import {
     id: number;
     node_id: number;
     label: string;
+    line_no: number;
+    char_no: number;
+    start_line_no: number;
+    start_char_no: number;
+    end_line_no: number;
+    end_char_no: number;
   }
   
   export interface ASTEdgeDef {
@@ -33,6 +39,7 @@ import {
   interface ASTPaneProps {
     astData: ASTData;
     onReady?: () => void;
+    onNodeClick?: (node: ASTNodeDef) => void;
   }
   
   /* VS Code–like graph options */
@@ -74,7 +81,7 @@ import {
   };
   
   const ASTPane = forwardRef<ASTPaneHandle, ASTPaneProps>(
-    ({ astData, onReady }, ref) => {
+    ({ astData, onReady, onNodeClick }, ref) => {
       const containerRef = useRef<HTMLDivElement | null>(null);
       const networkRef = useRef<Network | null>(null);
   
@@ -87,6 +94,12 @@ import {
         () => new Map(astData.nodes.map((n) => [n.id, n])),
         [astData.nodes]
       );
+
+      const nodeMapRef = useRef(nodeMap);
+
+      useEffect(() => {
+        nodeMapRef.current = nodeMap;
+      }, [nodeMap]);
 
       const nodeIdToVisId = useMemo(
         () =>
@@ -128,6 +141,21 @@ import {
           networkRef.current?.redraw();
         });
 
+        networkRef.current.on("click", (params) => {
+          if (params.nodes.length === 0) {
+            return;
+          }
+
+          const visId = params.nodes[0];
+          const node = nodeMapRef.current.get(visId);
+
+          console.log("Clicked node:", node);
+
+          if (node) {
+            onNodeClick?.(node);
+          }
+        });
+
         onReady?.();
       }, []);
 
@@ -166,7 +194,7 @@ import {
               return;
             }
 
-            const def = nodeMap.get(visId);
+            const def = nodeMapRef.current.get(visId);
             if (!def) {
               return;
             }
@@ -175,6 +203,8 @@ import {
             nodes.current.add({
               id: visId,
               label: def.label,
+              line_no: def.line_no,
+              char_no: def.char_no,
             });
           });
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
 import Editor from "@monaco-editor/react";
 import type * as Monaco from "monaco-editor";
 import type {
@@ -16,28 +16,60 @@ interface EditorWindowProps {
   onOpenStepPicker?: () => void;
 }
 
-export default function EditorWindow({
-  code,
-  steps,
-  currentStepIndex,
-  phaseName,
-  onCodeChange,
-  onStepChange,
-  onOpenStepPicker,
-}: EditorWindowProps) {
+export interface EditorWindowHandle {
+  highlightRange: (
+    startLine: number,
+    startChar: number,
+    endLine: number,
+    endChar: number
+  ) => void;
+}
+
+const EditorWindow = forwardRef<
+  EditorWindowHandle,
+  EditorWindowProps
+>((props, ref) => {
+  const { onCodeChange, onStepChange, currentStepIndex, code, steps, phaseName, onOpenStepPicker } = props;
   const editorRef = useRef<any>(null);
+  const decorationIdsRef = useRef<string[]>([]);
   const lastLocationRef = useRef<{ line: number; char: number } | null>(null);
   const monacoRef = useRef<typeof Monaco | null>(null);
 
   const handleEditorMount = (
-  editor: any,
-  monaco: typeof Monaco
-) => {
-  editorRef.current = editor;
-  monacoRef.current = monaco;
-};
+    editor: any,
+    monaco: typeof Monaco
+  ) => {
+    editorRef.current = editor;
+    monacoRef.current = monaco;
+  };
 
+  useImperativeHandle(ref, () => ({
+    highlightRange(startLine, startChar, endLine, endChar) {
+      if (!editorRef.current || !monacoRef.current) {
+        return;
+      }
 
+      decorationIdsRef.current =
+        editorRef.current.deltaDecorations(
+          decorationIdsRef.current,
+          [
+            {
+              range: new monacoRef.current.Range(
+                startLine,
+                startChar,
+                endLine,
+                endChar
+              ),
+              options: {
+                inlineClassName: "ast-node-highlight",
+              },
+            },
+          ]
+        );
+
+      editorRef.current.revealLineInCenter(startLine);
+    },
+  }));
 
   const currentStep =
   currentStepIndex >= 0 ? steps[currentStepIndex] : null;
@@ -213,4 +245,6 @@ export default function EditorWindow({
       </div>
     </div>
   );
-}
+});
+
+export default EditorWindow;

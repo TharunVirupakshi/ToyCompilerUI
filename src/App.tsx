@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
-import EditorWindow from "./components/EditorWindow";
+import EditorWindow, {
+  type EditorWindowHandle,
+} from "./components/EditorWindow";
 import GrammarPanel from "./components/GrammarPanel";
 import ResizableLayout from "./components/ResizableLayout";
 import SymbolTablesPane from "./components/SymbolTablesPane";
@@ -99,6 +101,7 @@ function App() {
     [activePhaseIndex, phaseSlots]
   );
   const astRef = useRef<ASTPaneHandle>(null);
+  const editorRef = useRef<EditorWindowHandle>(null);
 
   const firstAvailablePhaseIndex = useMemo(() => {
     const index = phaseSlots.findIndex((slot) => slot.isAvailable);
@@ -458,6 +461,7 @@ function App() {
           leftTop={
             <div className="panel panel--editor h-full">
               <EditorWindow
+                ref={editorRef}
                 code={sourceCode}
                 steps={visibleSteps}
                 currentStepIndex={effectiveStepIndex}
@@ -507,6 +511,14 @@ function App() {
                 ref={astRef}
                 astData={astData}
                 onReady={() => setAstPaneReadyVersion((value) => value + 1)}
+                onNodeClick={(node) => {
+                  editorRef.current?.highlightRange(
+                    node.start_line_no,
+                    node.start_char_no,
+                    node.end_line_no,
+                    node.end_char_no
+                  );
+                }}
               />
             </div>
           }
