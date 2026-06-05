@@ -12,4 +12,9 @@ export const sampleStepsData = stepsJson as StepsData;
 export const sampleStatesJson = statesJson as ParserState[];
 export const grammarJson = grammarJsonData as GrammarRule[];
 export const sampleInputCode = 
-`int i = 2;`;
+`int i = 2;
+
+int main() {
+    return 0;
+}
+`;
