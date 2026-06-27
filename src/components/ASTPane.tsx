@@ -4,6 +4,7 @@ import {
     useImperativeHandle,
     useMemo,
     useRef,
+    useState,
   } from "react";
   import { DataSet, Network } from "vis-network/standalone";
   
@@ -81,8 +82,42 @@ import {
     },
   };
 
+  const TARGET_NODE_MIN_SCALE = 1.25;
+  const TARGET_NODE_MAX_SCALE = 3;
+
+  const centerNodeInPane = (
+    network: Network,
+    viewport: HTMLDivElement | null,
+    visId: number,
+    scale: number
+  ) => {
+    if (viewport) {
+      const width = viewport.clientWidth;
+      const height = viewport.clientHeight;
+      if (width > 0 && height > 0) {
+        network.setSize(`${width}px`, `${height}px`);
+      }
+    }
+
+    network.stopSimulation();
+    network.selectNodes([visId]);
+    network.redraw();
+    network.moveTo({
+      position: network.getPosition(visId),
+      scale,
+      offset: { x: 0, y: 0 },
+      animation: {
+        duration: 500,
+        easingFunction: "easeInOutQuad",
+      },
+    });
+  };
+
   const ASTPane = forwardRef<ASTPaneHandle, ASTPaneProps>(
     ({ astData, onReady, onNodeClick }, ref) => {
+      const [isFocusEnabled, setIsFocusEnabled] = useState(true);
+      const [hasTargetNode, setHasTargetNode] = useState(false);
+      const viewportRef = useRef<HTMLDivElement | null>(null);
       const containerRef = useRef<HTMLDivElement | null>(null);
       const networkRef = useRef<Network | null>(null);
   
@@ -90,6 +125,8 @@ import {
       const edges = useRef(new DataSet<any>());
       const redrawFrameRef = useRef<number | null>(null);
       const focusedVisIdRef = useRef<number | null>(null);
+      const isFocusEnabledRef = useRef(true);
+      const hasRenderedNodesRef = useRef(false);
   
       /* Lookup maps */
       const nodeMap = useMemo(
@@ -144,17 +181,35 @@ import {
           if (!network) return;
 
           network.redraw();
+        });
 
+        networkRef.current.on("animationFinished", () => {
+          const network = networkRef.current;
+          const viewport = viewportRef.current;
           const focusedVisId = focusedVisIdRef.current;
           if (
-            focusedVisId !== null &&
-            nodes.current.get(focusedVisId)
+            !network ||
+            !viewport ||
+            focusedVisId === null ||
+            !nodes.current.get(focusedVisId)
           ) {
-            network.stopSimulation();
-            network.selectNodes([focusedVisId]);
+            return;
+          }
+
+          const nodePosition = network.canvasToDOM(
+            network.getPosition(focusedVisId)
+          );
+          const expectedX = viewport.clientWidth / 2;
+          const expectedY = viewport.clientHeight / 2;
+          const isCentered =
+            Math.abs(nodePosition.x - expectedX) <= 2 &&
+            Math.abs(nodePosition.y - expectedY) <= 2;
+
+          if (!isCentered) {
             network.moveTo({
               position: network.getPosition(focusedVisId),
-              scale: 1,
+              scale: network.getScale(),
+              offset: { x: 0, y: 0 },
               animation: false,
             });
             network.redraw();
@@ -188,6 +243,7 @@ import {
       }, []);
 
       useEffect(() => {
+        hasRenderedNodesRef.current = false;
         nodes.current.clear();
         edges.current.clear();
         networkRef.current?.unselectAll();
@@ -197,19 +253,30 @@ import {
       useImperativeHandle(ref, () => ({
         resetGraph() {
           focusedVisIdRef.current = null;
+          setHasTargetNode(false);
+          hasRenderedNodesRef.current = false;
           nodes.current.clear();
           edges.current.clear();
           networkRef.current?.unselectAll();
         },
         clearFocus() {
           focusedVisIdRef.current = null;
+          setHasTargetNode(false);
           networkRef.current?.unselectAll();
         },
         showNodes(nodeIds: number[]) {
           const network = networkRef.current;
           const visibleVisIds = new Set<number>();
+          const shouldFitInitialNodes =
+            !hasRenderedNodesRef.current && nodeIds.length > 0;
+          const previousScale = network?.getScale() ?? 1;
+          const previousPosition = network?.getViewPosition() ?? {
+            x: 0,
+            y: 0,
+          };
 
           focusedVisIdRef.current = null;
+          setHasTargetNode(false);
           nodes.current.clear();
           edges.current.clear();
           network?.unselectAll();
@@ -261,24 +328,34 @@ import {
           redrawFrameRef.current = window.requestAnimationFrame(() => {
             redrawFrameRef.current = null;
             network.redraw();
-            network.fit({
-              animation: false,
-            });
+
+            if (shouldFitInitialNodes) {
+              network.fit({
+                animation: false,
+              });
+            } else {
+              network.moveTo({
+                position: previousPosition,
+                scale: previousScale,
+                animation: false,
+              });
+            }
+
+            hasRenderedNodesRef.current = nodeIds.length > 0;
             network.stabilize(30);
 
             const focusedVisId = focusedVisIdRef.current;
             if (
               focusedVisId !== null &&
-              nodes.current.get(focusedVisId)
+              nodes.current.get(focusedVisId) &&
+              isFocusEnabledRef.current
             ) {
-              network.stopSimulation();
-              network.selectNodes([focusedVisId]);
-              network.moveTo({
-                position: network.getPosition(focusedVisId),
-                scale: 1,
-                animation: false,
-              });
-              network.redraw();
+              centerNodeInPane(
+                network,
+                viewportRef.current,
+                focusedVisId,
+                network.getScale()
+              );
             }
           });
         },
@@ -290,7 +367,12 @@ import {
           if (!network) return;
 
           focusedVisIdRef.current = visId;
+          setHasTargetNode(true);
           network.selectNodes([visId]);
+
+          if (!isFocusEnabledRef.current) {
+            return;
+          }
 
           // showNodes schedules fit() on the next frame. Let that finish before
           // panning, otherwise fit() immediately overwrites this focus request.
@@ -298,29 +380,100 @@ import {
             return;
           }
 
-          network.stopSimulation();
-          network.moveTo({
-            position: network.getPosition(visId),
-            scale: 1,
-            animation: false,
-          });
-          network.redraw();
+          centerNodeInPane(
+            network,
+            viewportRef.current,
+            visId,
+            network.getScale()
+          );
         },
       }));
   
       return (
-        <div className="h-full flex flex-col font-mono text-sm text-gray-200">
+        <div className="h-full min-h-0 overflow-hidden flex flex-col font-mono text-sm text-gray-200">
           {/* Header */}
-          <div className="bg-neutral-800 p-1 border-b border-neutral-700">
-            <h2 className="font-semibold text-gray-100">AST</h2>
-            <p className="text-xs text-gray-400">
-              Nodes appear as they are created
-            </p>
+          <div className="flex items-center justify-between gap-2 bg-neutral-800 p-1 border-b border-neutral-700">
+            <div>
+              <h2 className="font-semibold text-gray-100">AST</h2>
+              <p className="text-xs text-gray-400">
+                Nodes appear as they are created
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              <button
+                type="button"
+                aria-pressed={isFocusEnabled}
+                className={`rounded-sm border px-2 py-1 text-xs transition-colors ${
+                  isFocusEnabled
+                    ? "border-blue-500 bg-blue-950/60 text-blue-200"
+                    : "border-neutral-600 bg-neutral-900 text-gray-400"
+                }`}
+                onClick={() => {
+                  const nextValue = !isFocusEnabledRef.current;
+                  isFocusEnabledRef.current = nextValue;
+                  setIsFocusEnabled(nextValue);
+
+                  if (!nextValue) return;
+
+                  const network = networkRef.current;
+                  const focusedVisId = focusedVisIdRef.current;
+                  if (
+                    network &&
+                    focusedVisId !== null &&
+                    nodes.current.get(focusedVisId)
+                  ) {
+                    centerNodeInPane(
+                      network,
+                      viewportRef.current,
+                      focusedVisId,
+                      network.getScale()
+                    );
+                  }
+                }}
+              >
+                Focus: {isFocusEnabled ? "ON" : "OFF"}
+              </button>
+              <button
+                type="button"
+                className="rounded-sm border border-neutral-600 bg-neutral-900 px-2 py-1 text-xs text-gray-300 transition-colors hover:border-neutral-400 hover:text-gray-100 disabled:cursor-default disabled:opacity-40"
+                disabled={!hasTargetNode}
+                onClick={() => {
+                  const network = networkRef.current;
+                  const focusedVisId = focusedVisIdRef.current;
+                  if (
+                    !network ||
+                    focusedVisId === null ||
+                    !nodes.current.get(focusedVisId)
+                  ) {
+                    return;
+                  }
+
+                  const targetScale = Math.min(
+                    Math.max(
+                      network.getScale() * 1.35,
+                      TARGET_NODE_MIN_SCALE
+                    ),
+                    TARGET_NODE_MAX_SCALE
+                  );
+                  centerNodeInPane(
+                    network,
+                    viewportRef.current,
+                    focusedVisId,
+                    targetScale
+                  );
+                }}
+              >
+                Go to target
+              </button>
+            </div>
           </div>
   
           {/* Graph */}
-          <div className="flex-1 bg-neutral-900 border border-neutral-700 mt-2">
-            <div ref={containerRef} className="h-full w-full" />
+          <div
+            ref={viewportRef}
+            className="relative mt-2 min-h-0 flex-1 overflow-hidden bg-neutral-900 border border-neutral-700"
+          >
+            <div ref={containerRef} className="absolute inset-0" />
           </div>
         </div>
       );

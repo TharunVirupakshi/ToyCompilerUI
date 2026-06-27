@@ -47,34 +47,36 @@ const ResizableLayout: FC<ResizableLayoutProps> = ({
         </Split>
 
         {/* RIGHT COLUMN */}
-        <Split
-          key={showSplitTopRow ? "right-column-split" : "right-column-single"}
-          direction="vertical"
-          sizes={[50, 50]}
-          minSize={120}
-          gutterSize={8}
-          className="flex flex-col h-full"
-        >
-          {/* TOP RIGHT ROW */}
-          <div className="pane h-full">
-            {showSplitTopRow ? (
-              <Split
-                sizes={[50, 50]}
-                minSize={120}
-                gutterSize={8}
-                className="flex h-full"
-              >
-                <div className="pane h-full">{topLeft}</div>
-                <div className="pane h-full">{topRight}</div>
-              </Split>
-            ) : (
-              <div className="h-full w-full">{topRight}</div>
-            )}
-          </div>
+        <div className="h-full min-w-0">
+          <Split
+            key={showSplitTopRow ? "right-column-split" : "right-column-single"}
+            direction="vertical"
+            sizes={[50, 50]}
+            minSize={120}
+            gutterSize={8}
+            className="flex flex-col h-full"
+          >
+            {/* TOP RIGHT ROW */}
+            <div className="pane h-full">
+              {showSplitTopRow ? (
+                <Split
+                  sizes={[50, 50]}
+                  minSize={120}
+                  gutterSize={8}
+                  className="flex h-full"
+                >
+                  <div className="pane h-full">{topLeft}</div>
+                  <div className="pane h-full">{topRight}</div>
+                </Split>
+              ) : (
+                <div className="h-full w-full">{topRight}</div>
+              )}
+            </div>
 
-          {/* BOTTOM RIGHT */}
-          <div className="pane h-full">{bottomLeft}</div>
-        </Split>
+            {/* BOTTOM RIGHT */}
+            <div className="pane h-full">{bottomLeft}</div>
+          </Split>
+        </div>
       </Split>
     </div>
   );
