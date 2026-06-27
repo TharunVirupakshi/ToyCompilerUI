@@ -315,6 +315,7 @@ function App() {
     }
 
     astRef.current?.focusNode(semanticPlayback.activeNodeId);
+    astRef.current?.centerOnNode(semanticPlayback.activeNodeId);
   }, [
     astPaneReadyVersion,
     isSemanticPhase,

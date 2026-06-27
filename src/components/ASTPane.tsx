@@ -32,11 +32,20 @@ import {
   }
   
   export interface ASTPaneHandle {
-    showNodes: (nodeIds: number[]) => void;
-    focusNode: (nodeId: number) => void;
-    clearFocus: () => void;
-    resetGraph: () => void;
-  }
+  showNodes: (nodeIds: number[]) => void;
+
+  // Highlight/select the node only.
+  focusNode: (nodeId: number) => void;
+
+  // Move the viewport to the node.
+  centerOnNode: (
+    nodeId: number,
+    scale?: number
+  ) => void;
+
+  clearFocus: () => void;
+  resetGraph: () => void;
+}
   
   interface ASTPaneProps {
     astData: ASTData;
@@ -265,101 +274,108 @@ import {
           networkRef.current?.unselectAll();
         },
         showNodes(nodeIds: number[]) {
-          const network = networkRef.current;
-          const visibleVisIds = new Set<number>();
-          const shouldFitInitialNodes =
-            !hasRenderedNodesRef.current && nodeIds.length > 0;
-          const previousScale = network?.getScale() ?? 1;
-          const previousPosition = network?.getViewPosition() ?? {
-            x: 0,
-            y: 0,
-          };
+  const network = networkRef.current;
+  if (!network) return;
 
-          focusedVisIdRef.current = null;
-          setHasTargetNode(false);
-          nodes.current.clear();
-          edges.current.clear();
-          network?.unselectAll();
+  const visibleVisIds = new Set<number>();
 
-          nodeIds.forEach((nodeId) => {
-            const visId = nodeIdToVisId.get(nodeId);
-            if (visId === undefined || visibleVisIds.has(visId)) {
-              return;
-            }
+  nodes.current.clear();
+  edges.current.clear();
 
-            const def = nodeMapRef.current.get(visId);
-            if (!def) {
-              return;
-            }
+  // Add visible nodes
+  nodeIds.forEach((nodeId) => {
+    const visId = nodeIdToVisId.get(nodeId);
+    if (visId === undefined || visibleVisIds.has(visId)) return;
 
-            visibleVisIds.add(visId);
-            nodes.current.add({
-              id: visId,
-              label: def.label,
-              line_no: def.line_no,
-              char_no: def.char_no,
-            });
-          });
+    const def = nodeMapRef.current.get(visId);
+    if (!def) return;
 
-          visibleVisIds.forEach((visId) => {
-            (outgoingEdgeMap.get(visId) ?? []).forEach((edge) => {
-              if (!visibleVisIds.has(edge.to)) return;
-              const edgeId = `${edge.from}->${edge.to}`;
-              if (!edges.current.get(edgeId)) {
-                edges.current.add({ id: edgeId, from: edge.from, to: edge.to });
-              }
-            });
+    visibleVisIds.add(visId);
 
-            (incomingEdgeMap.get(visId) ?? []).forEach((edge) => {
-              if (!visibleVisIds.has(edge.from)) return;
-              const edgeId = `${edge.from}->${edge.to}`;
-              if (!edges.current.get(edgeId)) {
-                edges.current.add({ id: edgeId, from: edge.from, to: edge.to });
-              }
-            });
-          });
+    nodes.current.add({
+      id: visId,
+      label: def.label,
+      line_no: def.line_no,
+      char_no: def.char_no,
+    });
+  });
 
-          if (!network) return;
+  // Add edges
+  visibleVisIds.forEach((visId) => {
+    (outgoingEdgeMap.get(visId) ?? []).forEach((edge) => {
+      if (!visibleVisIds.has(edge.to)) return;
 
-          if (redrawFrameRef.current !== null) {
-            window.cancelAnimationFrame(redrawFrameRef.current);
-          }
+      const edgeId = `${edge.from}->${edge.to}`;
 
-          redrawFrameRef.current = window.requestAnimationFrame(() => {
-            redrawFrameRef.current = null;
-            network.redraw();
+      if (!edges.current.get(edgeId)) {
+        edges.current.add({
+          id: edgeId,
+          from: edge.from,
+          to: edge.to,
+        });
+      }
+    });
 
-            if (shouldFitInitialNodes) {
-              network.fit({
-                animation: false,
-              });
-            } else {
-              network.moveTo({
-                position: previousPosition,
-                scale: previousScale,
-                animation: false,
-              });
-            }
+    (incomingEdgeMap.get(visId) ?? []).forEach((edge) => {
+      if (!visibleVisIds.has(edge.from)) return;
 
-            hasRenderedNodesRef.current = nodeIds.length > 0;
-            network.stabilize(30);
+      const edgeId = `${edge.from}->${edge.to}`;
 
-            const focusedVisId = focusedVisIdRef.current;
-            if (
-              focusedVisId !== null &&
-              nodes.current.get(focusedVisId) &&
-              isFocusEnabledRef.current
-            ) {
-              centerNodeInPane(
-                network,
-                viewportRef.current,
-                focusedVisId,
-                network.getScale()
-              );
-            }
-          });
-        },
+      if (!edges.current.get(edgeId)) {
+        edges.current.add({
+          id: edgeId,
+          from: edge.from,
+          to: edge.to,
+        });
+      }
+    });
+  });
+
+  // Keep existing focus if possible.
+  if (
+    focusedVisIdRef.current !== null &&
+    !visibleVisIds.has(focusedVisIdRef.current)
+  ) {
+    focusedVisIdRef.current = null;
+    setHasTargetNode(false);
+    network.unselectAll();
+  } else if (focusedVisIdRef.current !== null) {
+    network.selectNodes([focusedVisIdRef.current]);
+  }
+
+  if (redrawFrameRef.current !== null) {
+    cancelAnimationFrame(redrawFrameRef.current);
+  }
+
+  redrawFrameRef.current = requestAnimationFrame(() => {
+    redrawFrameRef.current = null;
+
+    network.redraw();
+
+    // Only fit the graph once.
+    if (!hasRenderedNodesRef.current && nodeIds.length > 0) {
+      network.fit({
+        animation: false,
+      });
+    }
+
+    hasRenderedNodesRef.current = nodeIds.length > 0;
+
+    network.stabilize(30);
+  });
+},
         focusNode(nodeId: number) {
+          const visId = nodeIdToVisId.get(nodeId);
+          if (visId === undefined || !nodes.current.get(visId)) return;
+
+          focusedVisIdRef.current = visId;
+          setHasTargetNode(true);
+
+          networkRef.current?.selectNodes([visId]);
+
+          // Nothing else.
+        },
+        centerOnNode(nodeId: number, scale?: number) {
           const visId = nodeIdToVisId.get(nodeId);
           if (visId === undefined || !nodes.current.get(visId)) return;
 
@@ -368,23 +384,12 @@ import {
 
           focusedVisIdRef.current = visId;
           setHasTargetNode(true);
-          network.selectNodes([visId]);
-
-          if (!isFocusEnabledRef.current) {
-            return;
-          }
-
-          // showNodes schedules fit() on the next frame. Let that finish before
-          // panning, otherwise fit() immediately overwrites this focus request.
-          if (redrawFrameRef.current !== null) {
-            return;
-          }
 
           centerNodeInPane(
             network,
             viewportRef.current,
             visId,
-            network.getScale()
+            scale ?? network.getScale(),
           );
         },
       }));
