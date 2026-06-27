@@ -5,6 +5,7 @@ import type {
   LexReadTokenData,
   Step,
 } from "../types/steps";
+import type { SemanticSourceHighlight } from "../utils/semanticPlayback";
 import { getStepSummary } from "../utils/stepSummary";
 interface EditorWindowProps {
   code: string;
@@ -14,6 +15,7 @@ interface EditorWindowProps {
   onCodeChange: (code: string) => void;
   onStepChange: (nextIndex: number) => void;
   onOpenStepPicker?: () => void;
+  semanticHighlight?: SemanticSourceHighlight | null;
 }
 
 export interface EditorWindowHandle {
@@ -29,7 +31,16 @@ const EditorWindow = forwardRef<
   EditorWindowHandle,
   EditorWindowProps
 >((props, ref) => {
-  const { onCodeChange, onStepChange, currentStepIndex, code, steps, phaseName, onOpenStepPicker } = props;
+  const {
+    onCodeChange,
+    onStepChange,
+    currentStepIndex,
+    code,
+    steps,
+    phaseName,
+    onOpenStepPicker,
+    semanticHighlight = null,
+  } = props;
   const editorRef = useRef<any>(null);
   const decorationIdsRef = useRef<string[]>([]);
   const lastLocationRef = useRef<{ line: number; char: number } | null>(null);
@@ -159,6 +170,80 @@ const EditorWindow = forwardRef<
     ]
   );
 }, [currentStep]);
+
+  useEffect(() => {
+    if (!editorRef.current || !monacoRef.current) {
+      return;
+    }
+
+    const model = editorRef.current.getModel();
+    if (!model) {
+      return;
+    }
+
+    monacoRef.current.editor.setModelMarkers(model, "semantic-errors", []);
+
+    if (!semanticHighlight) {
+      decorationIdsRef.current = editorRef.current.deltaDecorations(
+        decorationIdsRef.current,
+        []
+      );
+      return;
+    }
+
+    if (
+      semanticHighlight.line < 1 ||
+      semanticHighlight.line > model.getLineCount()
+    ) {
+      decorationIdsRef.current = editorRef.current.deltaDecorations(
+        decorationIdsRef.current,
+        []
+      );
+      return;
+    }
+
+    const maxColumn = model.getLineMaxColumn(semanticHighlight.line);
+    const startColumn = Math.min(
+      Math.max(1, semanticHighlight.char),
+      maxColumn
+    );
+    const range = new monacoRef.current.Range(
+      semanticHighlight.line,
+      startColumn,
+      semanticHighlight.line,
+      maxColumn
+    );
+
+    decorationIdsRef.current = editorRef.current.deltaDecorations(
+      decorationIdsRef.current,
+      [
+        {
+          range,
+          options: {
+            inlineClassName:
+              semanticHighlight.kind === "error"
+                ? "semantic-error-highlight"
+                : "ast-node-highlight",
+          },
+        },
+      ]
+    );
+
+    if (semanticHighlight.kind === "error") {
+      monacoRef.current.editor.setModelMarkers(model, "semantic-errors", [
+        {
+          startLineNumber: semanticHighlight.line,
+          startColumn,
+          endLineNumber: semanticHighlight.line,
+          endColumn: maxColumn,
+          message: semanticHighlight.message ?? "Semantic error",
+          severity: monacoRef.current.MarkerSeverity.Error,
+        },
+      ]);
+    }
+
+    editorRef.current.revealLineInCenter(semanticHighlight.line);
+  }, [semanticHighlight]);
 
   const stepSummary = currentStep ? getStepSummary(currentStep) : "—";
   const isEnteringStateSummary = stepSummary.startsWith("ENTERING STATE");

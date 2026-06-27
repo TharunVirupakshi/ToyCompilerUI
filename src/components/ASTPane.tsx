@@ -33,6 +33,7 @@ import {
   export interface ASTPaneHandle {
     showNodes: (nodeIds: number[]) => void;
     focusNode: (nodeId: number) => void;
+    clearFocus: () => void;
     resetGraph: () => void;
   }
   
@@ -79,7 +80,7 @@ import {
       },
     },
   };
-  
+
   const ASTPane = forwardRef<ASTPaneHandle, ASTPaneProps>(
     ({ astData, onReady, onNodeClick }, ref) => {
       const containerRef = useRef<HTMLDivElement | null>(null);
@@ -88,6 +89,7 @@ import {
       const nodes = useRef(new DataSet<any>());
       const edges = useRef(new DataSet<any>());
       const redrawFrameRef = useRef<number | null>(null);
+      const focusedVisIdRef = useRef<number | null>(null);
   
       /* Lookup maps */
       const nodeMap = useMemo(
@@ -138,7 +140,25 @@ import {
         );
 
         networkRef.current.on("stabilizationIterationsDone", () => {
-          networkRef.current?.redraw();
+          const network = networkRef.current;
+          if (!network) return;
+
+          network.redraw();
+
+          const focusedVisId = focusedVisIdRef.current;
+          if (
+            focusedVisId !== null &&
+            nodes.current.get(focusedVisId)
+          ) {
+            network.stopSimulation();
+            network.selectNodes([focusedVisId]);
+            network.moveTo({
+              position: network.getPosition(focusedVisId),
+              scale: 1,
+              animation: false,
+            });
+            network.redraw();
+          }
         });
 
         networkRef.current.on("click", (params) => {
@@ -176,14 +196,20 @@ import {
       /* Expose imperative API */
       useImperativeHandle(ref, () => ({
         resetGraph() {
+          focusedVisIdRef.current = null;
           nodes.current.clear();
           edges.current.clear();
+          networkRef.current?.unselectAll();
+        },
+        clearFocus() {
+          focusedVisIdRef.current = null;
           networkRef.current?.unselectAll();
         },
         showNodes(nodeIds: number[]) {
           const network = networkRef.current;
           const visibleVisIds = new Set<number>();
 
+          focusedVisIdRef.current = null;
           nodes.current.clear();
           edges.current.clear();
           network?.unselectAll();
@@ -239,6 +265,21 @@ import {
               animation: false,
             });
             network.stabilize(30);
+
+            const focusedVisId = focusedVisIdRef.current;
+            if (
+              focusedVisId !== null &&
+              nodes.current.get(focusedVisId)
+            ) {
+              network.stopSimulation();
+              network.selectNodes([focusedVisId]);
+              network.moveTo({
+                position: network.getPosition(focusedVisId),
+                scale: 1,
+                animation: false,
+              });
+              network.redraw();
+            }
           });
         },
         focusNode(nodeId: number) {
@@ -248,11 +289,22 @@ import {
           const network = networkRef.current;
           if (!network) return;
 
-          network.focus(visId, {
-            scale: 1,
-            animation: { duration: 300, easingFunction: "easeInOutQuad" },
-          });
+          focusedVisIdRef.current = visId;
           network.selectNodes([visId]);
+
+          // showNodes schedules fit() on the next frame. Let that finish before
+          // panning, otherwise fit() immediately overwrites this focus request.
+          if (redrawFrameRef.current !== null) {
+            return;
+          }
+
+          network.stopSimulation();
+          network.moveTo({
+            position: network.getPosition(visId),
+            scale: 1,
+            animation: false,
+          });
+          network.redraw();
         },
       }));
   

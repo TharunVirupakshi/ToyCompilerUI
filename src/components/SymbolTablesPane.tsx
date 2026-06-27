@@ -4,16 +4,32 @@ import type { SymbolTableRecord } from "../utils/symbolTables";
 interface SymbolTablesPaneProps {
   tables: SymbolTableRecord[];
   focusId: number | null;
+  symbolHighlight?: {
+    symbolName: string;
+    reason: string;
+    line?: number;
+    char?: number;
+  } | null;
 }
 
-const SymbolTablesPane = ({ tables, focusId }: SymbolTablesPaneProps) => {
+const SymbolTablesPane = ({
+  tables,
+  focusId,
+  symbolHighlight = null,
+}: SymbolTablesPaneProps) => {
   const activeRef = useRef<HTMLDivElement | null>(null);
+  const activeSymbolRef = useRef<HTMLTableRowElement | null>(null);
 
   useEffect(() => {
-    if (activeRef.current) {
+    if (activeSymbolRef.current) {
+      activeSymbolRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    } else if (activeRef.current) {
       activeRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-  }, [focusId]);
+  }, [focusId, symbolHighlight]);
 
   const hasData = tables.length > 0;
 
@@ -90,24 +106,41 @@ const SymbolTablesPane = ({ tables, focusId }: SymbolTablesPaneProps) => {
                   </thead>
                   <tbody>
                     {table.symbols.map((sym, idx) => {
-                      const isNewSymbol =
-                        isActiveTable && idx === lastSymbolIndex;
+                      const matchesSemanticSymbol =
+                        isActiveTable &&
+                        symbolHighlight !== null &&
+                        sym.name === symbolHighlight.symbolName &&
+                        (symbolHighlight.line === undefined ||
+                          Number(sym.line_no) === symbolHighlight.line) &&
+                        (symbolHighlight.char === undefined ||
+                          Number(sym.char_no) === symbolHighlight.char);
+                      const isHighlightedSymbol = symbolHighlight
+                        ? matchesSemanticSymbol
+                        : isActiveTable && idx === lastSymbolIndex;
+                      const isDuplicateHighlight =
+                        matchesSemanticSymbol &&
+                        symbolHighlight?.reason.toUpperCase() === "DUPLICATE";
 
                       return (
                         <tr
                           key={`${sym.name}-${idx}`}
+                          ref={isHighlightedSymbol ? activeSymbolRef : null}
                           className={`
                             ${
-                              isNewSymbol
-                                ? "bg-neutral-700 border-l-4 border-neutral-400"
+                              isDuplicateHighlight
+                                ? "bg-red-950/60 border-l-4 border-red-500"
+                                : isHighlightedSymbol
+                                  ? "bg-neutral-700 border-l-4 border-neutral-400"
                                 : ""
                             }
                           `}
                         >
                           <td
                             className={`px-1 py-[2px] ${
-                              isNewSymbol
-                                ? "text-gray-100 font-medium"
+                              isDuplicateHighlight
+                                ? "text-red-300 font-medium"
+                                : isHighlightedSymbol
+                                  ? "text-gray-100 font-medium"
                                 : "text-gray-400"
                             }`}
                           >

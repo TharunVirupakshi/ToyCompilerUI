@@ -30,6 +30,7 @@ import {
   deriveParseVisibleTimeline,
   findVisibleIndexForRawIndex,
 } from "./utils/parseTimeline";
+import { deriveSemanticPlaybackState } from "./utils/semanticPlayback";
 
 interface SinglePhasePlaybackState {
   currentVisibleStepIndex: number;
@@ -235,6 +236,14 @@ function App() {
   const effectiveStepIndex = isSemanticPhase
     ? semanticPhaseState.currentVisibleStepIndex
     : parseVisibleTimeline.currentVisibleStepIndex;
+  const semanticPlayback = useMemo(
+    () =>
+      deriveSemanticPlaybackState(
+        steps,
+        semanticPhaseState.currentVisibleStepIndex
+      ),
+    [semanticPhaseState.currentVisibleStepIndex, steps]
+  );
   const isParsePhaseComplete =
     activePhaseName === "PHASE_LEX_PARSE" &&
     parsePlayback.parseError === null &&
@@ -298,6 +307,21 @@ function App() {
   ]);
 
   useEffect(() => {
+    if (!isSemanticPhase) return;
+
+    if (semanticPlayback.activeNodeId === null) {
+      astRef.current?.clearFocus();
+      return;
+    }
+
+    astRef.current?.focusNode(semanticPlayback.activeNodeId);
+  }, [
+    astPaneReadyVersion,
+    isSemanticPhase,
+    semanticPlayback.activeNodeId,
+  ]);
+
+  useEffect(() => {
     const rawAnchorIndex = parsePhaseState.pendingParseRawAnchor;
     if (rawAnchorIndex === null) return;
 
@@ -316,7 +340,12 @@ function App() {
 
   const symbolTables = useMemo(() => {
     if (isSemanticPhase) {
-      return semanticPhaseCache?.symbolTables ?? semanticBaselineSymbolTables;
+      const baseline =
+        semanticPhaseCache?.symbolTables ?? semanticBaselineSymbolTables;
+      return {
+        ...baseline,
+        focusId: semanticPlayback.symbolFocus?.scopeId ?? null,
+      };
     }
 
     if (parseVisibleTimeline.currentRawStepIndex < 0) {
@@ -329,7 +358,7 @@ function App() {
     parseVisibleTimeline.currentRawStepIndex,
     semanticBaselineSymbolTables,
     semanticPhaseCache,
-    semanticPhaseState.currentVisibleStepIndex,
+    semanticPlayback.symbolFocus?.scopeId,
   ]);
 
   const handleUseSample = useCallback(() => {
@@ -469,12 +498,15 @@ function App() {
                 onCodeChange={setSourceCode}
                 onStepChange={(nextIndex) => setPhaseVisibleStepIndex(activePhaseName, nextIndex)}
                 onOpenStepPicker={() => setIsStepPickerOpen(true)}
+                semanticHighlight={
+                  isSemanticPhase ? semanticPlayback.sourceHighlight : null
+                }
               />
             </div>
           }
           leftBottom={
             isSemanticPhase ? (
-              <SemanticLoggerPanel />
+              <SemanticLoggerPanel playback={semanticPlayback} />
             ) : (
               <ParserStatesPanel
                 states={sampleStatesJson}
@@ -502,7 +534,20 @@ function App() {
           }
           topRight={
             <div className="panel h-full">
-              <SymbolTablesPane tables={symbolTables.tables} focusId={symbolTables.focusId} />
+              <SymbolTablesPane
+                tables={symbolTables.tables}
+                focusId={symbolTables.focusId}
+                symbolHighlight={
+                  isSemanticPhase && semanticPlayback.symbolFocus
+                    ? {
+                        symbolName: semanticPlayback.symbolFocus.symbolName,
+                        reason: semanticPlayback.symbolFocus.reason,
+                        line: semanticPlayback.symbolFocus.line,
+                        char: semanticPlayback.symbolFocus.char,
+                      }
+                    : null
+                }
+              />
             </div>
           }
           bottomLeft={
