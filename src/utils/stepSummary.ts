@@ -14,6 +14,13 @@ import type {
   SemanticNodeHighlightData,
   SemanticPassStatusData,
   SemanticSymbolHighlightData,
+  ICGCreateLabelData,
+  ICGCreateTempData,
+  ICGEmitData,
+  ICGFunctionData,
+  ICGNodeVisitData,
+  ICGPatchLabelData,
+  ICGCompleteData,
   Step,
 } from "../types/steps";
 
@@ -95,6 +102,36 @@ export const getStepSummary = (step: Step): string => {
     case "SEMANTIC_ANALYSIS_COMPLETE": {
       const data = step.data as SemanticAnalysisCompleteData;
       return `SEMANTIC ${data.status}: ${data.total_errors} errors`;
+    }
+
+    case "ICG_NODE_VISIT": {
+      const data = step.data as ICGNodeVisitData;
+      return `LOWER NODE: ${data.node_type}${data.operator ? ` (${data.operator})` : ""}`;
+    }
+
+    case "ICG_CREATE_TEMP":
+      return `CREATE TEMP: ${(step.data as ICGCreateTempData).temp_name}`;
+
+    case "ICG_CREATE_LABEL":
+      return `CREATE LABEL: ${(step.data as ICGCreateLabelData).label_name}`;
+
+    case "ICG_EMIT":
+      return `EMIT: ${(step.data as ICGEmitData).text}`;
+
+    case "ICG_PATCH_LABEL": {
+      const data = step.data as ICGPatchLabelData;
+      return `PATCH #${data.instruction_no}: ${data.text}`;
+    }
+
+    case "ICG_ENTER_FUNCTION":
+    case "ICG_EXIT_FUNCTION": {
+      const data = step.data as ICGFunctionData;
+      return `${step.type === "ICG_ENTER_FUNCTION" ? "ENTER" : "EXIT"} FUNCTION: ${data.function_name}`;
+    }
+
+    case "ICG_COMPLETE": {
+      const data = step.data as ICGCompleteData;
+      return `ICG ${data.status}: ${data.instruction_count} instructions`;
     }
 
     default:

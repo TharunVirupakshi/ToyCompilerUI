@@ -5,8 +5,17 @@ import type {
   LexReadTokenData,
   Step,
 } from "../types/steps";
-import type { SemanticSourceHighlight } from "../utils/semanticPlayback";
 import { getStepSummary } from "../utils/stepSummary";
+
+export interface EditorSourceHighlight {
+  line: number;
+  char: number;
+  endLine?: number;
+  endChar?: number;
+  kind: "activity" | "error";
+  message?: string;
+}
+
 interface EditorWindowProps {
   code: string;
   steps: Step[];
@@ -15,7 +24,7 @@ interface EditorWindowProps {
   onCodeChange: (code: string) => void;
   onStepChange: (nextIndex: number) => void;
   onOpenStepPicker?: () => void;
-  semanticHighlight?: SemanticSourceHighlight | null;
+  sourceHighlight?: EditorSourceHighlight | null;
 }
 
 export interface EditorWindowHandle {
@@ -39,7 +48,7 @@ const EditorWindow = forwardRef<
     steps,
     phaseName,
     onOpenStepPicker,
-    semanticHighlight = null,
+    sourceHighlight = null,
   } = props;
   const editorRef = useRef<any>(null);
   const decorationIdsRef = useRef<string[]>([]);
@@ -183,7 +192,7 @@ const EditorWindow = forwardRef<
 
     monacoRef.current.editor.setModelMarkers(model, "semantic-errors", []);
 
-    if (!semanticHighlight) {
+    if (!sourceHighlight) {
       decorationIdsRef.current = editorRef.current.deltaDecorations(
         decorationIdsRef.current,
         []
@@ -192,8 +201,8 @@ const EditorWindow = forwardRef<
     }
 
     if (
-      semanticHighlight.line < 1 ||
-      semanticHighlight.line > model.getLineCount()
+      sourceHighlight.line < 1 ||
+      sourceHighlight.line > model.getLineCount()
     ) {
       decorationIdsRef.current = editorRef.current.deltaDecorations(
         decorationIdsRef.current,
@@ -202,16 +211,26 @@ const EditorWindow = forwardRef<
       return;
     }
 
-    const maxColumn = model.getLineMaxColumn(semanticHighlight.line);
+    const maxColumn = model.getLineMaxColumn(sourceHighlight.line);
     const startColumn = Math.min(
-      Math.max(1, semanticHighlight.char),
+      Math.max(1, sourceHighlight.char),
       maxColumn
     );
+    const endLine = Math.min(
+      Math.max(sourceHighlight.line, sourceHighlight.endLine ?? sourceHighlight.line),
+      model.getLineCount()
+    );
+    const endColumn = sourceHighlight.endChar
+      ? Math.min(
+          Math.max(1, sourceHighlight.endChar),
+          model.getLineMaxColumn(endLine)
+        )
+      : maxColumn;
     const range = new monacoRef.current.Range(
-      semanticHighlight.line,
+      sourceHighlight.line,
       startColumn,
-      semanticHighlight.line,
-      maxColumn
+      endLine,
+      endColumn
     );
 
     decorationIdsRef.current = editorRef.current.deltaDecorations(
@@ -221,7 +240,7 @@ const EditorWindow = forwardRef<
           range,
           options: {
             inlineClassName:
-              semanticHighlight.kind === "error"
+              sourceHighlight.kind === "error"
                 ? "semantic-error-highlight"
                 : "ast-node-highlight",
           },
@@ -229,21 +248,21 @@ const EditorWindow = forwardRef<
       ]
     );
 
-    if (semanticHighlight.kind === "error") {
+    if (sourceHighlight.kind === "error") {
       monacoRef.current.editor.setModelMarkers(model, "semantic-errors", [
         {
-          startLineNumber: semanticHighlight.line,
+          startLineNumber: sourceHighlight.line,
           startColumn,
-          endLineNumber: semanticHighlight.line,
-          endColumn: maxColumn,
-          message: semanticHighlight.message ?? "Semantic error",
+          endLineNumber: endLine,
+          endColumn,
+          message: sourceHighlight.message ?? "Semantic error",
           severity: monacoRef.current.MarkerSeverity.Error,
         },
       ]);
     }
 
-    editorRef.current.revealLineInCenter(semanticHighlight.line);
-  }, [semanticHighlight]);
+    editorRef.current.revealLineInCenter(sourceHighlight.line);
+  }, [sourceHighlight]);
 
   const stepSummary = currentStep ? getStepSummary(currentStep) : "—";
   const isEnteringStateSummary = stepSummary.startsWith("ENTERING STATE");

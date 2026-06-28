@@ -371,9 +371,16 @@ import {
           focusedVisIdRef.current = visId;
           setHasTargetNode(true);
 
-          networkRef.current?.selectNodes([visId]);
-
-          // Nothing else.
+          const network = networkRef.current;
+          network?.selectNodes([visId]);
+          if (network && isFocusEnabledRef.current) {
+            centerNodeInPane(
+              network,
+              viewportRef.current,
+              visId,
+              network.getScale()
+            );
+          }
         },
         centerOnNode(nodeId: number, scale?: number) {
           const visId = nodeIdToVisId.get(nodeId);

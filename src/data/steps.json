@@ -289,5 +289,21 @@
     { "type": "SEMANTIC_NODE_HIGHLIGHT", "data": {"pass": "validateFunctionReturnTypes", "node_id": "10", "node_type": "INT_LITERAL", "line_no": "4", "char_no": "12", "action": "VISIT" }},
     { "type": "SEMANTIC_PASS_STATUS", "data": {"pass": "validateFunctionReturnTypes", "status": "COMPLETE", "message": "FUNCTION RETURN TYPE VALIDATION COMPLETE" }},
     { "type": "SEMANTIC_ANALYSIS_COMPLETE", "data": {"status": "SUCCESS", "total_errors": "0" }}
+  ]},
+  { "phase": "PHASE_ICG", "steps": [
+    { "type": "ICG_NODE_VISIT", "data": {"ast_node_id": "6", "node_type": "DECL", "line_no": "1", "char_no": "1", "action": "Lower AST node" }},
+    { "type": "ICG_EMIT", "data": {"ast_node_id": "6", "node_type": "DECL", "line_no": "1", "char_no": "1", "instruction_no": "1", "source_tac_id": "1", "opcode": "ASSIGN", "result": "i_0", "arg1": "2", "arg2": "", "target_label": "", "text": "i_0 = 2" }},
+    { "type": "ICG_NODE_VISIT", "data": {"ast_node_id": "18", "node_type": "PROGRAM", "line_no": "1", "char_no": "1", "action": "Lower AST node" }},
+    { "type": "ICG_EMIT", "data": {"ast_node_id": "18", "node_type": "PROGRAM", "line_no": "1", "char_no": "1", "instruction_no": "2", "source_tac_id": "2", "opcode": "END", "result": "", "arg1": "", "arg2": "", "target_label": "", "text": "end" }},
+    { "type": "ICG_ENTER_FUNCTION", "data": {"ast_node_id": "15", "node_type": "FUNC_DECL", "line_no": "3", "char_no": "1", "function_name": "main" }},
+    { "type": "ICG_NODE_VISIT", "data": {"ast_node_id": "11", "node_type": "EXPR_TERM", "line_no": "4", "char_no": "12", "action": "Lower AST node" }},
+    { "type": "ICG_CREATE_TEMP", "data": {"ast_node_id": "11", "node_type": "EXPR_TERM", "line_no": "4", "char_no": "12", "temp_name": "t1" }},
+    { "type": "ICG_EMIT", "data": {"ast_node_id": "11", "node_type": "EXPR_TERM", "line_no": "4", "char_no": "12", "instruction_no": "3", "source_tac_id": "3", "opcode": "ASSIGN", "result": "t1", "arg1": "0", "arg2": "", "target_label": "", "text": "t1 = 0" }},
+    { "type": "ICG_NODE_VISIT", "data": {"ast_node_id": "12", "node_type": "RETURN", "line_no": "4", "char_no": "5", "action": "Lower AST node" }},
+    { "type": "ICG_EMIT", "data": {"ast_node_id": "12", "node_type": "RETURN", "line_no": "4", "char_no": "5", "instruction_no": "4", "source_tac_id": "4", "opcode": "ASSIGN", "result": "ret_val", "arg1": "t1", "arg2": "", "target_label": "", "text": "ret_val = t1" }},
+    { "type": "ICG_NODE_VISIT", "data": {"ast_node_id": "12", "node_type": "RETURN", "line_no": "4", "char_no": "5", "action": "Lower AST node" }},
+    { "type": "ICG_EMIT", "data": {"ast_node_id": "12", "node_type": "RETURN", "line_no": "4", "char_no": "5", "instruction_no": "5", "source_tac_id": "5", "opcode": "RETURN", "result": "", "arg1": "", "arg2": "", "target_label": "", "text": "return" }},
+    { "type": "ICG_EXIT_FUNCTION", "data": {"ast_node_id": "15", "node_type": "FUNC_DECL", "line_no": "3", "char_no": "1", "function_name": "main" }},
+    { "type": "ICG_COMPLETE", "data": {"status": "SUCCESS", "instruction_count": "5", "temporary_count": "1", "label_count": "0" }}
   ]}
 ]}

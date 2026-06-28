@@ -16,15 +16,28 @@ export type StepType =
   | "SEMANTIC_SYMBOL_HIGHLIGHT"
   | "SEMANTIC_NODE_HIGHLIGHT"
   | "SEMANTIC_ERROR"
-  | "SEMANTIC_ANALYSIS_COMPLETE";
+  | "SEMANTIC_ANALYSIS_COMPLETE"
+  | "ICG_NODE_VISIT"
+  | "ICG_CREATE_TEMP"
+  | "ICG_CREATE_LABEL"
+  | "ICG_EMIT"
+  | "ICG_PATCH_LABEL"
+  | "ICG_ENTER_FUNCTION"
+  | "ICG_EXIT_FUNCTION"
+  | "ICG_COMPLETE";
 
-export type PhaseName = "PHASE_LEX_PARSE" | "PHASE_SEMANTIC";
+export type PhaseName = "PHASE_LEX_PARSE" | "PHASE_SEMANTIC" | "PHASE_ICG";
 
-export const PHASE_ORDER: PhaseName[] = ["PHASE_LEX_PARSE", "PHASE_SEMANTIC"];
+export const PHASE_ORDER: PhaseName[] = [
+  "PHASE_LEX_PARSE",
+  "PHASE_SEMANTIC",
+  "PHASE_ICG",
+];
 
 export const PHASE_LABELS: Record<PhaseName, string> = {
   PHASE_LEX_PARSE: "LEX PARSE",
   PHASE_SEMANTIC: "SEMANTIC",
+  PHASE_ICG: "ICG",
 };
 
 export const isKnownPhaseName = (phaseName: string): phaseName is PhaseName =>
@@ -141,6 +154,55 @@ export interface SemanticAnalysisCompleteData {
   total_errors: string;
 }
 
+export interface ICGOriginData {
+  ast_node_id: NumericValue;
+  node_type: string;
+  line_no: NumericValue;
+  char_no: NumericValue;
+}
+
+export interface ICGNodeVisitData extends ICGOriginData {
+  action: string;
+  operator?: string;
+}
+
+export interface ICGCreateTempData extends ICGOriginData {
+  temp_name: string;
+}
+
+export interface ICGCreateLabelData extends ICGOriginData {
+  label_name: string;
+  target_tac_id: NumericValue;
+}
+
+export interface ICGEmitData extends ICGOriginData {
+  instruction_no: NumericValue;
+  source_tac_id: NumericValue;
+  opcode: string;
+  result: string;
+  arg1: string;
+  arg2: string;
+  target_label: string;
+  text: string;
+}
+
+export interface ICGPatchLabelData extends ICGOriginData {
+  instruction_no: NumericValue;
+  label_name: string;
+  text: string;
+}
+
+export interface ICGFunctionData extends ICGOriginData {
+  function_name: string;
+}
+
+export interface ICGCompleteData {
+  status: string;
+  instruction_count: NumericValue;
+  temporary_count: NumericValue;
+  label_count: NumericValue;
+}
+
 export type ParseStepData =
   | ParseCreateScopeData
   | ParseReduceRuleData
@@ -158,7 +220,14 @@ export type ParseStepData =
   | SemanticSymbolHighlightData
   | SemanticNodeHighlightData
   | SemanticErrorData
-  | SemanticAnalysisCompleteData;
+  | SemanticAnalysisCompleteData
+  | ICGNodeVisitData
+  | ICGCreateTempData
+  | ICGCreateLabelData
+  | ICGEmitData
+  | ICGPatchLabelData
+  | ICGFunctionData
+  | ICGCompleteData;
 
 export interface Step {
   type: StepType;

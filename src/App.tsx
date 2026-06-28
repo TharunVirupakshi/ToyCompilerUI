@@ -21,6 +21,8 @@ import ASTPane from "./components/ASTPane";
 import type { ASTData, ASTPaneHandle } from "./components/ASTPane";
 import ParserStatesPanel from "./components/ParserStatesPanel";
 import SemanticLoggerPanel from "./components/SemanticLoggerPanel";
+import ICGLoggerPanel from "./components/ICGLoggerPanel";
+import TACPanel from "./components/TACPanel";
 import StepPickerModal from "./components/StepPickerModal";
 import { compileSource } from "./api/compiler";
 import { deriveParsePlaybackState } from "./utils/parsePlayback";
@@ -31,6 +33,7 @@ import {
   findVisibleIndexForRawIndex,
 } from "./utils/parseTimeline";
 import { deriveSemanticPlaybackState } from "./utils/semanticPlayback";
+import { deriveICGPlaybackState } from "./utils/icgPlayback";
 
 interface SinglePhasePlaybackState {
   currentVisibleStepIndex: number;
@@ -50,6 +53,10 @@ const createInitialPhasePlaybackState = (): PhasePlaybackState => ({
     pendingParseRawAnchor: null,
   },
   PHASE_SEMANTIC: {
+    currentVisibleStepIndex: -1,
+    pendingParseRawAnchor: null,
+  },
+  PHASE_ICG: {
     currentVisibleStepIndex: -1,
     pendingParseRawAnchor: null,
   },
@@ -93,6 +100,7 @@ function App() {
   const activePhaseName = activePhaseSlot?.phaseName ?? "PHASE_LEX_PARSE";
   const steps = useMemo(() => activePhaseSlot?.logPhase?.steps ?? [], [activePhaseSlot]);
   const isSemanticPhase = activePhaseSlot?.phaseName === "PHASE_SEMANTIC";
+  const isICGPhase = activePhaseSlot?.phaseName === "PHASE_ICG";
   const parsePhaseSlot = useMemo(
     () => phaseSlots.find((slot) => slot.phaseName === "PHASE_LEX_PARSE") ?? null,
     [phaseSlots]
@@ -179,6 +187,7 @@ function App() {
   const parseRawSteps = parsePhaseSlot?.logPhase?.steps ?? [];
   const parsePhaseState = phasePlaybackState.PHASE_LEX_PARSE;
   const semanticPhaseState = phasePlaybackState.PHASE_SEMANTIC;
+  const icgPhaseState = phasePlaybackState.PHASE_ICG;
 
   const parseVisibleTimeline = useMemo(
     () =>
@@ -232,10 +241,15 @@ function App() {
     [parseRawSteps]
   );
 
-  const visibleSteps = isSemanticPhase ? steps : parseVisibleTimeline.visibleSteps;
+  const visibleSteps =
+    isSemanticPhase || isICGPhase
+      ? steps
+      : parseVisibleTimeline.visibleSteps;
   const effectiveStepIndex = isSemanticPhase
     ? semanticPhaseState.currentVisibleStepIndex
-    : parseVisibleTimeline.currentVisibleStepIndex;
+    : isICGPhase
+      ? icgPhaseState.currentVisibleStepIndex
+      : parseVisibleTimeline.currentVisibleStepIndex;
   const semanticPlayback = useMemo(
     () =>
       deriveSemanticPlaybackState(
@@ -244,6 +258,30 @@ function App() {
       ),
     [semanticPhaseState.currentVisibleStepIndex, steps]
   );
+  const icgPlayback = useMemo(
+    () => deriveICGPlaybackState(steps, icgPhaseState.currentVisibleStepIndex),
+    [icgPhaseState.currentVisibleStepIndex, steps]
+  );
+  const activeICGNode = useMemo(
+    () =>
+      icgPlayback.activeNodeId === null
+        ? null
+        : astData.nodes.find(
+            (node) => node.node_id === icgPlayback.activeNodeId
+          ) ?? null,
+    [astData.nodes, icgPlayback.activeNodeId]
+  );
+  const editorSourceHighlight = isICGPhase && activeICGNode
+    ? {
+        line: activeICGNode.start_line_no,
+        char: activeICGNode.start_char_no,
+        endLine: activeICGNode.end_line_no,
+        endChar: activeICGNode.end_char_no,
+        kind: "activity" as const,
+      }
+    : isSemanticPhase
+      ? semanticPlayback.sourceHighlight
+      : null;
   const isParsePhaseComplete =
     activePhaseName === "PHASE_LEX_PARSE" &&
     parsePlayback.parseError === null &&
@@ -286,7 +324,7 @@ function App() {
   ]);
 
   useEffect(() => {
-    if (isSemanticPhase) {
+    if (isSemanticPhase || isICGPhase) {
       astRef.current?.showNodes(
         semanticPhaseCache?.astNodeIds ?? semanticBaselineASTPlayback.visibleNodeIds
       );
@@ -300,6 +338,7 @@ function App() {
   }, [
     astPaneReadyVersion,
     isSemanticPhase,
+    isICGPhase,
     parseASTPlayback.focusNodeId,
     parseASTPlayback.visibleNodeIds,
     semanticBaselineASTPlayback.visibleNodeIds,
@@ -307,17 +346,21 @@ function App() {
   ]);
 
   useEffect(() => {
-    if (!isSemanticPhase) return;
+    if (!isSemanticPhase && !isICGPhase) return;
 
-    if (semanticPlayback.activeNodeId === null) {
+    const activeNodeId = isICGPhase
+      ? icgPlayback.activeNodeId
+      : semanticPlayback.activeNodeId;
+    if (activeNodeId === null) {
       astRef.current?.clearFocus();
       return;
     }
 
-    astRef.current?.focusNode(semanticPlayback.activeNodeId);
-    astRef.current?.centerOnNode(semanticPlayback.activeNodeId);
+    astRef.current?.focusNode(activeNodeId);
   }, [
     astPaneReadyVersion,
+    icgPlayback.activeNodeId,
+    isICGPhase,
     isSemanticPhase,
     semanticPlayback.activeNodeId,
   ]);
@@ -499,14 +542,14 @@ function App() {
                 onCodeChange={setSourceCode}
                 onStepChange={(nextIndex) => setPhaseVisibleStepIndex(activePhaseName, nextIndex)}
                 onOpenStepPicker={() => setIsStepPickerOpen(true)}
-                semanticHighlight={
-                  isSemanticPhase ? semanticPlayback.sourceHighlight : null
-                }
+                sourceHighlight={editorSourceHighlight}
               />
             </div>
           }
           leftBottom={
-            isSemanticPhase ? (
+            isICGPhase ? (
+              <ICGLoggerPanel activity={icgPlayback.activity} />
+            ) : isSemanticPhase ? (
               <SemanticLoggerPanel playback={semanticPlayback} />
             ) : (
               <ParserStatesPanel
@@ -523,7 +566,7 @@ function App() {
             )
           }
           topLeft={
-            isSemanticPhase ? null : (
+            isSemanticPhase || isICGPhase ? null : (
               <div className="panel h-full">
                 <GrammarPanel
                   activeRuleNo={parsePlayback.activeRule?.ruleNo}
@@ -535,7 +578,13 @@ function App() {
           }
           topRight={
             <div className="panel h-full">
-              <SymbolTablesPane
+              {isICGPhase ? (
+                <TACPanel
+                  instructions={icgPlayback.instructions}
+                  activeInstructionNo={icgPlayback.activeInstructionNo}
+                />
+              ) : (
+                <SymbolTablesPane
                 tables={symbolTables.tables}
                 focusId={symbolTables.focusId}
                 symbolHighlight={
@@ -548,7 +597,8 @@ function App() {
                       }
                     : null
                 }
-              />
+                />
+              )}
             </div>
           }
           bottomLeft={
