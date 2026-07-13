@@ -18,6 +18,7 @@ import type {
   ICGCreateTempData,
   ICGEmitData,
   ICGFunctionData,
+  ICGListEventData,
   ICGNodeVisitData,
   ICGPatchLabelData,
   ICGCompleteData,
@@ -121,6 +122,21 @@ export const getStepSummary = (step: Step): string => {
     case "ICG_PATCH_LABEL": {
       const data = step.data as ICGPatchLabelData;
       return `PATCH #${data.instruction_no}: ${data.text}`;
+    }
+
+    case "ICG_LIST_CREATE": {
+      const data = step.data as ICGListEventData;
+      return `CREATE ${data.list_type}: ${data.instructions ?? "empty"}`;
+    }
+
+    case "ICG_LIST_MERGE": {
+      const data = step.data as ICGListEventData;
+      return `MERGE ${data.list_type}: ${data.result ?? "empty"}`;
+    }
+
+    case "ICG_BACKPATCH": {
+      const data = step.data as ICGListEventData;
+      return `BACKPATCH ${data.list_type}: ${data.instructions ?? "empty"} -> ${data.label_name ?? data.target_tac_id}`;
     }
 
     case "ICG_ENTER_FUNCTION":

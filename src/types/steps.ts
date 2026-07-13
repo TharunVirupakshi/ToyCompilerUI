@@ -22,6 +22,9 @@ export type StepType =
   | "ICG_CREATE_LABEL"
   | "ICG_EMIT"
   | "ICG_PATCH_LABEL"
+  | "ICG_LIST_CREATE"
+  | "ICG_LIST_MERGE"
+  | "ICG_BACKPATCH"
   | "ICG_ENTER_FUNCTION"
   | "ICG_EXIT_FUNCTION"
   | "ICG_COMPLETE";
@@ -192,6 +195,16 @@ export interface ICGPatchLabelData extends ICGOriginData {
   text: string;
 }
 
+export interface ICGListEventData extends ICGOriginData {
+  list_type: string;
+  instructions?: string;
+  left?: string;
+  right?: string;
+  result?: string;
+  target_tac_id?: NumericValue;
+  label_name?: string;
+}
+
 export interface ICGFunctionData extends ICGOriginData {
   function_name: string;
 }
@@ -226,6 +239,7 @@ export type ParseStepData =
   | ICGCreateLabelData
   | ICGEmitData
   | ICGPatchLabelData
+  | ICGListEventData
   | ICGFunctionData
   | ICGCompleteData;
 

@@ -4,6 +4,7 @@ import type {
   ICGCreateTempData,
   ICGEmitData,
   ICGFunctionData,
+  ICGListEventData,
   ICGNodeVisitData,
   ICGOriginData,
   ICGPatchLabelData,
@@ -133,6 +134,39 @@ export const deriveICGPlaybackState = (
           tone: "create",
           message: `Patch jump with ${data.label_name}`,
           detail: data.text,
+        });
+        break;
+      }
+      case "ICG_LIST_CREATE": {
+        const data = step.data as ICGListEventData;
+        state.activeNodeId = originNodeId(data);
+        state.activity.push({
+          stepIndex,
+          tone: "create",
+          message: `Create ${data.list_type}`,
+          detail: data.instructions ? `pending: ${data.instructions}` : undefined,
+        });
+        break;
+      }
+      case "ICG_LIST_MERGE": {
+        const data = step.data as ICGListEventData;
+        state.activeNodeId = originNodeId(data);
+        state.activity.push({
+          stepIndex,
+          tone: "create",
+          message: `Merge ${data.list_type}`,
+          detail: `${data.left ?? "empty"} + ${data.right ?? "empty"} → ${data.result ?? "empty"}`,
+        });
+        break;
+      }
+      case "ICG_BACKPATCH": {
+        const data = step.data as ICGListEventData;
+        state.activeNodeId = originNodeId(data);
+        state.activity.push({
+          stepIndex,
+          tone: "create",
+          message: `Backpatch ${data.list_type}`,
+          detail: `${data.instructions ?? "empty"} → ${data.label_name ?? `instruction ${data.target_tac_id}`}`,
         });
         break;
       }
