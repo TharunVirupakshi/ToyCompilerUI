@@ -23,6 +23,7 @@ import ParserStatesPanel from "./components/ParserStatesPanel";
 import SemanticLoggerPanel from "./components/SemanticLoggerPanel";
 import ICGLoggerPanel from "./components/ICGLoggerPanel";
 import TACPanel from "./components/TACPanel";
+import BackpatchListsPane from "./components/BackpatchListsPane";
 import StepPickerModal from "./components/StepPickerModal";
 import { compileSource } from "./api/compiler";
 import { deriveParsePlaybackState } from "./utils/parsePlayback";
@@ -79,6 +80,10 @@ function App() {
   const [isStepPickerOpen, setIsStepPickerOpen] = useState<boolean>(false);
   const [isParseSuccessModalOpen, setIsParseSuccessModalOpen] = useState<boolean>(false);
   const [hasDismissedParseSuccessModal, setHasDismissedParseSuccessModal] = useState<boolean>(false);
+  const [tacScrollRequest, setTacScrollRequest] = useState<{
+    instructionNo: number | null;
+    version: number;
+  }>({ instructionNo: null, version: 0 });
 
   const phaseSlots = useMemo(
     () =>
@@ -173,6 +178,13 @@ function App() {
     },
     [activePhaseIndex, phaseSlots]
   );
+
+  const handleSelectTACInstruction = useCallback((instructionNo: number) => {
+    setTacScrollRequest((previous) => ({
+      instructionNo,
+      version: previous.version + 1,
+    }));
+  }, []);
 
   useEffect(() => {
     if (phaseSlots.length === 0) return;
@@ -566,7 +578,18 @@ function App() {
             )
           }
           topLeft={
-            isSemanticPhase || isICGPhase ? null : (
+            isICGPhase ? (
+              <div className="panel h-full">
+                <TACPanel
+                  instructions={icgPlayback.instructions}
+                  activeInstructionNo={icgPlayback.activeInstructionNo}
+                  scrollInstructionNo={tacScrollRequest.instructionNo}
+                  scrollRequestVersion={tacScrollRequest.version}
+                  backpatchInstructionNo={icgPlayback.activeBackpatchInstructionNo}
+                  backpatchLabel={icgPlayback.activeBackpatchLabel}
+                />
+              </div>
+            ) : isSemanticPhase ? null : (
               <div className="panel h-full">
                 <GrammarPanel
                   activeRuleNo={parsePlayback.activeRule?.ruleNo}
@@ -579,9 +602,10 @@ function App() {
           topRight={
             <div className="panel h-full">
               {isICGPhase ? (
-                <TACPanel
-                  instructions={icgPlayback.instructions}
-                  activeInstructionNo={icgPlayback.activeInstructionNo}
+                <BackpatchListsPane
+                  lists={icgPlayback.pendingLists}
+                  animation={icgPlayback.activeBackpatchAnimation}
+                  onSelectInstruction={handleSelectTACInstruction}
                 />
               ) : (
                 <SymbolTablesPane
